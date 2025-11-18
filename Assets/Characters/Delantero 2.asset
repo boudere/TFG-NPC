@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed96d0d922c85db4387d45aca177f197, type: 3}
+  m_Name: Delantero 2
+  m_EditorClassIdentifier: 
+  personajeJugable: {fileID: 2746126376170194217, guid: 3bc7c51a65985824099a9210bf45ed69, type: 3}
+  imagen: {fileID: 21300000, guid: 3d8f0a62aa6069348874e06c4b0be22d, type: 3}
+  nombre: Extremo
+  function: desbordar por las bandas y generar ocasiones.
+  task: Abrir el campo y estirar la defensa rival.  Encarar y superar defensas. 
+    Poner centros o asistir al delantero.  Replegarse para ayudar al lateral cuando
+    el equipo defiende.
+  feature: "r\xE1pido, h\xE1bil en el uno contra uno y con buena capacidad de centro
+    o disparo."
+  id: 1
+  defaultMaterial: {fileID: 0}
+  newMaterial: {fileID: 0}
