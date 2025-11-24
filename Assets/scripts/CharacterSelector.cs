@@ -2,6 +2,7 @@
 
 using NUnit.Framework.Internal.Commands;
 using System;
+using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.Build.Content;
@@ -21,10 +22,14 @@ public class CharacterSelector : MonoBehaviour
     [SerializeField] private TextMeshProUGUI function;
     [SerializeField] private int id;
     private CharacterManager characterManager;
+    private CharacterManagerInField characterManagerInField;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material newMaterial;
     [SerializeField] private bool selected;
     private int index;
+    private bool characterLoaded = false;
+    private bool fieldLoaded = false;
+    private AsyncOperation _async;
     void Start()
     {
         characterManager = CharacterManager.instance;
@@ -91,23 +96,43 @@ public class CharacterSelector : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
     }
 
+    //void OnEnable()
+    //{
+    //    SceneManager.sceneLoaded += OnSceneLoaded;
+    //}
+
+    //void OnDisable()
+    //{
+    //    SceneManager.sceneLoaded -= OnSceneLoaded;
+    //}
+
+    //private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
+  
+
+
     public void PlayStart()
     {
-        // Marca el personaje seleccionado en el manager
-       
-
-        // (opcional) actualizas materiales
         resetMaterial();
         putNewMaterial(characterManager.index);
 
-        // Guardas el índice (aunque ya lo hace SelectCharacter)
+
         characterManager.index = index;
         characterManager.characterList[index].selected = true;
-
-        // Cargas las escenas
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 3, LoadSceneMode.Additive);
+        SceneManager.LoadScene(
+    SceneManager.GetActiveScene().buildIndex + 3,
+    LoadSceneMode.Additive
+);
+
+   
+
     }
+
+
 
     private void putNewMaterial(int index)
     {

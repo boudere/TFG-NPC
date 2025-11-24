@@ -4,12 +4,7 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - P2
-  - P1
-  - P3
-  - P4
-  - P5
-  - P6
+  - mainCamera
   layers:
   - Default
   - TransparentFX

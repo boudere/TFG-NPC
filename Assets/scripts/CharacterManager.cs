@@ -1,6 +1,8 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CharacterManager : MonoBehaviour
 {
@@ -10,14 +12,15 @@ public class CharacterManager : MonoBehaviour
     public static CharacterManager instance;
     public bool selected;
     public List<Character> characterList;
-    public int index = 0;   // índice del personaje actualmente seleccionado
+    public int index = 0;  
 
+    private DebugCharacterCamera debugCam;
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);   // se mantiene al cambiar de escena
+            DontDestroyOnLoad(gameObject);   
         }
         else
         {
@@ -25,14 +28,8 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    
-  
-   
-
-    // Esto es algo que ya tenías, lo dejo porque quizá lo uses para otra cosa
-    public static void RegisterSelection(string tag, int count)
+    private void Start()
     {
-        LastSelectedTag = tag;
-        LastSelectedCount = count;
     }
+
 }
