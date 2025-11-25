@@ -2,19 +2,16 @@
 
 public class DebugCharacterCamera : MonoBehaviour
 {
-    private void LateUpdate()
-    {
-        // Muestra la posición cada frame
-        Debug.Log("Cam pos: " + transform.position);
-    }
-
-    // Llama a esto desde tu CharacterManager
+    
     public void SetConfig(int i)
     {
         switch (i)
         {
             case 0:
-                transform.position = new Vector3(-261, 300, 265);
+               
+                    transform.position = new Vector3(-261, 300, 265);
+                   
+                
                 break;
             case 1: 
                 transform.position = new Vector3(-240, 300, -115); 

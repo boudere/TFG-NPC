@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CharacterManagerInField : MonoBehaviour
 
@@ -7,7 +8,7 @@ public class CharacterManagerInField : MonoBehaviour
     public static CharacterManager characterManager;
    [SerializeField] Camera camY;
     private DebugCharacterCamera debugCam;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         
@@ -18,36 +19,36 @@ public class CharacterManagerInField : MonoBehaviour
     public void cameraConfiguration(int i)
     {
 
-        //camY = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        switch (i)
+        {
+            case 0:
 
-        var camGO = GameObject.FindGameObjectWithTag("MainCamera");
-        debugCam = camGO.GetComponent<DebugCharacterCamera>();
+                camY.transform.position = new Vector3(-261, 300, 265);
 
-        Debug.Log("camGO encontrado = " + camGO.name);
-        Debug.Log("camGO escena = " + camGO.scene.name);
+                break;
+            case 1:
+                camY.transform.position = new Vector3(-240, 300, -115);
+                break;
+            case 2:
+                camY.transform.position = new Vector3(-8, 300, 252);
+                break;
+            case 3:
+                transform.position = new Vector3(47, 300, -124);
+                break;
+            case 4:
+                camY.transform.position = new Vector3(293, 300, -153);
+                break;
+            case 5:
+                camY.transform.position = new Vector3(266, 300, 239);
+                break;
 
-        //switch (i)
-        //{
-        //    case 0:
+        }
 
-        //        camY.transform.position = new Vector3(-261, 300, 265);
-        //        if (camY != null)
-        //            Debug.Log("Pos cam en Update: " + camY.transform.position);
-        //        camY.gameObject.SetActive(false);
-
-        //        break;
-
-        //    case 1: break;
-        //    case 2: break;
-        //    case 3: break;
-        //    case 4: break;
-        //    case 5: break;
-        //    default: break;
-        //}
-
-        debugCam.SetConfig(i);
 
 
 
     }
+        
+       
+
 }
