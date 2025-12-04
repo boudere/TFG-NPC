@@ -95,22 +95,6 @@ public class CharacterSelector : MonoBehaviour
     public void Info() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
     }
-
-    //void OnEnable()
-    //{
-    //    SceneManager.sceneLoaded += OnSceneLoaded;
-    //}
-
-    //void OnDisable()
-    //{
-    //    SceneManager.sceneLoaded -= OnSceneLoaded;
-    //}
-
-    //private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
-    //{
-    //    throw new NotImplementedException();
-    //}
-
   
 
 

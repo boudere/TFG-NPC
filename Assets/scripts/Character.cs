@@ -13,4 +13,5 @@ public class Character : ScriptableObject
     public string feature;
     public int id;
     public bool selected;
+    public Vector3 position;
 }
