@@ -23,31 +23,19 @@ public class CharacterGV : MonoBehaviour
 
     private void Update()
     {
-
-
-        //if (characterManager.index != index)
-        //    return;
-
-
-
-        if (index != characterManager.index) {
-            Debug.Log(index);
+        if (index != characterManager.index)
+        {
             return;
-        } 
-       
+        }
 
+         float moveHorizontal = Input.GetAxis("Horizontal"); 
+         float moveVertical = Input.GetAxis("Vertical");   
 
-
-            float moveHorizontal = Input.GetAxis("Horizontal");   // A / D o flechas
-            float moveVertical = Input.GetAxis("Vertical");     // W / S o flechas
-
-            // Dirección de movimiento en el plano XZ
+          
             Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical) * speed;
-
-            // Aplicamos velocidad manteniendo la Y del rigidbody (gravedad, salto, etc.)
             rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
-            // Salto
+      
             if (Input.GetButtonDown("Jump"))
             {
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);

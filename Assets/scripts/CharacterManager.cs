@@ -12,9 +12,8 @@ public class CharacterManager : MonoBehaviour
     public static CharacterManager instance;
     public bool selected;
     public List<Character> characterList;
-    public int index = 0;  
-
-    private DebugCharacterCamera debugCam;
+    public int index = 0;
+    public CharacterGV[] characters;
     private void Awake()
     {
         if (instance == null)
@@ -31,5 +30,6 @@ public class CharacterManager : MonoBehaviour
     private void Start()
     {
     }
+
 
 }

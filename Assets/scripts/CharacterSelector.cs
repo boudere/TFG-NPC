@@ -27,8 +27,6 @@ public class CharacterSelector : MonoBehaviour
     [SerializeField] private Material newMaterial;
     [SerializeField] private bool selected;
     private int index;
-    private bool characterLoaded = false;
-    private bool fieldLoaded = false;
     private AsyncOperation _async;
     void Start()
     {

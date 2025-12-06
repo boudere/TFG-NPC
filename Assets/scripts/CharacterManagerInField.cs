@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CharacterManagerInField : MonoBehaviour
@@ -7,48 +8,56 @@ public class CharacterManagerInField : MonoBehaviour
 {
     public static CharacterManager characterManager;
    [SerializeField] Camera camY;
-    private DebugCharacterCamera debugCam;
-    
+    private GameObject[] players;
+
     void Start()
     {
         
-            characterManager = CharacterManager.instance;
-        cameraConfiguration(characterManager.index);
+        characterManager = CharacterManager.instance;
+        GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
+        players = new GameObject[p.Length];
+
+        for (int i = 0; i < p.Length; i++)
+        {
+            foreach (var go in p)
+            {
+                int id = go.GetComponent<PlayerID>().id;
+
+                if (id == i)
+                {
+                    players[i] = go;
+                    Debug.Log(go.name + " tiene ID: " + go.GetComponent<PlayerID>().id);
+
+                    break;
+                }
+            }
         }
+
+
+        for (int i = 0; i < players.Length; i++)
+        {
+           
+        }
+        cameraConfiguration(characterManager.index);
+    }
+
+    private void Update()
+    {
+        cameraConfiguration(characterManager.index);
+    }
 
     public void cameraConfiguration(int i)
     {
-
-        switch (i)
-        {
-            case 0:
-
-                camY.transform.position = new Vector3(-261, 300, 265);
-
-                break;
-            case 1:
-                camY.transform.position = new Vector3(-240, 300, -115);
-                break;
-            case 2:
-                camY.transform.position = new Vector3(-8, 300, 252);
-                break;
-            case 3:
-                transform.position = new Vector3(47, 300, -124);
-                break;
-            case 4:
-                camY.transform.position = new Vector3(293, 300, -153);
-                break;
-            case 5:
-                camY.transform.position = new Vector3(266, 300, 239);
-                break;
-
-        }
-
-
-
-
+        camY.transform.position = new Vector3(players[i].transform.position.x, 300, players[i].transform.position.z);
     }
-        
-       
+    
+
+
 
 }
+
+
+
+
+
+    
