@@ -26,8 +26,6 @@ public class CharacterManagerInField : MonoBehaviour
                 if (id == i)
                 {
                     players[i] = go;
-                    Debug.Log(go.name + " tiene ID: " + go.GetComponent<PlayerID>().id);
-
                     break;
                 }
             }
