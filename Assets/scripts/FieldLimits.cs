@@ -27,7 +27,5 @@ public class FieldLimits : MonoBehaviour
         minZ = b.min.z;
         maxZ = b.max.z;
         y = b.center.y;
-
-        Debug.Log($"MinX: {minX}, MaxX: {maxX}, MinZ: {minZ}, MaxZ: {maxZ}");
     }
 }

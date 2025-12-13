@@ -30,12 +30,6 @@ public class CharacterManagerInField : MonoBehaviour
                 }
             }
         }
-
-
-        for (int i = 0; i < players.Length; i++)
-        {
-           
-        }
         cameraConfiguration(characterManager.index);
     }
 
