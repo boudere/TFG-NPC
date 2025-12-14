@@ -1,14 +1,20 @@
-
-
+using System.Collections;
 using UnityEngine;
 
 public class CharacterGV : MonoBehaviour
 {
-    public float speed = 5f;
-    public float jumpForce = 7f;
+    private float speed = 150;
+    private float npcSpeed = 75;
+
+    private float changeTargetDistance = 50f;
+
+    private Vector3 npcTarget;
+   
+
     private Rigidbody rb;
     public int index;
     private CharacterManager characterManager;
+    private FieldLimits field;
 
     private void Awake()
     {
@@ -18,29 +24,87 @@ public class CharacterGV : MonoBehaviour
     private void Start()
     {
         characterManager = CharacterManager.instance;
-    }
+        field = FieldLimits.instance;
 
+        if (index != characterManager.index)
+            PickNewTarget();
+    }
 
     private void Update()
     {
-        if (index != characterManager.index)
-        {
-            return;
-        }
-
-         float moveHorizontal = Input.GetAxis("Horizontal"); 
-         float moveVertical = Input.GetAxis("Vertical");   
-
-          
-            Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical) * speed;
-            rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
-
-      
-            if (Input.GetButtonDown("Jump"))
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            }
-        
+        movePlayer();
+        othersBehaviour();
     }
 
+    void movePlayer()
+    {
+        if (index != characterManager.index)
+            return;
+
+        float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveVertical = Input.GetAxis("Vertical");
+
+        Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical) * speed;
+        rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
+
+        //if (Input.GetButtonDown("Jump"))
+        //    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
+
+    void othersBehaviour()
+    {
+        //Hacer un swich con las distinas posibilidades (ir a un destino y llegar al objetivo), estar quieto
+        if (index == characterManager.index)
+            return;
+
+        Vector3 direction = (npcTarget - transform.position).normalized;
+
+        rb.linearVelocity = new Vector3(
+            direction.x * npcSpeed,
+            rb.linearVelocity.y,
+            direction.z * npcSpeed
+        );
+
+        if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
+            PickNewTarget();
+
+        StartCoroutine(ControlarTiempo());
+    }
+
+    private IEnumerator ControlarTiempo()
+    {
+        float distanciaTotal = 0f;
+        Vector3 ultimaPosicion = transform.position;
+
+        int segundos = 0;
+
+        while (segundos < 2)
+        {
+            yield return new WaitForSeconds(1f);
+
+            Vector3 posicionActual = transform.position;
+            float distancia = Vector3.Distance(ultimaPosicion, posicionActual);
+
+            distanciaTotal += distancia;
+            ultimaPosicion = posicionActual;
+
+            segundos++;
+        }
+
+        if (distanciaTotal < 15f)
+        {
+            PickNewTarget();
+        }
+       
+    }
+
+    void PickNewTarget()
+    {
+        float x = Random.Range(field.minX, field.maxX);
+        float z = Random.Range(field.minZ, field.maxZ);
+
+        npcTarget = new Vector3(x, transform.position.y, z);
+    }
 }
+
+
