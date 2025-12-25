@@ -688,6 +688,10 @@ PrefabInstance:
       propertyPath: id
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4504459551387871550, guid: 3bc7c51a65985824099a9210bf45ed69, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 49f6cf999c20c2c4ea58be53f354c3ae, type: 2}
     - target: {fileID: 8296290410509342265, guid: 3bc7c51a65985824099a9210bf45ed69, type: 3}
       propertyPath: m_LocalPosition.x
       value: -240
@@ -759,11 +763,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 1
 --- !u!54 &980140375
 Rigidbody:
@@ -1025,6 +1024,10 @@ PrefabInstance:
       propertyPath: id
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 2552737448833528377, guid: 91061cb8dce2f2c4ea484ff19273a231, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 4ed38cc7e7269c34faac377dd59629d8, type: 2}
     - target: {fileID: 4319541743082888750, guid: 91061cb8dce2f2c4ea484ff19273a231, type: 3}
       propertyPath: m_Name
       value: player 6
@@ -1100,11 +1103,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 5
 --- !u!54 &1026487310500677389
 Rigidbody:
@@ -1190,6 +1188,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5443927778574284407, guid: 3ba3e4a64ebe49f4bbf9f74a29562bba, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6324a3c89896bf4428cfc2e403ef4f16, type: 2}
     - target: {fileID: 5986280078125783648, guid: 3ba3e4a64ebe49f4bbf9f74a29562bba, type: 3}
       propertyPath: m_Name
       value: player 5
@@ -1225,11 +1227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 4
 --- !u!54 &3345642324323717116
 Rigidbody:
@@ -1347,11 +1344,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 0
 --- !u!54 &3625312987260654814
 Rigidbody:
@@ -1437,6 +1429,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8025563837105647668, guid: 376667023795a7c498b584dbffaa9360, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 377d71b133edef749b5e9b4707ab744f, type: 2}
     - target: {fileID: 8646835087511739427, guid: 376667023795a7c498b584dbffaa9360, type: 3}
       propertyPath: m_Name
       value: player 3
@@ -1472,11 +1468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 2
 --- !u!54 &7727232850989682733
 Rigidbody:
@@ -1562,6 +1553,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7156395344308192735, guid: 36a6b0bd9facaa24e9d221fb9d5abbec, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 76bd8de07787a0c478f7ebba0b672242, type: 2}
     - target: {fileID: 8921528458524076488, guid: 36a6b0bd9facaa24e9d221fb9d5abbec, type: 3}
       propertyPath: m_Name
       value: player 4
@@ -1597,11 +1592,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 7
-  npcSpeed: 3
-  fieldMin: {x: 0, y: 0, z: 0}
-  fieldMax: {x: 0, y: 0, z: 0}
-  changeTargetDistance: 1.5
   index: 3
 --- !u!54 &8757151642796768870
 Rigidbody:

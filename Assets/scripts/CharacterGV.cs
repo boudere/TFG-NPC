@@ -1,4 +1,5 @@
-using System.Collections;
+﻿using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterGV : MonoBehaviour
@@ -9,15 +10,21 @@ public class CharacterGV : MonoBehaviour
     private float changeTargetDistance = 50f;
 
     private Vector3 npcTarget;
-   
+
 
     private Rigidbody rb;
     public int index;
     private CharacterManager characterManager;
     private FieldLimits field;
+    public static CharacterGV instance;
+
+    private bool frozen = false;
+    private GameObject playerStop = null;
 
     private void Awake()
     {
+        
+
         rb = GetComponent<Rigidbody>();
     }
 
@@ -32,6 +39,17 @@ public class CharacterGV : MonoBehaviour
 
     private void Update()
     {
+        if (frozen && playerStop)
+        {
+
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+            //Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+            //rbPlayer.linearVelocity = Vector3.zero;
+            //rbPlayer.angularVelocity = Vector3.zero;
+            
+            // rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            //return;
+        }
         movePlayer();
         othersBehaviour();
     }
@@ -95,7 +113,7 @@ public class CharacterGV : MonoBehaviour
         {
             PickNewTarget();
         }
-       
+
     }
 
     void PickNewTarget()
@@ -104,6 +122,65 @@ public class CharacterGV : MonoBehaviour
         float z = Random.Range(field.minZ, field.maxZ);
 
         npcTarget = new Vector3(x, transform.position.y, z);
+    }
+    private void OnEnable()
+    {
+        Pase.OnCharacterGVSelected += OnSelected;
+    }
+
+    private void OnDisable()
+    {
+       Pase.OnCharacterGVSelected -= OnSelected;
+    }
+
+    void OnSelected(GameObject player)
+    {
+        // stopPlayerPass(player);
+        frozen = true;
+        playerStop = player;
+    }
+
+    //private void OnCharacterSelected(GameObject selectedPlayer)
+    //{
+    //    Pase.OnCharacterGVSelected
+     
+    //        stopPlayerPass(selectedPlayer);
+       
+    //}
+
+    public void stopPlayerPass(GameObject selectedPlayer)
+    {
+
+        Rigidbody rbPlayer = selectedPlayer.GetComponent<Rigidbody>();
+        rbPlayer.linearVelocity = Vector3.zero;
+        rbPlayer.angularVelocity = Vector3.zero;
+        //StartCoroutine(RecibirBola());
+        //PickNewTarget();
+    }
+
+    private IEnumerator RecibirBola()
+    {
+        yield return new WaitForSeconds(2f);
+    }
+
+    private IEnumerator StopAndRetargetRoutine(GameObject playerStop)
+    {
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+
+        
+        rbPlayer.linearVelocity = Vector3.zero;
+        rbPlayer.angularVelocity = Vector3.zero;
+
+       
+
+      
+        yield return new WaitForSeconds(2f);
+
+        // 🟢 NUEVO OBJETIVO
+    //    PickNewTarget();
+
+        // Reanudar movimiento
+        frozen = false;
     }
 }
 
