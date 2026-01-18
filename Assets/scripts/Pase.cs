@@ -54,19 +54,20 @@ public class Pase : MonoBehaviour
     void passBall(int index, GameObject[] p)
     {
 
-        GameObject player = p[0];
+        GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
         float minDistance;
         float currentDistance;
 
-        int id = p[0].GetComponent<PlayerID>().id;
-        int j;
+        int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
+        int j; // Es la posición de la lista (no el id)
+       
 
-        if (index != id)
-        {
-            minDistance = calculateDistance(p[0].transform.position);
+        if (index != id) // Comparo si es el mismo que MI JUGADOR
+        {                //Si no es el mismo, continuo
+            minDistance = calculateDistance(p[0].transform.position); //Calculo la distancia a la bola
             currentDistance = calculateDistance(p[0].transform.position);
             j = 0;
-        } else
+        } else //Si fuese la misma, cojo el siguiente 
         {
             minDistance = calculateDistance(p[1].transform.position);
             currentDistance = calculateDistance(p[1].transform.position);
@@ -76,7 +77,7 @@ public class Pase : MonoBehaviour
 
         for (int i = 0; i < p.Length; i++)
         {
-            id = p[i].GetComponent<PlayerID>().id;
+            id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
             if (id != index)
             {
                 currentDistance = calculateDistance(p[i].transform.position);
@@ -88,11 +89,6 @@ public class Pase : MonoBehaviour
                 }
             }
         }
-
-        //CharacterGV playerStop = CharacterManager.instance.characterList[id].characterGV;
-        //Debug.Log(CharacterManager.instance.characters.Length);
-        //  CharacterGV playerStop = CharacterManager.instance.characters[id];
-        // playerStop.stopPlayerPass();
 
         OnCharacterGVSelected?.Invoke(player);
 

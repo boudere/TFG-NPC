@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class CharacterGV : MonoBehaviour
 {
+
+    [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
+    [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
+    private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
     private float npcSpeed = 75;
 
@@ -20,6 +24,8 @@ public class CharacterGV : MonoBehaviour
 
     private bool frozen = false;
     private GameObject playerStop = null;
+
+
 
     private void Awake()
     {
@@ -40,33 +46,39 @@ public class CharacterGV : MonoBehaviour
     private void Update()
     {
         if (frozen && playerStop)
-        {
-
+        { 
             StartCoroutine(StopAndRetargetRoutine(playerStop));
-            //Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
-            //rbPlayer.linearVelocity = Vector3.zero;
-            //rbPlayer.angularVelocity = Vector3.zero;
-            
-            // rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-            //return;
         }
         movePlayer();
         othersBehaviour();
     }
+
+    
 
     void movePlayer()
     {
         if (index != characterManager.index)
             return;
 
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+        float h = Input.GetAxisRaw("Horizontal"); 
+        float v = Input.GetAxisRaw("Vertical");
 
-        Vector3 movement = new Vector3(moveHorizontal, 0f, moveVertical) * speed;
+        Vector3 inputDir = new Vector3(h, 0f, v);
+
+        // Movimiento (en la dirección que toca)
+        Vector3 moveDir = inputDir.normalized;
+        Vector3 movement = moveDir * speed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
-        //if (Input.GetButtonDown("Jump"))
-        //    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        
+        if (inputDir.sqrMagnitude > 0.001f)
+        {
+           
+            smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
+
+            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+            rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
+        }
     }
 
     void othersBehaviour()
@@ -86,7 +98,7 @@ public class CharacterGV : MonoBehaviour
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
 
-        StartCoroutine(ControlarTiempo());
+      StartCoroutine(ControlarTiempo());
     }
 
     private IEnumerator ControlarTiempo()
@@ -135,51 +147,16 @@ public class CharacterGV : MonoBehaviour
 
     void OnSelected(GameObject player)
     {
-        // stopPlayerPass(player);
         frozen = true;
         playerStop = player;
-    }
-
-    //private void OnCharacterSelected(GameObject selectedPlayer)
-    //{
-    //    Pase.OnCharacterGVSelected
-     
-    //        stopPlayerPass(selectedPlayer);
-       
-    //}
-
-    public void stopPlayerPass(GameObject selectedPlayer)
-    {
-
-        Rigidbody rbPlayer = selectedPlayer.GetComponent<Rigidbody>();
-        rbPlayer.linearVelocity = Vector3.zero;
-        rbPlayer.angularVelocity = Vector3.zero;
-        //StartCoroutine(RecibirBola());
-        //PickNewTarget();
-    }
-
-    private IEnumerator RecibirBola()
-    {
-        yield return new WaitForSeconds(2f);
     }
 
     private IEnumerator StopAndRetargetRoutine(GameObject playerStop)
     {
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
-
-        
         rbPlayer.linearVelocity = Vector3.zero;
         rbPlayer.angularVelocity = Vector3.zero;
-
-       
-
-      
         yield return new WaitForSeconds(2f);
-
-        // 🟢 NUEVO OBJETIVO
-    //    PickNewTarget();
-
-        // Reanudar movimiento
         frozen = false;
     }
 }
