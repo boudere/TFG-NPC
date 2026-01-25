@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed96d0d922c85db4387d45aca177f197, type: 3}
+  m_Name: Cd T1
+  m_EditorClassIdentifier: 
+  personajeJugable: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+  imagen: {fileID: 21300000, guid: 6bcaee3ddcda1db4fb98e9b3a7e8c045, type: 3}
+  nombre: Centro defensivo 1
+  function: Proteger la defensa y recuperar balones.
+  task: "Cortar ataques rivales.  Cubrir a los defensas cuando suben.  Iniciar la
+    salida de bal\xF3n.  Interceptar y presionar al rival en el medio campo."
+  feature: "Fuerza, posicionamiento, lectura del juego y capacidad para distribuir
+    el bal\xF3n con seguridad."
+  id: 3
+  selected: 0
+  position: {x: 0, y: 0, z: 0}

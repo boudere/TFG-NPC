@@ -98,7 +98,7 @@ public class CharacterGV : MonoBehaviour
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
 
-      StartCoroutine(ControlarTiempo());
+      //StartCoroutine(ControlarTiempo());
     }
 
     private IEnumerator ControlarTiempo()
