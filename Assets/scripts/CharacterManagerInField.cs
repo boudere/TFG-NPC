@@ -40,7 +40,7 @@ public class CharacterManagerInField : MonoBehaviour
 
     public void cameraConfiguration(int i)
     {
-        camY.transform.position = new Vector3(players[i].transform.position.x, 300, players[i].transform.position.z);
+        camY.transform.position = new Vector3(players[i].transform.position.x, 450, players[i].transform.position.z);
     }
     
 
