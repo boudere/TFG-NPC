@@ -14,20 +14,27 @@ public class TriggerHavePlayer : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        owner = GetComponentInParent<PlayerID>();
+
+        if (owner == null) return;
         if (!other.CompareTag("Ball")) return;
 
-        
-        owner = GetComponentInParent<PlayerID>();
        
-        if (owner != null)
-        {
+
+       Bola.instance.AsignarPosesion(owner);
+        
+
+   
             id = owner.id;
             Arbitro.instance.BallEntraEnArea(owner);
-        }
+        
     }
 
     private void OnTriggerExit(Collider other)
     {
+
+        if (!other.CompareTag("Ball")) return;
+
         
 
         if (owner != null)

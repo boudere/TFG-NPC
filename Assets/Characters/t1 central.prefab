@@ -478,6 +478,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 4
+  haveBall: 0
+  holdPoint: {fileID: 0}
 --- !u!114 &2664582207194471344
 MonoBehaviour:
   m_ObjectHideFlags: 0
