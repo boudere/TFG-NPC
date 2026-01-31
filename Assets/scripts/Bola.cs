@@ -12,9 +12,18 @@ public class Bola : MonoBehaviour
     [Header("Posesión")]
     [SerializeField] private Vector3 localHoldOffset = new Vector3(0f, 0f, 1f);
 
+ 
+   
     public bool EnPosesion { get; private set; }
     public PlayerID Owner { get; private set; }
     private Collider[] ownerColliders;
+
+    private float blockPickupUntil = 0f;
+
+    public bool PuedeSerRecogida()
+    {
+        return Time.time >= blockPickupUntil;
+    }
 
     private void Awake()
     {
@@ -24,20 +33,10 @@ public class Bola : MonoBehaviour
             rb = GetComponent<Rigidbody>();
     }
 
-    private void FixedUpdate()
-    {
-        if (!EnPosesion) return;
-
-
-        Debug.Log($"RB kinematic={rb.isKinematic}, vel={rb.linearVelocity}, physEnabled={physicalCollider.enabled}, triggerEnabled={stealTriggerCollider.enabled}");
-    }
 
     public void AsignarPosesion(PlayerID newOwner)
-
-
     {
-        Debug.Log($"physicalCollider: trigger={physicalCollider.isTrigger}, enabled={physicalCollider.enabled}");
-        Debug.Log($"stealTriggerCollider: trigger={stealTriggerCollider.isTrigger}, enabled={stealTriggerCollider.enabled}");
+    
 
         // Si ya la tiene este jugador, no rehagas todo
         if (EnPosesion && Owner == newOwner) return;
@@ -93,7 +92,6 @@ public class Bola : MonoBehaviour
 
         ownerColliders = null;
     }
-
     public void Soltar()
     {
         gameObject.layer = LayerMask.NameToLayer("Default");
@@ -109,5 +107,9 @@ public class Bola : MonoBehaviour
 
         rb.isKinematic = false;
         rb.useGravity = true;
+
+     
+        blockPickupUntil = Time.time + 0.25f;
+        rb.WakeUp();
     }
 }

@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CharacterManagerInField : MonoBehaviour
-
-
 {
     public static CharacterManager characterManager;
    [SerializeField] Camera camY;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -19,9 +19,9 @@ public class TriggerHavePlayer : MonoBehaviour
         if (owner == null) return;
         if (!other.CompareTag("Ball")) return;
 
-       
+        if (!Bola.instance.PuedeSerRecogida()) return;
 
-       Bola.instance.AsignarPosesion(owner);
+        Bola.instance.AsignarPosesion(owner);
         
 
    

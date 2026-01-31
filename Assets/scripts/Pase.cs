@@ -7,7 +7,7 @@ public class Pase : MonoBehaviour
 {
 
     private GameObject[] players;
-    public GameObject ball;
+    public Bola ball;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
     private NavMeshAgent navMeshAgent;
@@ -18,18 +18,16 @@ public class Pase : MonoBehaviour
     void Start()
     {
         characterManager = CharacterManager.instance;
-    
-       
     }
 
     
     void Update()
     {
-      
-
 
             if (Input.GetKeyDown(KeyCode.P))
         {
+
+            Bola.instance.Soltar();
 
             GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
             int id, i;
@@ -94,9 +92,12 @@ public class Pase : MonoBehaviour
 
 
 
-        Rigidbody rb = ball.GetComponent<Rigidbody>();
+        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
 
-         Vector3 direction = (player.transform.position - ball.transform.position).normalized;
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 
          float passSpeed = 200f;
          rb.linearVelocity = direction * passSpeed;
@@ -107,7 +108,7 @@ public class Pase : MonoBehaviour
 
     float calculateDistance(Vector3 myPos)
     {
-        Vector3 ballPosition = ball.transform.position;
+        Vector3 ballPosition = Bola.instance.transform.position;
         myPos.y = 0;
         ballPosition.y = 0;
 
