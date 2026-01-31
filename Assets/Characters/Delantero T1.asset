@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Delantero T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
-  imagen: {fileID: 21300000, guid: 53cb0e792de33a04d8a1bff9e142acc0, type: 3}
+  imagen: {fileID: 21300000, guid: fdd86affa1c5e724a843a3a37c106718, type: 3}
   nombre: Delantero Centro 1
   function: Marcar goles.
   task: Buscar espacios entre los defensas. Rematar centros y pases. Presionar la
     salida del rival. Recibir de espaldas y combinar con los mediocampistas
   feature: "Juega m\xE1s adelantado que nadie, dentro o cerca del \xE1rea rival."
   id: 0
-  selected: 1
+  selected: 0
   position: {x: 0, y: 0, z: 0}

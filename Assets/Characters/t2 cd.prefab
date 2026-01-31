@@ -565,7 +565,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31907cd9ffe145a4c928904cc1471f88, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -622,7 +622,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 592a34ef92ca6c148bb57d3704101b36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 9
+  id: 7
+  haveBall: 0
+  holdPoint: {fileID: 0}
 --- !u!114 &4721451125952191663
 MonoBehaviour:
   m_ObjectHideFlags: 0

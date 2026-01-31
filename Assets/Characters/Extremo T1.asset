@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Extremo T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
-  imagen: {fileID: 21300000, guid: 3d8f0a62aa6069348874e06c4b0be22d, type: 3}
+  imagen: {fileID: 21300000, guid: d71b809b5ae54b442ac301776bdc777a, type: 3}
   nombre: Extremo 1
   function: desbordar por las bandas y generar ocasiones.
   task: Abrir el campo y estirar la defensa rival.  Encarar y superar defensas. 
@@ -21,6 +21,6 @@ MonoBehaviour:
     el equipo defiende.
   feature: "r\xE1pido, h\xE1bil en el uno contra uno y con buena capacidad de centro
     o disparo."
-  id: 1
+  id: 2
   selected: 0
   position: {x: 0, y: 0, z: 0}

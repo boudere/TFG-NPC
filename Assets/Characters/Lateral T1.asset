@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Lateral T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
-  imagen: {fileID: 21300000, guid: 871cb46881e2aa6439ffc4f4268c33d3, type: 3}
+  imagen: {fileID: 21300000, guid: c9bed0443e82adc4a9b2202a521326f7, type: 3}
   nombre: Lateral 1
   function: Defender la banda y apoyar en ataque.
   task: "Evitar centros y cubrir su zona.  Subir al ataque para apoyar al extremo. 
     Centrar balones o crear superioridad num\xE9rica.  Replegar r\xE1pido cuando
     el rival ataca."
   feature: velocidad, resistencia y capacidad de ir y volver constantemente.
-  id: 5
+  id: 10
   selected: 0
   position: {x: 0, y: 0, z: 0}

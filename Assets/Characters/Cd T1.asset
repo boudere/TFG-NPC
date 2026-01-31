@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Cd T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
-  imagen: {fileID: 21300000, guid: 6bcaee3ddcda1db4fb98e9b3a7e8c045, type: 3}
+  imagen: {fileID: 21300000, guid: f7d086412774a2a49aae0177b32b71c9, type: 3}
   nombre: Centro defensivo 1
   function: Proteger la defensa y recuperar balones.
   task: "Cortar ataques rivales.  Cubrir a los defensas cuando suben.  Iniciar la
     salida de bal\xF3n.  Interceptar y presionar al rival en el medio campo."
   feature: "Fuerza, posicionamiento, lectura del juego y capacidad para distribuir
     el bal\xF3n con seguridad."
-  id: 3
+  id: 6
   selected: 0
   position: {x: 0, y: 0, z: 0}

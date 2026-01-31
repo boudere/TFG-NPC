@@ -472,7 +472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 592a34ef92ca6c148bb57d3704101b36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 10
+  id: 9
   haveBall: 0
   holdPoint: {fileID: 0}
 --- !u!114 &6277277049600538943

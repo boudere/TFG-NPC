@@ -53,30 +53,31 @@ public class Pase : MonoBehaviour
     {
 
         GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
-        float minDistance;
+        float minDistance = 1000000;
         float currentDistance;
 
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
         int j; // Es la posición de la lista (no el id)
-       
+        int team = index % 2;
 
-        if (index != id) // Comparo si es el mismo que MI JUGADOR
-        {                //Si no es el mismo, continuo
-            minDistance = calculateDistance(p[0].transform.position); //Calculo la distancia a la bola
-            currentDistance = calculateDistance(p[0].transform.position);
-            j = 0;
-        } else //Si fuese la misma, cojo el siguiente 
-        {
-            minDistance = calculateDistance(p[1].transform.position);
-            currentDistance = calculateDistance(p[1].transform.position);
-            j = 1;
-        }
+
+        //if (index != id) // Comparo si es el mismo que MI JUGADOR
+        //{                //Si no es el mismo, continuo
+        //    minDistance = calculateDistance(p[0].transform.position); //Calculo la distancia a la bola
+        //    currentDistance = calculateDistance(p[0].transform.position);
+        //    j = 0;
+        //} else //Si fuese la misma, cojo el siguiente 
+        //{
+        //    minDistance = calculateDistance(p[1].transform.position);
+        //    currentDistance = calculateDistance(p[1].transform.position);
+        //    j = 1;
+        //}
 
 
         for (int i = 0; i < p.Length; i++)
         {
             id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
-            if (id != index)
+            if (id != index && team == id % 2)
             {
                 currentDistance = calculateDistance(p[i].transform.position);
                 if (currentDistance < minDistance)
