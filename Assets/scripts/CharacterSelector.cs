@@ -103,7 +103,18 @@ public class CharacterSelector : MonoBehaviour
 
 
         characterManager.index = index;
-        characterManager.characterList[index].selected = true;
+
+        for (int i = 0; i < characterManager.characterList.Count; i++)
+        {
+           
+            if (characterManager.characterList[i].id == index)
+            {
+                characterManager.characterList[i].selected = true;
+                break;
+            }
+        }
+
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         SceneManager.LoadScene(
     SceneManager.GetActiveScene().buildIndex + 3,

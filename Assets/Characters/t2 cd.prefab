@@ -639,7 +639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnSpeedDeg: 720
   directionLerp: 12
-  index: 9
+  index: 7
 --- !u!54 &4071018893424864272
 Rigidbody:
   m_ObjectHideFlags: 0
