@@ -1,8 +1,15 @@
+
 using UnityEngine;
 
 public class FieldLimits : MonoBehaviour
 {
-    public float minX, maxX, minZ, maxZ, y;
+    [Header("Field Limits")]
+    public float minX;
+    public float maxX;
+    public float minZ;
+    public float maxZ;
+    public float y;
+
     public static FieldLimits instance;
 
     private void Awake()
@@ -16,16 +23,5 @@ public class FieldLimits : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-    void Start()
-    {
-        Renderer rend = GetComponent<Renderer>();
-        Bounds b = rend.bounds;
-
-        minX = b.min.x;
-        maxX = b.max.x;
-        minZ = b.min.z;
-        maxZ = b.max.z;
-        y = b.center.y;
     }
 }

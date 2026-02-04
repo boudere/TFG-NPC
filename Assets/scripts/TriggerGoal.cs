@@ -7,11 +7,21 @@ public class TriggerGoal : MonoBehaviour
 
     private int goalCounter = 0;
     public Goal goal;
+    private Porteria porteria;
+    private int team;
 
     void Awake()
     {
         goal = Goal.instance;
     }
+
+    void Start()
+    {
+        porteria = GetComponentInParent<Porteria>();
+        team = porteria.team;
+    }
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ball"))

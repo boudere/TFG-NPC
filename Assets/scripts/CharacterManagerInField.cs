@@ -20,9 +20,6 @@ public class CharacterManagerInField : MonoBehaviour
             foreach (var go in p)
             {
                 int id = go.GetComponent<PlayerID>().id;
-                Debug.Log(id);
-                Debug.Log(characterManager.index);
-
                 if (id == characterManager.index)
                 {
                     players[id] = go;

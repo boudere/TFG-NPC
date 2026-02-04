@@ -2,10 +2,11 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Portero : MonoBehaviour
+public class Portero : PlayerID
 {
 
     public float minX, maxX, minZ, maxZ, y;
+    public float lineaGolMax, lineaGolMin, hx;
 
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
@@ -18,7 +19,6 @@ public class Portero : MonoBehaviour
 
     private Vector3 npcTarget;
 
-
     private Rigidbody rb;
     public int index;
     private CharacterManager characterManager;
@@ -27,8 +27,9 @@ public class Portero : MonoBehaviour
 
     private bool frozen = false;
     private GameObject playerStop = null;
-
-
+    public bool defendiendo = false;
+    [SerializeField] private float velocidadDefensa = 50f;
+    private int direccionDefensa = 1;
 
     private void Awake()
     {
@@ -48,41 +49,25 @@ public class Portero : MonoBehaviour
 
     private void Update()
     {
+
+
         if (frozen && playerStop)
         {
             StartCoroutine(StopAndRetargetRoutine(playerStop));
         }
-        movePlayer();
-        othersBehaviour();
-    }
 
-
-
-    void movePlayer()
-    {
-        if (index != characterManager.index)
-            return;
-
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-
-        Vector3 inputDir = new Vector3(h, 0f, v);
-
-        // Movimiento (en la dirección que toca)
-        Vector3 moveDir = inputDir.normalized;
-        Vector3 movement = moveDir * speed;
-        rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
-
-
-        if (inputDir.sqrMagnitude > 0.001f)
+        if (defendiendo)
         {
-
-            smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
-
-            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-            rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
+           
+           DefensaBehaviour();
+            return;
         }
+
+
+        othersBehaviour();
+
     }
+
 
     void othersBehaviour()
     {
@@ -100,41 +85,12 @@ public class Portero : MonoBehaviour
 
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
-
-        //StartCoroutine(ControlarTiempo());
-    }
-
-    private IEnumerator ControlarTiempo()
-    {
-        float distanciaTotal = 0f;
-        Vector3 ultimaPosicion = transform.position;
-
-        int segundos = 0;
-
-        while (segundos < 2)
-        {
-            yield return new WaitForSeconds(1f);
-
-            Vector3 posicionActual = transform.position;
-            float distancia = Vector3.Distance(ultimaPosicion, posicionActual);
-
-            distanciaTotal += distancia;
-            ultimaPosicion = posicionActual;
-
-            segundos++;
-        }
-
-        if (distanciaTotal < 15f)
-        {
-            PickNewTarget();
-        }
-
     }
 
     void PickNewTarget()
     {
-        float x = Random.Range(field.minX, field.maxX);
-        float z = Random.Range(field.minZ, field.maxZ);
+        float x = Random.Range(minX, maxX);
+        float z = Random.Range(minZ, maxZ);
 
         npcTarget = new Vector3(x, transform.position.y, z);
     }
@@ -163,8 +119,37 @@ public class Portero : MonoBehaviour
         frozen = false;
     }
 
+    void DefensaBehaviour()
+    {
+        Vector3 pos = transform.position;
+
+        
+        pos.x = hx;
+
+        pos.z += direccionDefensa * velocidadDefensa * Time.deltaTime;
+
+        if (pos.z >= lineaGolMax)
+        {
+            pos.z = lineaGolMax;
+            direccionDefensa = -1;
+        }
+        else if (pos.z <= lineaGolMin)
+        {
+            pos.z = lineaGolMin;
+            direccionDefensa = 1;
+        }
+
+        transform.position = pos;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
 
 
-
+    public void PararDefensa()
+    {
+        defendiendo = false;
+        PickNewTarget();
+    }
 
 }
