@@ -19,6 +19,8 @@ public class TriggerHavePlayer : MonoBehaviour
         if (owner == null) return;
         if (!other.CompareTag("Ball")) return;
 
+      
+
         if (!Bola.instance.PuedeSerRecogida()) return;
 
         Bola.instance.AsignarPosesion(owner);
@@ -27,7 +29,9 @@ public class TriggerHavePlayer : MonoBehaviour
    
             id = owner.id;
             Arbitro.instance.BallEntraEnArea(owner);
-        
+
+       
+
     }
 
     private void OnTriggerExit(Collider other)

@@ -30,6 +30,7 @@ public class Portero : PlayerID
     public bool defendiendo = false;
     [SerializeField] private float velocidadDefensa = 50f;
     private int direccionDefensa = 1;
+   
 
     private void Awake()
     {
@@ -51,6 +52,13 @@ public class Portero : PlayerID
     {
 
 
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            saquePorteria();
+        }
+
+
+
         if (frozen && playerStop)
         {
             StartCoroutine(StopAndRetargetRoutine(playerStop));
@@ -65,6 +73,55 @@ public class Portero : PlayerID
 
 
         othersBehaviour();
+
+    }
+
+    void saquePorteria()
+    {
+        float probabilidadSaque = 0.05f;
+        float exito = 0.3f;
+
+        float aux = Random.value;
+        if (aux < probabilidadSaque)
+        {
+            StartCoroutine(EsperarYSacar(exito));
+        }
+    }
+
+    IEnumerator EsperarYSacar(float exito)
+    {
+        yield return new WaitForSeconds(3f);
+
+        Bola.instance.Soltar();
+
+        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
+
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        if (Random.value < exito)
+        {
+
+        } else
+        {
+            disparoAleatorio();
+        }
+
+
+            rb.WakeUp();
+    }
+
+    void disparoAleatorio()
+    {
+        Vector3 direction = Bola.instance.transform.forward;
+
+        float passSpeed = 200f;
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    void paseCorrecto()
+    {
 
     }
 

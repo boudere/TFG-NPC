@@ -49,6 +49,8 @@ public class Pase : MonoBehaviour
         
     }
 
+   
+
     void passBall(int index, GameObject[] p)
     {
 
@@ -59,19 +61,6 @@ public class Pase : MonoBehaviour
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
         int j; // Es la posición de la lista (no el id)
         int team = index % 2;
-
-
-        //if (index != id) // Comparo si es el mismo que MI JUGADOR
-        //{                //Si no es el mismo, continuo
-        //    minDistance = calculateDistance(p[0].transform.position); //Calculo la distancia a la bola
-        //    currentDistance = calculateDistance(p[0].transform.position);
-        //    j = 0;
-        //} else //Si fuese la misma, cojo el siguiente 
-        //{
-        //    minDistance = calculateDistance(p[1].transform.position);
-        //    currentDistance = calculateDistance(p[1].transform.position);
-        //    j = 1;
-        //}
 
 
         for (int i = 0; i < p.Length; i++)

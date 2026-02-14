@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Bola : MonoBehaviour
 {
@@ -40,6 +41,10 @@ public class Bola : MonoBehaviour
 
         // Si ya la tiene este jugador, no rehagas todo
         if (EnPosesion && Owner == newOwner) return;
+        
+        if (EnPosesion && Owner.CompareTag("Portero")) return;
+        
+      
 
         // Si venía con otro dueño, restaurar colisiones
         if (Owner != null) RestaurarColisionesConOwner();
