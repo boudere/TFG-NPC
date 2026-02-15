@@ -30,7 +30,8 @@ public class Portero : PlayerID
     public bool defendiendo = false;
     [SerializeField] private float velocidadDefensa = 50f;
     private int direccionDefensa = 1;
-   
+    private bool saqueEnProceso = false;
+
 
     private void Awake()
     {
@@ -78,12 +79,17 @@ public class Portero : PlayerID
 
     void saquePorteria()
     {
+        if (saqueEnProceso) return;
+
         float probabilidadSaque = 0.05f;
         float exito = 0.3f;
+     
+
 
         float aux = Random.value;
         if (aux < probabilidadSaque)
         {
+            saqueEnProceso = true;
             StartCoroutine(EsperarYSacar(exito));
         }
     }
@@ -101,14 +107,16 @@ public class Portero : PlayerID
 
         if (Random.value < exito)
         {
-
+            
+            Pase.instance.searchPlayersToPass("portero", transform.position, this.id);
         } else
         {
+           
             disparoAleatorio();
         }
 
-
-            rb.WakeUp();
+        saqueEnProceso = false;
+        rb.WakeUp();
     }
 
     void disparoAleatorio()
@@ -120,10 +128,7 @@ public class Portero : PlayerID
         rb.angularVelocity = Vector3.zero;
     }
 
-    void paseCorrecto()
-    {
-
-    }
+    
 
 
     void othersBehaviour()

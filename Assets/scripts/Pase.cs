@@ -7,15 +7,18 @@ public class Pase : MonoBehaviour
 {
 
     private GameObject[] players;
-    public Bola ball;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
     private NavMeshAgent navMeshAgent;
     public static event Action <GameObject> OnCharacterGVSelected;
+    public static Pase instance;
 
+    private void Awake()
+    {
+        instance = this;
+    }
 
-   
-    void Start()
+        void Start()
     {
         characterManager = CharacterManager.instance;
     }
@@ -26,13 +29,38 @@ public class Pase : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.P))
         {
+            Vector3 pos = new Vector3(0f, 0f, 0f);
+            string tagPlayer = "npc";
+            int team = 0;
+            searchPlayersToPass(tagPlayer, pos, team);
+        }
+        
+    }
 
-            Bola.instance.Soltar();
+     public void searchPlayersToPass(string tagPlayer, Vector3 pos, int team)
+    {
+        GameObject[] p;
+        int id = -1, i;
 
-            GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
-            int id, i;
+        if (tagPlayer == "portero" )
+        {
+            p = GameObject.FindGameObjectsWithTag("Portero");
 
-            for ( i = 0; i < p.Length; i++)
+            for (i = 0; i < p.Length; i++)
+            {
+                id = p[i].GetComponent<PlayerID>().id;
+                if (team % 2 == id % 2)
+                {
+                    break;
+                }
+
+            }
+
+        } else
+        {
+             p = GameObject.FindGameObjectsWithTag("Player");
+
+            for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
                 if (id == characterManager.index)
@@ -41,18 +69,24 @@ public class Pase : MonoBehaviour
                 }
             }
 
-            if (calculateDistance(p[i].transform.position) < 25)
-            {
-                passBall(characterManager.index, p);
-            }
         }
-        
+
+       
+
+
+
+        if (calculateDistance(p[i].transform.position) < 25)
+        {
+            passBall(id);
+        }
     }
 
    
 
-    void passBall(int index, GameObject[] p)
+    void passBall(int index)
     {
+
+        GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
 
         GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
         float minDistance = 1000000;
@@ -101,7 +135,6 @@ public class Pase : MonoBehaviour
         Vector3 ballPosition = Bola.instance.transform.position;
         myPos.y = 0;
         ballPosition.y = 0;
-
         return Vector3.Distance(myPos, ballPosition); 
     }
 }

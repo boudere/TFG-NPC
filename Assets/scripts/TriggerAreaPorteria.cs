@@ -60,7 +60,7 @@ public class TriggerAreaPorteria : MonoBehaviour
 
      void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Ball")) return;
+        if (!other.CompareTag("Ball") && !Bola.instance.transform.IsChildOf(other.transform)) return;
 
         pararDefensa();
     }
@@ -91,6 +91,8 @@ public class TriggerAreaPorteria : MonoBehaviour
     public void pararDefensa()
     {
         if (porteroActivo == null) return;
+
+        Debug.Log("PORTERO DESCANSA: ");
 
         porteroActivo.defendiendo = false;
         porteroActivo.PararDefensa();

@@ -475,6 +475,7 @@ MonoBehaviour:
   id: 9
   haveBall: 0
   holdPoint: {fileID: 0}
+  self: {fileID: 0}
 --- !u!114 &6277277049600538943
 MonoBehaviour:
   m_ObjectHideFlags: 0
