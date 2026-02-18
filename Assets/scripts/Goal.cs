@@ -27,7 +27,7 @@ public class Goal : MonoBehaviour
         }
     }
 
-    public void openModal()
+    public void openModalGoal()
     {
         if (modal != null)
         {
@@ -35,7 +35,7 @@ public class Goal : MonoBehaviour
         }
     }
 
-    public void closeModal()
+    public void closeModalGoal()
     {
         if (modal != null)
         {
