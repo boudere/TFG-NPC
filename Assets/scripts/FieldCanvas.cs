@@ -11,8 +11,6 @@ public class FieldCanvas : MonoBehaviour
             modal.SetActive(false);
         }
     }
-
-    // Update is called once per frame
     void Update()
     {
        

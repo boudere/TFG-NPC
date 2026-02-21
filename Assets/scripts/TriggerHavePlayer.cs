@@ -10,44 +10,41 @@ public class TriggerHavePlayer : MonoBehaviour
     public static CharacterManager characterManager;
     private PlayerID owner;
 
-
+    private bool locked = false;
 
     private void OnTriggerEnter(Collider other)
     {
+        if (locked) return;
+
         owner = GetComponentInParent<PlayerID>();
-
         if (owner == null) return;
-        if (!other.CompareTag("Ball")) return;
 
-      
+        var rb = other.attachedRigidbody;
+        if (rb == null) return;
+        if (!rb.CompareTag("Ball")) return;
 
         if (!Bola.instance.PuedeSerRecogida()) return;
 
+        locked = true;
+        Debug.Log($"TriggerHavePlayer ENTER -> this={name} id={GetInstanceID()} root={transform.root.name} other={other.name}");
         Bola.instance.AsignarPosesion(owner);
-        
-
-   
-            id = owner.id;
-            Arbitro.instance.BallEntraEnArea(owner);
-
-       
-
+        Arbitro.instance.BallEntraEnArea(owner);
     }
 
     private void OnTriggerExit(Collider other)
     {
+        if (other.isTrigger) return;
+        var rb = other.attachedRigidbody;
+        if (rb == null) return;
+        if (!rb.CompareTag("Ball")) return;
 
-        if (!other.CompareTag("Ball")) return;
-
-        
+        locked = false;
 
         if (owner != null)
         {
             Arbitro.instance.BallSaleDeArea(owner);
-            id = -1;
             owner = null;
         }
     }
-
 
 }

@@ -8,7 +8,7 @@ public class Bola : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Collider physicalCollider;      // NO trigger
-    [SerializeField] private Collider stealTriggerCollider;  // SÍ trigger
+   // [SerializeField] private Collider stealTriggerCollider;  // SÍ trigger
 
     [Header("Posesión")]
     [SerializeField] private Vector3 localHoldOffset = new Vector3(0f, 0f, 1f);
@@ -28,6 +28,12 @@ public class Bola : MonoBehaviour
 
     private void Awake()
     {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         instance = this;
 
         if (rb == null)
@@ -61,8 +67,8 @@ public class Bola : MonoBehaviour
 
         // Asegurar estados
         physicalCollider.enabled = false;
-        stealTriggerCollider.enabled = true;
-        stealTriggerCollider.isTrigger = true;
+        //stealTriggerCollider.enabled = true;
+        //stealTriggerCollider.isTrigger = true;
 
 
         // Mantener escala mundial del balón
@@ -92,7 +98,7 @@ public class Bola : MonoBehaviour
         {
             if (c == null) continue;
             Physics.IgnoreCollision(physicalCollider, c, false);
-            Physics.IgnoreCollision(stealTriggerCollider, c, false);
+            //Physics.IgnoreCollision(stealTriggerCollider, c, false);
         }
 
         ownerColliders = null;

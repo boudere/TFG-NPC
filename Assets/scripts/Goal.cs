@@ -11,7 +11,7 @@ public class Goal : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
+          
         }
         else
         {
@@ -29,6 +29,7 @@ public class Goal : MonoBehaviour
 
     public void openModal()
     {
+       
         if (modal != null)
         {
             modal.SetActive(true);

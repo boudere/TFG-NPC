@@ -27,14 +27,16 @@ public class Pase : MonoBehaviour
     void Update()
     {
 
-            if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.P))
         {
+
+
             Vector3 pos = new Vector3(0f, 0f, 0f);
             string tagPlayer = "npc";
             int team = 0;
             searchPlayersToPass(tagPlayer, pos, team);
         }
-        
+
     }
 
      public void searchPlayersToPass(string tagPlayer, Vector3 pos, int team)

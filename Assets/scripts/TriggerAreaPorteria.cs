@@ -40,7 +40,7 @@ public class TriggerAreaPorteria : MonoBehaviour
         if (other.CompareTag("Player")) //PROVISIONAL
         {
             PlayerID jugador = other.GetComponent<PlayerID>();
-           
+
 
             if (jugador == null) return;
 
@@ -51,9 +51,9 @@ public class TriggerAreaPorteria : MonoBehaviour
             if (bola != null && teamJugador % 2 != team)
             {
                 Debug.Log("TRIGGER ENTER con: " + jugador.name);
-              
+
                 porteroDefender();
-                
+
             }
         }
     }

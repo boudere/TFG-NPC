@@ -67,8 +67,8 @@ public class Portero : PlayerID
 
         if (defendiendo)
         {
-           
-           DefensaBehaviour();
+
+            DefensaBehaviour();
             return;
         }
 
@@ -83,7 +83,7 @@ public class Portero : PlayerID
 
         float probabilidadSaque = 0.05f;
         float exito = 0.3f;
-     
+
 
 
         float aux = Random.value;
@@ -107,11 +107,12 @@ public class Portero : PlayerID
 
         if (Random.value < exito)
         {
-            
+
             Pase.instance.searchPlayersToPass("portero", transform.position, this.id);
-        } else
+        }
+        else
         {
-           
+
             disparoAleatorio();
         }
 
@@ -128,7 +129,7 @@ public class Portero : PlayerID
         rb.angularVelocity = Vector3.zero;
     }
 
-    
+
 
 
     void othersBehaviour()
@@ -185,7 +186,7 @@ public class Portero : PlayerID
     {
         Vector3 pos = transform.position;
 
-        
+
         pos.x = hx;
 
         pos.z += direccionDefensa * velocidadDefensa * Time.deltaTime;

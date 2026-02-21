@@ -1,14 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-
 
 public class TriggerGoal : MonoBehaviour
 {
-
     private int goalCounter = 0;
     public Goal goal;
     private Porteria porteria;
     private int team;
+
+    private bool goalLocked = false;   // <-- candado
 
     void Awake()
     {
@@ -21,20 +21,29 @@ public class TriggerGoal : MonoBehaviour
         team = porteria.team;
     }
 
-
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball"))
-        {
-            goalCounter++;
-            StartCoroutine(ResetBallAfterDelay(other.gameObject));
-            StartCoroutine(MostrarPanel());
-        }
+       
+        if (goalLocked) return;
+        var rb = other.attachedRigidbody;
+        if (rb == null) return;
+
+        GameObject ballRoot = rb.gameObject;
+
+        if (!ballRoot.CompareTag("Ball")) return;
+
+        goalLocked = true; 
+
+        goalCounter++;
+        Debug.Log($"GOAL! Counter {goalCounter} | collider={other.name} | ballRoot={ballRoot.name}");
+
+        StartCoroutine(ResetBallAfterDelay(ballRoot));
+        StartCoroutine(MostrarPanel());
     }
 
     private IEnumerator ResetBallAfterDelay(GameObject ball)
     {
-        yield return new WaitForSeconds(1f); 
+        yield return new WaitForSeconds(1f);
 
         ball.transform.position = new Vector3(59, 9.391f, 80.6f);
 
@@ -44,6 +53,8 @@ public class TriggerGoal : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+
+        goalLocked = false;
     }
 
     private IEnumerator MostrarPanel()
