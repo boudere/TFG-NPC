@@ -9,7 +9,6 @@ public class Pase : MonoBehaviour
     private GameObject[] players;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
-    private NavMeshAgent navMeshAgent;
     public static event Action <GameObject> OnCharacterGVSelected;
     public static Pase instance;
 

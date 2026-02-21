@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Linq;
 
 public class TriggerGoal : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class TriggerGoal : MonoBehaviour
     public ShowScore showScore;
     private Porteria porteria;
     private int team;
+    
 
     private bool goalLocked = false;   
 
@@ -39,16 +41,33 @@ public class TriggerGoal : MonoBehaviour
 
         goalCounter++;
         porteria.goalCounterTeam++;
-        Debug.Log($"GOAL! Counter {goalCounter} | collider={other.name} | ballRoot={ballRoot.name}");
 
         StartCoroutine(ResetBallAfterDelay(ballRoot));
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] porteros = GameObject.FindGameObjectsWithTag("Portero");
+
+        GameObject[] total = players.Concat(porteros).ToArray();
+
+        foreach (GameObject p in total)
+        {
+            CharacterGV character= p.GetComponent<CharacterGV>();
+
+            if (character != null)
+            {
+               character.ResetToSpawn();
+            }
+        }
+
         StartCoroutine(GoalThenScoreSequence());
+
     }
 
     private IEnumerator GoalThenScoreSequence()
     {
         yield return StartCoroutine(MostrarPanelGoal());
         yield return StartCoroutine(MostrarPanelMarcador());
+
     }
 
     private IEnumerator ResetBallAfterDelay(GameObject ball)
@@ -97,4 +116,6 @@ public class TriggerGoal : MonoBehaviour
         yield return new WaitForSeconds(1f);
         showScore.closeModalMarcador();
     }
+
+   
 }

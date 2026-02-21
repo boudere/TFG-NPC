@@ -25,13 +25,20 @@ public class CharacterGV : MonoBehaviour
     private bool frozen = false;
     private GameObject playerStop = null;
 
-
+    private Vector3 spawnPos;
+    private Quaternion spawnRot;
+    private bool resetPos = false;
 
     private void Awake()
     {
-        
+
 
         rb = GetComponent<Rigidbody>();
+        instance = this;
+
+        spawnPos = transform.position;
+        Debug.Log(spawnPos);
+        spawnRot = transform.rotation;
     }
 
     private void Start()
@@ -41,26 +48,32 @@ public class CharacterGV : MonoBehaviour
 
         if (index != characterManager.index)
             PickNewTarget();
+
+
     }
 
     private void Update()
     {
         if (frozen && playerStop)
-        { 
+        {
             StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
+        if (resetPos)
+        {
+            return;
         }
         movePlayer();
         othersBehaviour();
     }
 
-    
+
 
     void movePlayer()
     {
         if (index != characterManager.index)
             return;
 
-        float h = Input.GetAxisRaw("Horizontal"); 
+        float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
         Vector3 inputDir = new Vector3(h, 0f, v);
@@ -70,10 +83,10 @@ public class CharacterGV : MonoBehaviour
         Vector3 movement = moveDir * speed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
-        
+
         if (inputDir.sqrMagnitude > 0.001f)
         {
-           
+
             smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
 
             Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
@@ -98,35 +111,37 @@ public class CharacterGV : MonoBehaviour
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
 
-      //StartCoroutine(ControlarTiempo());
+        //StartCoroutine(ControlarTiempo());
     }
 
-    private IEnumerator ControlarTiempo()
-    {
-        float distanciaTotal = 0f;
-        Vector3 ultimaPosicion = transform.position;
+    //private IEnumerator ControlarTiempo()
+    //{
+    //    float distanciaTotal = 0f;
+    //    Vector3 ultimaPosicion = transform.position;
 
-        int segundos = 0;
+    //    int segundos = 0;
 
-        while (segundos < 2)
-        {
-            yield return new WaitForSeconds(1f);
+    //    while (segundos < 2)
+    //    {
+    //        yield return new WaitForSeconds(1f);
 
-            Vector3 posicionActual = transform.position;
-            float distancia = Vector3.Distance(ultimaPosicion, posicionActual);
+    //        Vector3 posicionActual = transform.position;
+    //        float distancia = Vector3.Distance(ultimaPosicion, posicionActual);
 
-            distanciaTotal += distancia;
-            ultimaPosicion = posicionActual;
+    //        distanciaTotal += distancia;
+    //        ultimaPosicion = posicionActual;
 
-            segundos++;
-        }
+    //        segundos++;
+    //    }
 
-        if (distanciaTotal < 15f)
-        {
-            PickNewTarget();
-        }
+    //    if (distanciaTotal < 15f)
+    //    {
+    //        PickNewTarget();
+    //    }
 
-    }
+    //}
+
+
 
     void PickNewTarget()
     {
@@ -142,7 +157,7 @@ public class CharacterGV : MonoBehaviour
 
     private void OnDisable()
     {
-       Pase.OnCharacterGVSelected -= OnSelected;
+        Pase.OnCharacterGVSelected -= OnSelected;
     }
 
     void OnSelected(GameObject player)
@@ -159,6 +174,28 @@ public class CharacterGV : MonoBehaviour
         yield return new WaitForSeconds(2f);
         frozen = false;
     }
+
+    public void ResetToSpawn()
+    {
+
+        transform.position = spawnPos;
+        transform.rotation = spawnRot;
+        resetPos = true;
+
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        rb.angularVelocity = Vector3.zero;
+
+        StartCoroutine(ResetRoutine());
+
+        
+    }
+
+    private IEnumerator ResetRoutine()
+    {
+        yield return new WaitForSeconds(3f);
+        resetPos = false;
+    }
+
 }
 
 
