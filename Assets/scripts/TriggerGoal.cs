@@ -41,7 +41,8 @@ public class TriggerGoal : MonoBehaviour
         Debug.Log($"GOAL! Counter {goalCounter} | collider={other.name} | ballRoot={ballRoot.name}");
 
         StartCoroutine(ResetBallAfterDelay(ballRoot));
-        StartCoroutine(MostrarPanel());
+      //  StartCoroutine(MostrarPanelGoal());
+        StartCoroutine(MostrarPanelMarcador());
     }
 
     private IEnumerator ResetBallAfterDelay(GameObject ball)
