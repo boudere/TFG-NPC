@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class Porteria : MonoBehaviour
 {
-   public int team;
+    public int team;
     public int lineaGolMax, lineaGolMin, hx;
+    public int goalCounterTeam = 0;
     void Start()
     {
         
@@ -13,5 +14,14 @@ public class Porteria : MonoBehaviour
     void Update()
     {
         
+    }
+     protected void goalScored()
+    {
+        goalCounterTeam++;
+    }
+
+    public int getNumberGoals()
+    {
+        return goalCounterTeam;
     }
 }

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class TriggerGoal : MonoBehaviour
 {
     private int goalCounter = 0;
     public Goal goal;
+    public ShowScore showScore;
     private Porteria porteria;
     private int team;
 
@@ -13,6 +15,7 @@ public class TriggerGoal : MonoBehaviour
     void Awake()
     {
         goal = Goal.instance;
+        porteria = GetComponentInParent<Porteria>();
     }
 
     void Start()
@@ -57,10 +60,34 @@ public class TriggerGoal : MonoBehaviour
         goalLocked = false;
     }
 
-    private IEnumerator MostrarPanel()
+    private IEnumerator MostrarPanelGoal()
     {
-        goal.openModal();
+        goal.openModalGoal();
         yield return new WaitForSeconds(1f);
-        goal.closeModal();
+        goal.closeModalGoal();
+    }
+
+    private IEnumerator MostrarPanelMarcador()
+    {
+
+        GameObject[] p = GameObject.FindGameObjectsWithTag("Porteria");
+        int id;
+
+        for (int i = 0; i < p.Length; i++)
+        {
+            id = p[i].GetComponent<Porteria>().team; 
+            if (team % 2 == 0)
+            {
+                showScore.setScoret0(porteria.goalCounterTeam);
+            } else if (team % 2 == 1)
+            {
+                showScore.setScoret1(porteria.goalCounterTeam);
+            }
+        }
+
+           
+        showScore.openModalMarcador();
+        yield return new WaitForSeconds(1f);
+        showScore.closeModalMarcador();
     }
 }

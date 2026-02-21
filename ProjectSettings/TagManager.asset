@@ -9,6 +9,7 @@ TagManager:
   - CinemachineTarget
   - Portero
   - area
+  - Porteria
   layers:
   - Default
   - TransparentFX
