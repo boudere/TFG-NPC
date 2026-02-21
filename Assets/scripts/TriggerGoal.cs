@@ -10,7 +10,7 @@ public class TriggerGoal : MonoBehaviour
     private Porteria porteria;
     private int team;
 
-    private bool goalLocked = false;   // <-- candado
+    private bool goalLocked = false;   
 
     void Awake()
     {
@@ -38,11 +38,17 @@ public class TriggerGoal : MonoBehaviour
         goalLocked = true; 
 
         goalCounter++;
+        porteria.goalCounterTeam++;
         Debug.Log($"GOAL! Counter {goalCounter} | collider={other.name} | ballRoot={ballRoot.name}");
 
         StartCoroutine(ResetBallAfterDelay(ballRoot));
-      //  StartCoroutine(MostrarPanelGoal());
-        StartCoroutine(MostrarPanelMarcador());
+        StartCoroutine(GoalThenScoreSequence());
+    }
+
+    private IEnumerator GoalThenScoreSequence()
+    {
+        yield return StartCoroutine(MostrarPanelGoal());
+        yield return StartCoroutine(MostrarPanelMarcador());
     }
 
     private IEnumerator ResetBallAfterDelay(GameObject ball)

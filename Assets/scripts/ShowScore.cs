@@ -57,7 +57,7 @@ public class ShowScore : MonoBehaviour
     public void setScoret0(int team0)
     {
         int t0 = Mathf.Clamp(team0, 0, 9);
-        if (scoreTeam0Image != null) scoreTeam0Image.sprite = digits[team0];
+        if (scoreTeam0Image != null) scoreTeam1Image.sprite = digits[team0];
     }
 
     public void setScoret1(int team1)
