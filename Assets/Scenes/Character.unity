@@ -310,19 +310,49 @@ PrefabInstance:
       propertyPath: id
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 8476839841250352750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7983882802795531582, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       insertIndex: 1
       addedObject: {fileID: 1112385196}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202939609}
   m_SourcePrefab: {fileID: 100100000, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
 --- !u!4 &202939607 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7983882802795531582, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
   m_PrefabInstance: {fileID: 202939606}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &202939608 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+  m_PrefabInstance: {fileID: 202939606}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &202939609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202939608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1922600d46c1fbb47bf1cab7f2ab1ea9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 11
+  posicion: Defensa
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &283558378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -387,6 +417,10 @@ PrefabInstance:
       propertyPath: index
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 5919709056188679227, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 8025563837105647668, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -405,13 +439,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       insertIndex: 1
       addedObject: {fileID: 589632700}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 283558381}
   m_SourcePrefab: {fileID: 100100000, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
 --- !u!4 &283558379 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
   m_PrefabInstance: {fileID: 283558378}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &283558380 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+  m_PrefabInstance: {fileID: 283558378}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &283558381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283558380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93d6c9085fcdfb84790bd0524c767bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 4
+  posicion: CentroCampista
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &292062939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -476,6 +536,10 @@ PrefabInstance:
       propertyPath: index
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 4721451125952191663, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 7156395344308192735, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -494,13 +558,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       insertIndex: 0
       addedObject: {fileID: 1749565647}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 292062942}
   m_SourcePrefab: {fileID: 100100000, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
 --- !u!4 &292062940 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
   m_PrefabInstance: {fileID: 292062939}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &292062941 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+  m_PrefabInstance: {fileID: 292062939}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &292062942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292062941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93d6c9085fcdfb84790bd0524c767bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 7
+  posicion: CentroCampista
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &297937649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -509,6 +599,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2015104785228139664, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
+      propertyPath: posicion
+      value: Portero
+      objectReference: {fileID: 0}
     - target: {fileID: 2696775346851101435, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -479.1
@@ -1025,6 +1119,10 @@ PrefabInstance:
       propertyPath: velocidadDefensa
       value: 75
       objectReference: {fileID: 0}
+    - target: {fileID: 7532456671956861460, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
+      propertyPath: posicion
+      value: Portero
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1435,6 +1533,10 @@ PrefabInstance:
       propertyPath: index
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4810361649715017735, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      propertyPath: posicion
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 44
@@ -1482,13 +1584,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       insertIndex: 0
       addedObject: {fileID: 977930459}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980140375}
   m_SourcePrefab: {fileID: 100100000, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
 --- !u!4 &980140373 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
   m_PrefabInstance: {fileID: 980140372}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &980140374 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+  m_PrefabInstance: {fileID: 980140372}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &980140375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980140374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4f0657af750c34597be191fa9054cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 3
+  posicion: Delantero
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1 &1010783935
 GameObject:
   m_ObjectHideFlags: 0
@@ -1751,6 +1879,10 @@ PrefabInstance:
       propertyPath: index
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 273183180097427751, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      propertyPath: posicion
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       propertyPath: m_Name
       value: t2 extremo
@@ -1818,13 +1950,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8296290410509342265, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       insertIndex: 0
       addedObject: {fileID: 2062942599}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026767}
   m_SourcePrefab: {fileID: 100100000, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
 --- !u!4 &1490026765 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8296290410509342265, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
   m_PrefabInstance: {fileID: 1490026764}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1490026766 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+  m_PrefabInstance: {fileID: 1490026764}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1490026767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4f0657af750c34597be191fa9054cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 3
+  posicion: Delantero
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &1528111957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1901,19 +2059,49 @@ PrefabInstance:
       propertyPath: index
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 6277277049600538943, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       insertIndex: 1
       addedObject: {fileID: 891374586}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1528111960}
   m_SourcePrefab: {fileID: 100100000, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
 --- !u!4 &1528111958 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
   m_PrefabInstance: {fileID: 1528111957}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1528111959 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+  m_PrefabInstance: {fileID: 1528111957}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1528111960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528111959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1922600d46c1fbb47bf1cab7f2ab1ea9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 9
+  posicion: Defensa
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1 &1741050838
 GameObject:
   m_ObjectHideFlags: 0
@@ -2491,6 +2679,10 @@ PrefabInstance:
       propertyPath: index
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 4233730810356135116, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     - target: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: m_Name
       value: t1 lateral
@@ -2545,13 +2737,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7983882802795531582, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       insertIndex: 0
       addedObject: {fileID: 1921531940}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1026487310500677389}
   m_SourcePrefab: {fileID: 100100000, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
 --- !u!4 &1026487310500677387 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7983882802795531582, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
   m_PrefabInstance: {fileID: 1026487310500677386}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1026487310500677388 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+  m_PrefabInstance: {fileID: 1026487310500677386}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1026487310500677389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026487310500677388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1922600d46c1fbb47bf1cab7f2ab1ea9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 10
+  posicion: Defensa
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &3345642324323717113
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2616,6 +2834,10 @@ PrefabInstance:
       propertyPath: index
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 2664582207194471344, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     - target: {fileID: 5443927778574284407, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -2638,13 +2860,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       insertIndex: 1
       addedObject: {fileID: 524377866}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3345642324323717116}
   m_SourcePrefab: {fileID: 100100000, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
 --- !u!4 &3345642324323717114 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
   m_PrefabInstance: {fileID: 3345642324323717113}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3345642324323717115 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+  m_PrefabInstance: {fileID: 3345642324323717113}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3345642324323717116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3345642324323717115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1922600d46c1fbb47bf1cab7f2ab1ea9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 8
+  posicion: Defensa
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &3625312987260654811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2709,6 +2957,10 @@ PrefabInstance:
       propertyPath: index
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      propertyPath: posicion
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
       value: 0
@@ -2724,13 +2976,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       insertIndex: 1
       addedObject: {fileID: 1010783936}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654814}
   m_SourcePrefab: {fileID: 100100000, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
 --- !u!4 &3625312987260654812 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
   m_PrefabInstance: {fileID: 3625312987260654811}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3625312987260654813 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+  m_PrefabInstance: {fileID: 3625312987260654811}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3625312987260654814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4f0657af750c34597be191fa9054cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 0
+  posicion: Delantero
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2795,6 +3073,10 @@ PrefabInstance:
       propertyPath: index
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5505991660044748958, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      propertyPath: posicion
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 8853274002777128782, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2813,13 +3095,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       insertIndex: 1
       addedObject: {fileID: 708110847}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6738770865320173679}
   m_SourcePrefab: {fileID: 100100000, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
 --- !u!4 &6738770865320173677 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
   m_PrefabInstance: {fileID: 6738770865320173676}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6738770865320173678 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+  m_PrefabInstance: {fileID: 6738770865320173676}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6738770865320173679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6738770865320173678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4f0657af750c34597be191fa9054cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 1
+  posicion: Delantero
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &7727232850989682730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2888,6 +3196,10 @@ PrefabInstance:
       propertyPath: index
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 8539756422676759453, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: m_Name
       value: t1 co
@@ -2902,13 +3214,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       insertIndex: 1
       addedObject: {fileID: 183752960}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7727232850989682733}
   m_SourcePrefab: {fileID: 100100000, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
 --- !u!4 &7727232850989682731 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
   m_PrefabInstance: {fileID: 7727232850989682730}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7727232850989682732 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+  m_PrefabInstance: {fileID: 7727232850989682730}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7727232850989682733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727232850989682732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93d6c9085fcdfb84790bd0524c767bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 4
+  posicion: CentroCampista
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1001 &8757151642796768867
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2973,6 +3311,10 @@ PrefabInstance:
       propertyPath: index
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 6155172991031746510, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 7156395344308192735, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2991,13 +3333,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       insertIndex: 0
       addedObject: {fileID: 1741050839}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8757151642796768870}
   m_SourcePrefab: {fileID: 100100000, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
 --- !u!4 &8757151642796768868 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
   m_PrefabInstance: {fileID: 8757151642796768867}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8757151642796768869 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+  m_PrefabInstance: {fileID: 8757151642796768867}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8757151642796768870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8757151642796768869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93d6c9085fcdfb84790bd0524c767bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 6
+  posicion: CentroCampista
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

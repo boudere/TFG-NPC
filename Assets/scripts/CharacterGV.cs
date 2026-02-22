@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -121,7 +122,21 @@ public class CharacterGV : PlayerID, IResettable
             float aux = Random.value;
             if (aux < npcPass)
             {
-                Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+                //Tendría que llamar al
+                //Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+
+                if (this.posicion == "Delantero")
+                {
+                    Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+                } else if (this.posicion == "CentroCampista")
+                {
+                    Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+                } else if (this.posicion == "Defensa")
+                {
+                    Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+                    //Buscar a ese jugador su instancia y castearlo, algo similar al reset habría que hacer una función que busque su instancia 
+
+                }
             }
 
         }
@@ -183,6 +198,7 @@ public class CharacterGV : PlayerID, IResettable
         yield return new WaitForSeconds(3f);
         resetPos = false;
     }
+
 
 }
 

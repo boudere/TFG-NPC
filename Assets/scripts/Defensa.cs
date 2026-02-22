@@ -7,6 +7,19 @@ public class Defensa : PlayerID, IResettable
     private Quaternion spawnRot;
     private bool resetPos = false;
     private Rigidbody rb;
+    public bool pase = false;
+
+    //Probabilidades (luego pueden fallarse o no) 
+
+    //Tirarla libre 10%
+    //Tirarla a un jugador cualquiera 25%
+    //Tirarla a un centro del campo 65% 
+
+    /*
+     En caso de que se pueda dar asistencia ...
+     */
+
+
     private void Awake()
     {
 
@@ -14,20 +27,36 @@ public class Defensa : PlayerID, IResettable
         spawnRot = transform.rotation;
         rb = GetComponent<Rigidbody>();
     }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+ 
     void Start()
     {
         
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         if (resetPos)
         {
             return;
         }
-    }
+
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            // Si tienen la bola, probabilidad de pasarla a un centro campista, probabilidad de pasarlo a otro player o de disparar libremente 
+            float aux = Random.value;
+
+           // if (aux >)
+
+            //También debería pararlo no ?
+
+        }
+
+        // Perseguir a delantero si está en área de defensa 
+
+
+        // Contar jugadores por campo y si hay más en el otro ir  hacia allá
+        }
 
 
     public void ResetToSpawn()
@@ -49,5 +78,10 @@ public class Defensa : PlayerID, IResettable
     {
         yield return new WaitForSeconds(3f);
         resetPos = false;
+    }
+
+    public void setPase(bool pase)
+    {
+        this.pase = pase;
     }
 }
