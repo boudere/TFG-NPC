@@ -758,6 +758,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 0
+  haveBall: 0
+  holdPoint: {fileID: 0}
+  self: {fileID: 0}
   turnSpeedDeg: 720
   directionLerp: 12
   index: 1

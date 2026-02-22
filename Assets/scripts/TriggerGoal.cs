@@ -43,23 +43,10 @@ public class TriggerGoal : MonoBehaviour
         porteria.goalCounterTeam++;
 
         StartCoroutine(ResetBallAfterDelay(ballRoot));
-
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        GameObject[] porteros = GameObject.FindGameObjectsWithTag("Portero");
-
-        GameObject[] total = players.Concat(porteros).ToArray();
-
-        foreach (GameObject p in total)
-        {
-            CharacterGV character= p.GetComponent<CharacterGV>();
-
-            if (character != null)
-            {
-               character.ResetToSpawn();
-            }
-        }
-
+        searchPlayersReset();
         StartCoroutine(GoalThenScoreSequence());
+
+
 
     }
 
@@ -117,5 +104,37 @@ public class TriggerGoal : MonoBehaviour
         showScore.closeModalMarcador();
     }
 
-   
+   private void searchPlayersReset()
+    {
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        
+        foreach (GameObject p in players)
+        {
+            CharacterGV character = p.GetComponent<CharacterGV>();
+
+            if (character != null)
+            {
+                character.ResetToSpawn();
+            }
+        }
+
+
+        GameObject[] portero = GameObject.FindGameObjectsWithTag("Portero");
+
+
+        foreach (GameObject p in portero)
+        {
+            Portero character = p.GetComponent<Portero>();
+
+            if (character != null)
+            {
+                character.ResetToSpawn();
+            }
+        
+        }
+
+
+
+    }
 }

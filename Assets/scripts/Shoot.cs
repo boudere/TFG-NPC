@@ -11,8 +11,9 @@ public class Shoot : MonoBehaviour
 
             Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
 
-            rb.isKinematic = false;
-            rb.useGravity = true;
+            //rb.isKinematic = false;
+            //rb.useGravity = true;
+
 
             Vector3 direction = Bola.instance.transform.forward;
 

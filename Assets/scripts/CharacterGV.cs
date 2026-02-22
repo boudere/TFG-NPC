@@ -2,7 +2,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CharacterGV : MonoBehaviour
+public class CharacterGV : PlayerID
 {
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
@@ -29,15 +29,16 @@ public class CharacterGV : MonoBehaviour
     private Quaternion spawnRot;
     private bool resetPos = false;
 
+    //Probabilidad de efectuar pase 
+    private float npcPass = 0.002f; //PROVISIONAL
+
+
     private void Awake()
     {
-
-
         rb = GetComponent<Rigidbody>();
         instance = this;
 
         spawnPos = transform.position;
-        Debug.Log(spawnPos);
         spawnRot = transform.rotation;
     }
 
@@ -111,36 +112,23 @@ public class CharacterGV : MonoBehaviour
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
 
-        //StartCoroutine(ControlarTiempo());
+        //Si tiene bola y se cumple x probabilidad que se pase 
+
+        
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+
+            float aux = Random.value;
+            if (aux < npcPass)
+            {
+                Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+            }
+
+        }
+     
     }
 
-    //private IEnumerator ControlarTiempo()
-    //{
-    //    float distanciaTotal = 0f;
-    //    Vector3 ultimaPosicion = transform.position;
-
-    //    int segundos = 0;
-
-    //    while (segundos < 2)
-    //    {
-    //        yield return new WaitForSeconds(1f);
-
-    //        Vector3 posicionActual = transform.position;
-    //        float distancia = Vector3.Distance(ultimaPosicion, posicionActual);
-
-    //        distanciaTotal += distancia;
-    //        ultimaPosicion = posicionActual;
-
-    //        segundos++;
-    //    }
-
-    //    if (distanciaTotal < 15f)
-    //    {
-    //        PickNewTarget();
-    //    }
-
-    //}
-
+   
 
 
     void PickNewTarget()

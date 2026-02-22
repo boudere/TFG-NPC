@@ -11,6 +11,7 @@ public class Pase : MonoBehaviour
     public static CharacterGV characterGV;
     public static event Action <GameObject> OnCharacterGVSelected;
     public static Pase instance;
+    private string tagPlayer;
 
     private void Awake()
     {
@@ -31,7 +32,8 @@ public class Pase : MonoBehaviour
 
 
             Vector3 pos = new Vector3(0f, 0f, 0f);
-            string tagPlayer = "npc";
+            string tagPlayer = "player";
+            this.tagPlayer = tagPlayer;
             int team = 0;
             searchPlayersToPass(tagPlayer, pos, team);
         }
@@ -42,6 +44,8 @@ public class Pase : MonoBehaviour
     {
         GameObject[] p;
         int id = -1, i;
+
+        this.tagPlayer = tagPlayer;
 
         if (tagPlayer == "portero" )
         {
@@ -57,9 +61,23 @@ public class Pase : MonoBehaviour
 
             }
 
-        } else
+        } else if (tagPlayer == "npc")
         {
-             p = GameObject.FindGameObjectsWithTag("Player");
+            p = GameObject.FindGameObjectsWithTag("Player");
+
+            for (i = 0; i < p.Length; i++)
+            {
+                id = p[i].GetComponent<PlayerID>().id;
+                if (id == team)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+         
+            p = GameObject.FindGameObjectsWithTag("Player");
 
             for (i = 0; i < p.Length; i++)
             {
@@ -94,7 +112,7 @@ public class Pase : MonoBehaviour
         float currentDistance;
 
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
-        int j; // Es la posición de la lista (no el id)
+        int j = 0; // Es la posición de la lista (no el id)
         int team = index % 2;
 
 
@@ -113,14 +131,19 @@ public class Pase : MonoBehaviour
             }
         }
 
-        OnCharacterGVSelected?.Invoke(player);
+        if (p[j].GetComponent<PlayerID>().id != characterManager.index)
+        {
+        
+            OnCharacterGVSelected?.Invoke(player);
+        }
 
+        Bola.instance.Soltar();
 
 
         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
 
-        rb.isKinematic = false;
-        rb.useGravity = true;
+        //rb.isKinematic = false;
+        //rb.useGravity = true;
 
         Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 
@@ -128,7 +151,7 @@ public class Pase : MonoBehaviour
          rb.linearVelocity = direction * passSpeed;
          rb.angularVelocity = Vector3.zero;
 
-
+     
     }
 
     float calculateDistance(Vector3 myPos)

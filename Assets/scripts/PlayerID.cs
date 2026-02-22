@@ -7,6 +7,7 @@ public class PlayerID : MonoBehaviour
     public bool haveBall = false;
     public Transform holdPoint;
     public PlayerID self;
+    public float probabilidadAciertoPase;
 
     void Awake()
     {
