@@ -106,35 +106,26 @@ public class TriggerGoal : MonoBehaviour
 
    private void searchPlayersReset()
     {
+        resetByTag<CharacterGV>("Player");
+        resetByTag<Portero>("Portero");
+        resetByTag<Defensa>("Defensa");
+        resetByTag<CentroCampista>("CentroCampista");
+        resetByTag<Delantero>("Delantero");
 
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        
+    }
+
+    private void resetByTag<T>(string tag) where T : PlayerID, IResettable
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag(tag);
         foreach (GameObject p in players)
         {
-            CharacterGV character = p.GetComponent<CharacterGV>();
+            T character =p.GetComponent<T>();
 
             if (character != null)
             {
                 character.ResetToSpawn();
             }
         }
-
-
-        GameObject[] portero = GameObject.FindGameObjectsWithTag("Portero");
-
-
-        foreach (GameObject p in portero)
-        {
-            Portero character = p.GetComponent<Portero>();
-
-            if (character != null)
-            {
-                character.ResetToSpawn();
-            }
-        
-        }
-
-
-
+          
     }
 }

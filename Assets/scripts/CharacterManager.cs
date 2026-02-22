@@ -29,19 +29,8 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
-        //BuildCharactersArray();
+        
     }
 
-    //private void BuildCharactersArray()
-    //{
-    //    characters = new CharacterGV[characterList.Count];
-
-    //    for (int i = 0; i < characterList.Count; i++)
-    //    {
-    //        GameObject go = characterList[i].personajeJugable;   
-    //        characters[i] = go.GetComponent<CharacterGV>();
-    //        characters[i].index = i;
-    //    }
-    //}
 
 }

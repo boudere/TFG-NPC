@@ -237,9 +237,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 2
+  posicion: 
   haveBall: 0
   holdPoint: {fileID: 0}
   self: {fileID: 0}
+  probabilidadAciertoPase: 0
 --- !u!114 &4810361649715017735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,9 +255,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
+  posicion: 
   haveBall: 0
   holdPoint: {fileID: 0}
   self: {fileID: 0}
+  probabilidadAciertoPase: 0
   turnSpeedDeg: 720
   directionLerp: 12
   index: 2

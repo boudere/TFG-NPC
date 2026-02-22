@@ -10,6 +10,9 @@ TagManager:
   - Portero
   - area
   - Porteria
+  - Defensa
+  - CentroCampista
+  - Delantero
   layers:
   - Default
   - TransparentFX

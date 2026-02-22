@@ -37,7 +37,7 @@ public class TriggerAreaPorteria : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
 
-        if (other.CompareTag("Player")) //PROVISIONAL
+        if (other.CompareTag("Defensa") || other.CompareTag("CentroCampista") || other.CompareTag("Delantero")) //PROVISIONAL
         {
             PlayerID jugador = other.GetComponent<PlayerID>();
 

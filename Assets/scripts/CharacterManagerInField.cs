@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,7 +13,7 @@ public class CharacterManagerInField : MonoBehaviour
     {
         
         characterManager = CharacterManager.instance;
-        GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] p = GetAllFieldPlayers();
         players = new GameObject[p.Length];
 
         for (int i = 0; i < p.Length; i++)
@@ -33,6 +34,17 @@ public class CharacterManagerInField : MonoBehaviour
     private void Update()
     {
         cameraConfiguration(characterManager.index);
+    }
+
+    private GameObject[] GetAllFieldPlayers()
+    {
+        List<GameObject> allPlayers = new List<GameObject>();
+
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Defensa"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("CentroCampista"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Delantero"));
+
+        return allPlayers.ToArray();
     }
 
     public void cameraConfiguration(int i)

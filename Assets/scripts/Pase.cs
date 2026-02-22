@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,7 +7,7 @@ using UnityEngine.AI;
 public class Pase : MonoBehaviour
 {
 
-    private GameObject[] players;
+    private GameObject[] p;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
     public static event Action <GameObject> OnCharacterGVSelected;
@@ -16,10 +17,12 @@ public class Pase : MonoBehaviour
     private void Awake()
     {
         instance = this;
+       
     }
 
         void Start()
     {
+        p = GetAllFieldPlayers();
         characterManager = CharacterManager.instance;
     }
 
@@ -32,7 +35,7 @@ public class Pase : MonoBehaviour
 
 
             Vector3 pos = new Vector3(0f, 0f, 0f);
-            string tagPlayer = "player";
+            string tagPlayer = " ";
             this.tagPlayer = tagPlayer;
             int team = 0;
             searchPlayersToPass(tagPlayer, pos, team);
@@ -42,16 +45,16 @@ public class Pase : MonoBehaviour
 
      public void searchPlayersToPass(string tagPlayer, Vector3 pos, int team)
     {
-        GameObject[] p;
+      
         int id = -1, i;
 
         this.tagPlayer = tagPlayer;
 
-        if (tagPlayer == "portero" )
+        if (tagPlayer == "portero")
         {
-            p = GameObject.FindGameObjectsWithTag("Portero");
+            GameObject[] porteros = GameObject.FindGameObjectsWithTag("Portero");
 
-            for (i = 0; i < p.Length; i++)
+            for (i = 0; i < porteros.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
                 if (team % 2 == id % 2)
@@ -63,8 +66,6 @@ public class Pase : MonoBehaviour
 
         } else if (tagPlayer == "npc")
         {
-            p = GameObject.FindGameObjectsWithTag("Player");
-
             for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
@@ -76,9 +77,6 @@ public class Pase : MonoBehaviour
         }
         else
         {
-         
-            p = GameObject.FindGameObjectsWithTag("Player");
-
             for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
@@ -87,12 +85,7 @@ public class Pase : MonoBehaviour
                     break;
                 }
             }
-
         }
-
-       
-
-
 
         if (calculateDistance(p[i].transform.position) < 25)
         {
@@ -100,12 +93,13 @@ public class Pase : MonoBehaviour
         }
     }
 
-   
 
     void passBall(int index)
     {
+        //Index es el que la pasa
+        // ID al que se la paso 
 
-        GameObject[] p = GameObject.FindGameObjectsWithTag("Player");
+      
 
         GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
         float minDistance = 1000000;
@@ -133,7 +127,7 @@ public class Pase : MonoBehaviour
 
         if (p[j].GetComponent<PlayerID>().id != characterManager.index)
         {
-        
+
             OnCharacterGVSelected?.Invoke(player);
         }
 
@@ -142,8 +136,6 @@ public class Pase : MonoBehaviour
 
         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
 
-        //rb.isKinematic = false;
-        //rb.useGravity = true;
 
         Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 
@@ -160,5 +152,16 @@ public class Pase : MonoBehaviour
         myPos.y = 0;
         ballPosition.y = 0;
         return Vector3.Distance(myPos, ballPosition); 
+    }
+
+    private GameObject[] GetAllFieldPlayers()
+    {
+        List<GameObject> allPlayers = new List<GameObject>();
+
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Defensa"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("CentroCampista"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Delantero"));
+
+        return allPlayers.ToArray();
     }
 }

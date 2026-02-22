@@ -2,7 +2,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CharacterGV : PlayerID
+public class CharacterGV : PlayerID, IResettable
 {
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro

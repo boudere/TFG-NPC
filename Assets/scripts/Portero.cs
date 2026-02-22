@@ -2,7 +2,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Portero : PlayerID
+public class Portero : PlayerID, IResettable
 {
 
     public float minX, maxX, minZ, maxZ, y;

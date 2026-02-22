@@ -250,6 +250,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5274288742510349136, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: posicion
+      value: Lateral
+      objectReference: {fileID: 0}
     - target: {fileID: 2552737448833528377, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -257,6 +261,10 @@ PrefabInstance:
     - target: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       propertyPath: m_Name
       value: t2 lateral
+      objectReference: {fileID: 0}
+    - target: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: m_TagString
+      value: Defensa
       objectReference: {fileID: 0}
     - target: {fileID: 7983882802795531582, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       propertyPath: m_LocalPosition.x
@@ -327,9 +335,13 @@ PrefabInstance:
       propertyPath: id
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: -8448274243675753509, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 210
+      value: 290.7
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: m_LocalPosition.y
@@ -337,7 +349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 213
+      value: 275.3
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: m_LocalRotation.w
@@ -383,6 +395,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: t2 co
       objectReference: {fileID: 0}
+    - target: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      propertyPath: m_TagString
+      value: CentroCampista
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -408,9 +424,13 @@ PrefabInstance:
       propertyPath: id
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: -3598338452732011170, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 227.1
+      value: 292
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: m_LocalPosition.y
@@ -418,7 +438,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -119.6
+      value: -96
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: m_LocalRotation.w
@@ -466,7 +486,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: CentroCampista
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1391,9 +1411,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: t1 extremo
       objectReference: {fileID: 0}
+    - target: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      propertyPath: m_TagString
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 4334170299427478599, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: id
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4334170299427478599, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      propertyPath: posicion
+      value: Delantero
       objectReference: {fileID: 0}
     - target: {fileID: 4504459551387871550, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1409,7 +1437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 39
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1417,7 +1445,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -15
+      value: -93
       objectReference: {fileID: 0}
     - target: {fileID: 8296290410509342265, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1727,9 +1755,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: t2 extremo
       objectReference: {fileID: 0}
+    - target: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      propertyPath: m_TagString
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 4334170299427478599, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       propertyPath: id
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4334170299427478599, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      propertyPath: posicion
+      value: Delantero
       objectReference: {fileID: 0}
     - target: {fileID: 4504459551387871550, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1801,9 +1837,13 @@ PrefabInstance:
       propertyPath: id
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: -2977776892259783664, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 418.1
+      value: 427
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1811,7 +1851,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 216.6
+      value: 279
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1848,6 +1888,10 @@ PrefabInstance:
     - target: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_Name
       value: t2 central
+      objectReference: {fileID: 0}
+    - target: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: m_TagString
+      value: Defensa
       objectReference: {fileID: 0}
     - target: {fileID: 6277277049600538943, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: id
@@ -2431,6 +2475,10 @@ PrefabInstance:
       propertyPath: id
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: -5274288742510349136, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: posicion
+      value: Lateral
+      objectReference: {fileID: 0}
     - target: {fileID: 2552737448833528377, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2446,6 +2494,10 @@ PrefabInstance:
     - target: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: m_Name
       value: t1 lateral
+      objectReference: {fileID: 0}
+    - target: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: m_TagString
+      value: Defensa
       objectReference: {fileID: 0}
     - target: {fileID: 7983882802795531582, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2512,9 +2564,13 @@ PrefabInstance:
       propertyPath: id
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: -2977776892259783664, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: posicion
+      value: Central
+      objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -270
+      value: -296
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2522,7 +2578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 172
+      value: 285
       objectReference: {fileID: 0}
     - target: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2572,6 +2628,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: t1 central
       objectReference: {fileID: 0}
+    - target: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: m_TagString
+      value: Defensa
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2595,7 +2655,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 49
+      value: 39
       objectReference: {fileID: 0}
     - target: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2603,7 +2663,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 147.5
+      value: 287
       objectReference: {fileID: 0}
     - target: {fileID: 2468668564581324267, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2641,6 +2701,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: t1 delantero
       objectReference: {fileID: 0}
+    - target: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      propertyPath: m_TagString
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: index
       value: 0
@@ -2648,6 +2712,10 @@ PrefabInstance:
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      propertyPath: posicion
+      value: Delantero
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2673,7 +2741,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 121
+      value: 140
       objectReference: {fileID: 0}
     - target: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2681,7 +2749,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 201
+      value: 279
       objectReference: {fileID: 0}
     - target: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2715,6 +2783,10 @@ PrefabInstance:
       propertyPath: id
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4978382398154392265, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      propertyPath: posicion
+      value: Delantero
+      objectReference: {fileID: 0}
     - target: {fileID: 5505991660044748958, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: id
       value: 1
@@ -2730,6 +2802,10 @@ PrefabInstance:
     - target: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: m_Name
       value: t2 delantero
+      objectReference: {fileID: 0}
+    - target: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      propertyPath: m_TagString
+      value: Delantero
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2756,9 +2832,13 @@ PrefabInstance:
       propertyPath: id
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: -8448274243675753509, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -119.5
+      value: -85
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2766,7 +2846,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 195.8
+      value: 286
       objectReference: {fileID: 0}
     - target: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2812,6 +2892,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: t1 co
       objectReference: {fileID: 0}
+    - target: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      propertyPath: m_TagString
+      value: CentroCampista
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2837,9 +2921,13 @@ PrefabInstance:
       propertyPath: id
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: -3598338452732011170, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      propertyPath: posicion
+      value: CentroCampista
+      objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -130
+      value: -67
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2847,7 +2935,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -51
+      value: -108
       objectReference: {fileID: 0}
     - target: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2892,6 +2980,10 @@ PrefabInstance:
     - target: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: m_Name
       value: t1 cd
+      objectReference: {fileID: 0}
+    - target: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      propertyPath: m_TagString
+      value: CentroCampista
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
