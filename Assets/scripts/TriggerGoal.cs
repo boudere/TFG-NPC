@@ -106,7 +106,6 @@ public class TriggerGoal : MonoBehaviour
 
    private void searchPlayersReset()
     {
-        resetByTag<CharacterGV>("Player");
         resetByTag<Portero>("Portero");
         resetByTag<Defensa>("Defensa");
         resetByTag<CentroCampista>("CentroCampista");
