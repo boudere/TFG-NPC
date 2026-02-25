@@ -2499,7 +2499,7 @@ Transform:
   m_GameObject: {fileID: 600763034}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -350, y: 49.953903, z: 24.39673}
+  m_LocalPosition: {x: -350, y: 49.953903, z: 24.396729}
   m_LocalScale: {x: 7.0387244, y: 7.0387244, z: 7.0387244}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4161,11 +4161,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1588692079}
   - {fileID: 1688863774}
   - {fileID: 600763035}
   - {fileID: 1823990851}
   - {fileID: 274229736}
-  - {fileID: 1588692079}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &808382905
@@ -4180,6 +4180,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 344638d676a6e294ab1bd289cb7cb968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  puntos:
+  - {fileID: 1688863774}
+  - {fileID: 600763035}
+  - {fileID: 1823990851}
+  - {fileID: 274229736}
+  minX: 259.7154
+  maxX: 646.1
+  minZ: -295
+  maxZ: 468.6033
 --- !u!1 &818198308
 GameObject:
   m_ObjectHideFlags: 0
@@ -4803,7 +4812,7 @@ Transform:
   m_GameObject: {fileID: 909448068}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -350, y: 49.953903, z: 24.39673}
+  m_LocalPosition: {x: -350, y: 49.953903, z: 24.396729}
   m_LocalScale: {x: 7.0387244, y: 7.0387244, z: 7.0387244}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12092,11 +12101,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1080781902}
   - {fileID: 565010628}
   - {fileID: 909448069}
   - {fileID: 1094167193}
   - {fileID: 820627879}
-  - {fileID: 1080781902}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1989943933
@@ -12111,6 +12120,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef2915ac2624408418832c1b71e8aa8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  puntos:
+  - {fileID: 565010628}
+  - {fileID: 909448069}
+  - {fileID: 1094167193}
+  - {fileID: 820627879}
+  minX: -497
+  maxX: -110.6154
+  minZ: -295
+  maxZ: 468.6033
 --- !u!43 &2012462113
 Mesh:
   m_ObjectHideFlags: 0

@@ -35,7 +35,7 @@ public class Pase : MonoBehaviour
 
 
             Vector3 pos = new Vector3(0f, 0f, 0f);
-            string tagPlayer = " ";
+            string tagPlayer = "character";
             this.tagPlayer = tagPlayer;
             int team = 0;
             searchPlayersToPass(tagPlayer, pos, team);
@@ -64,23 +64,23 @@ public class Pase : MonoBehaviour
 
             }
 
-        } else if (tagPlayer == "npc")
-        {
-            for (i = 0; i < p.Length; i++)
-            {
-                id = p[i].GetComponent<PlayerID>().id;
-                if (id == team)
-                {
-                    break;
-                }
-            }
-        }
-        else
+        } 
+        else if (tagPlayer == "character")
         {
             for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
                 if (id == characterManager.index)
+                {
+                    break;
+                }
+            }
+        } else
+        {
+            for (i = 0; i < p.Length; i++)
+            {
+                id = p[i].GetComponent<PlayerID>().id;
+                if (id == team) //El team es el id
                 {
                     break;
                 }
@@ -108,21 +108,68 @@ public class Pase : MonoBehaviour
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
         int j = 0; // Es la posición de la lista (no el id)
         int team = index % 2;
+        string posicionPlayer = " ";
 
 
         for (int i = 0; i < p.Length; i++)
         {
             id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
-            if (id != index && team == id % 2)
+            if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
             {
-                currentDistance = calculateDistance(p[i].transform.position);
-                if (currentDistance < minDistance)
+                if (id != index && team == id % 2)
                 {
-                    minDistance = currentDistance;
-                    player = p[i];
-                    j = i;
+                    currentDistance = calculateDistance(p[i].transform.position);
+                    if (currentDistance < minDistance)
+                    {
+                        minDistance = currentDistance;
+                        player = p[i];
+                        j = i;
+                    }
+                }
+            } else
+            {
+                posicionPlayer = p[i].GetComponent<PlayerID>().posicion;
+                if (this.tagPlayer == "Defensa")
+                {
+                   
+                    if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                    {
+                        currentDistance = calculateDistance(p[i].transform.position);
+                        if (currentDistance < minDistance)
+                        {
+                            minDistance = currentDistance;
+                            player = p[i];
+                            j = i;
+                        }
+                    }
+                }
+                else if (this.tagPlayer == "CentroCampista")
+                {
+                    if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                    {
+                        currentDistance = calculateDistance(p[i].transform.position);
+                        if (currentDistance < minDistance)
+                        {
+                            minDistance = currentDistance;
+                            player = p[i];
+                            j = i;
+                        }
+                    }
+                } else if (this.tagPlayer == "Delantero")
+                {
+                    if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                    {
+                        currentDistance = calculateDistance(p[i].transform.position);
+                        if (currentDistance < minDistance)
+                        {
+                            minDistance = currentDistance;
+                            player = p[i];
+                            j = i;
+                        }
+                    }
                 }
             }
+          
         }
 
         if (p[j].GetComponent<PlayerID>().id != characterManager.index)
@@ -145,6 +192,8 @@ public class Pase : MonoBehaviour
 
      
     }
+
+  
 
     float calculateDistance(Vector3 myPos)
     {

@@ -46,6 +46,7 @@ public class Delantero : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
+        PickNewTarget(); 
     }
 
 

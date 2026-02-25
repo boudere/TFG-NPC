@@ -617,6 +617,7 @@ MonoBehaviour:
   turnSpeedDeg: 720
   directionLerp: 12
   index: 11
+  defaultMove: 1
 --- !u!54 &633614096453617189
 Rigidbody:
   m_ObjectHideFlags: 0

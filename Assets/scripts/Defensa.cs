@@ -14,6 +14,8 @@ public class Defensa : PlayerID, IResettable
     private Rigidbody rb;
     public bool pase = false;
     private FieldLimits field;
+    private AreaPeligro1 ap1;
+    private AreaPeligro2 ap2;
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
@@ -26,19 +28,36 @@ public class Defensa : PlayerID, IResettable
     private CharacterManager characterManager;
 
     //Probabilidad de efectuar pase 
-    private float npcPass = 0.002f; //PROVISIONAL
+    private float npcPass = 0.02f; //PROVISIONAL
+
+    //Probabilidades (luego pueden fallarse o no) 
+
+    //Tirarla libre
+    //Tirarla a un jugador
+    //Tirarla a un centro del campo 
+
+    /*
+     *  Tiro libre De 0 a 30
+     *  Tiro a cualquier jugador 30 a 70
+     *  Tiro a un medio campo 70 a 100
+     */
+
+    private float tiroCase1 = 0.3f;
+    private float tiroCase2 = 0.7f;
+ 
+
+
 
     public bool defaultMove = true;
 
     private bool frozen = false;
     private GameObject playerStop = null;
 
+    private float moveInArea = 0.5f;
 
-    //Probabilidades (luego pueden fallarse o no) 
+    public bool defender = false;
+    private Transform targetDelantero;
 
-    //Tirarla libre 10%
-    //Tirarla a un jugador cualquiera 25%
-    //Tirarla a un centro del campo 65% 
 
     /*
      En caso de que se pueda dar asistencia ...
@@ -57,11 +76,22 @@ public class Defensa : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
+        ap1 = AreaPeligro1.instance;
+        ap2 = AreaPeligro2.instance;
+     
+        PickNewTarget();
     }
 
     
     void Update()
     {
+
+        if (defender && !Bola.instance.transform.IsChildOf(transform))
+        {
+            defenderJug();
+            return;
+        }
+
         if (frozen && playerStop)
         {
             StartCoroutine(StopAndRetargetRoutine(playerStop));
@@ -71,36 +101,29 @@ public class Defensa : PlayerID, IResettable
         {
             return;
         }
-        move();
+
+
+        move(); 
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
-
-
-            //Primero controlar aquí la probabilidad de que pase
-
-            // Si tienen la bola, probabilidad de pasarla a un centro campista, probabilidad de pasarlo a otro player o de disparar libremente 
-            float aux = Random.value;
-            if (aux > npcPass)
-            {
-
-            }
-                // if (aux >)
-
-                //También debería pararlo no ?
-
+            opcionPase();
         }
 
         // Perseguir a delantero si está en área de defensa 
+        /*
+         Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
+         
+         */
+         
+        // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
 
-
-        // Contar jugadores por campo y si hay más en el otro ir  hacia allá
+      
     }
 
 
     private void move()
     {
-        Debug.Log(characterManager.index);
         if (this.id == characterManager.index) { return; }
 
 
@@ -116,13 +139,56 @@ public class Defensa : PlayerID, IResettable
             PickNewTarget();
     }
 
+    private void opcionPase()
+    {
+        if (Random.value < npcPass)
+        {
+            float aux = Random.value;
+            if (aux < tiroCase1)
+            {
+                Shoot.instance.disparoLibre();
+            }
+            else if (tiroCase1 < aux && aux < tiroCase2)
+            {
+                Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+            }
+            else
+            {
+                Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
+            }
+        }
+    }
+
     void PickNewTarget()
     {
-        float x = Random.Range(field.minX, field.maxX);
-        float z = Random.Range(field.minZ, field.maxZ);
+        float x, z;
+        if (Random.value < moveInArea)
+        {
+
+            
+            if (this.id % 2 == 0)
+            {
+                x = Random.Range(ap1.minX, ap1.maxX);
+                z = Random.Range(ap1.minZ, ap1.maxZ);
+
+            } else
+            {
+                x = Random.Range(ap2.minX, ap2.maxX);
+                z = Random.Range(ap2.minZ, ap2.maxZ);
+            }
+         
+        } else
+        {
+            x = Random.Range(field.minX, field.maxX);
+            z = Random.Range(field.minZ, field.maxZ);
+        }
+         
 
         npcTarget = new Vector3(x, transform.position.y, z);
     }
+
+
+
     private void OnEnable()
     {
         Pase.OnCharacterGVSelected += OnSelected;
@@ -146,6 +212,46 @@ public class Defensa : PlayerID, IResettable
         rbPlayer.angularVelocity = Vector3.zero;
         yield return new WaitForSeconds(2f);
         frozen = false;
+    }
+
+    public void activarDefensa(Transform target)
+    {
+        // Si detecta delanteros en el area -> Olvida su target 
+        defender = true;
+        targetDelantero = target;
+    }
+
+    private void defenderJug()
+    {
+        if (targetDelantero == null)
+        {
+            DejarDeDefender();
+            return;
+        }
+
+        Vector3 dir = (targetDelantero.position - transform.position);
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.01f)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
+      
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+        rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, 10f * Time.deltaTime));
+    }
+
+    public void DejarDeDefender()
+    {
+        defender = false;
+        targetDelantero = null;
+
+        PickNewTarget();
     }
 
 

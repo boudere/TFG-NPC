@@ -47,6 +47,7 @@ public class CentroCampista : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
+        PickNewTarget(); 
     }
 
 
