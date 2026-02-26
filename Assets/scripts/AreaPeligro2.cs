@@ -6,6 +6,7 @@ public class AreaPeligro2 : MonoBehaviour
 
     List<PlayerID> playersInArea = new List<PlayerID>();
     [SerializeField] private Transform[] puntos = new Transform[4];
+    private Dictionary<Delantero, Defensa> marcajes = new Dictionary<Delantero, Defensa>();
 
     public float minX;
     public float maxX;
@@ -23,53 +24,75 @@ public class AreaPeligro2 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero")) return;
-        
-        if (other.CompareTag("Delantero")) {
-            llamarDefensa(other);
-        }
+        if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero"))
+            return;
+
         PlayerID jugador = other.GetComponent<PlayerID>();
-        playersInArea.Add(jugador);
+        if (jugador != null && !playersInArea.Contains(jugador))
+            playersInArea.Add(jugador);
+
+        if (other.CompareTag("Delantero"))
+        {
+            Delantero d = other.GetComponent<Delantero>();
+            Debug.Log(d.id);
+            if (d != null)
+                LlamarDefensaYCrearMarcaje(d);
+        }
     }
 
-    private void llamarDefensa(Collider other) //Llamo a defender 
+    private void LlamarDefensaYCrearMarcaje(Delantero d)
     {
-        Delantero d = other.GetComponent<Delantero>();
-        if (d.id % 2 == 0)
+       
+        if (marcajes.ContainsKey(d)) return;
+
+        Debug.Log(d.id);
+        if (d.id % 2 != 0) return;
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Defensa");
+
+        // Shuffle
+        for (int i = players.Length - 1; i > 0; i--)
         {
-            GameObject[] players = GameObject.FindGameObjectsWithTag("Defensa");
+            int randomIndex = Random.Range(0, i + 1);
+            (players[i], players[randomIndex]) = (players[randomIndex], players[i]);
+        }
 
-            for (int i = players.Length - 1; i > 0; i--)
+        for (int i = 0; i < players.Length; i++)
+        {
+            Defensa def = players[i].GetComponent<Defensa>();
+            if (def == null) continue;
+
+           
+            if (def.id % 2 == 1 && !def.defender)
             {
-                int randomIndex = Random.Range(0, i + 1);
-                GameObject temp = players[i];
-                players[i] = players[randomIndex];
-                players[randomIndex] = temp;
-            }  //Mezcla xd
-
-
-            for (int i = 0; i < players.Length; i++) {
-                Defensa def = players[i].GetComponent<Defensa>();
-
-                if (def.id % 2 == 1 && !def.defender)
-                {
-                    def.activarDefensa(d.transform); 
-                    break; 
-                }
-              
+                def.AsignarMarcaje(d);     
+                marcajes[d] = def;         
+                break;
             }
-
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero")) return;
+        if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero"))
+            return;
+
         PlayerID jugador = other.GetComponent<PlayerID>();
-        playersInArea.Remove(jugador);
+        if (jugador != null)
+            playersInArea.Remove(jugador);
 
+        if (other.CompareTag("Delantero"))
+        {
+            Delantero d = other.GetComponent<Delantero>();
+            if (d == null) return;
+
+            if (marcajes.TryGetValue(d, out Defensa def) && def != null)
+            {
+                def.QuitarMarcaje(d);   // <-- rompe vínculo y deja de defender
+            }
+            marcajes.Remove(d);
+        }
     }
-
 
 
     public int getPlayersInArea2()

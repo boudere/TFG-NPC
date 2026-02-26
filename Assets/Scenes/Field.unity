@@ -4140,7 +4140,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 808382904}
-  - component: {fileID: 808382905}
   m_Layer: 0
   m_Name: area peligro2
   m_TagString: Untagged
@@ -4168,27 +4167,6 @@ Transform:
   - {fileID: 274229736}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &808382905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 808382903}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 344638d676a6e294ab1bd289cb7cb968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puntos:
-  - {fileID: 1688863774}
-  - {fileID: 600763035}
-  - {fileID: 1823990851}
-  - {fileID: 274229736}
-  minX: 259.7154
-  maxX: 646.1
-  minZ: -295
-  maxZ: 468.6033
 --- !u!1 &818198308
 GameObject:
   m_ObjectHideFlags: 0
@@ -5989,6 +5967,7 @@ GameObject:
   - component: {fileID: 1080781905}
   - component: {fileID: 1080781904}
   - component: {fileID: 1080781903}
+  - component: {fileID: 1080781906}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -6085,6 +6064,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1080781901}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1080781906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1080781901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef2915ac2624408418832c1b71e8aa8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  puntos:
+  - {fileID: 565010628}
+  - {fileID: 909448069}
+  - {fileID: 1094167193}
+  - {fileID: 820627879}
+  minX: -497
+  maxX: -110.6154
+  minZ: -295
+  maxZ: 468.6033
 --- !u!1 &1086841360
 GameObject:
   m_ObjectHideFlags: 0
@@ -9598,6 +9598,7 @@ GameObject:
   - component: {fileID: 1588692082}
   - component: {fileID: 1588692081}
   - component: {fileID: 1588692080}
+  - component: {fileID: 1588692083}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -9694,6 +9695,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1588692078}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1588692083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588692078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 344638d676a6e294ab1bd289cb7cb968, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  puntos:
+  - {fileID: 1688863774}
+  - {fileID: 600763035}
+  - {fileID: 1823990851}
+  - {fileID: 274229736}
+  minX: 259.7154
+  maxX: 646.1
+  minZ: -295
+  maxZ: 468.6033
 --- !u!43 &1594554993
 Mesh:
   m_ObjectHideFlags: 0
@@ -12080,7 +12102,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1989943932}
-  - component: {fileID: 1989943933}
   m_Layer: 0
   m_Name: area peligro1
   m_TagString: Untagged
@@ -12108,27 +12129,6 @@ Transform:
   - {fileID: 820627879}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1989943933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1989943931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef2915ac2624408418832c1b71e8aa8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puntos:
-  - {fileID: 565010628}
-  - {fileID: 909448069}
-  - {fileID: 1094167193}
-  - {fileID: 820627879}
-  minX: -497
-  maxX: -110.6154
-  minZ: -295
-  maxZ: 468.6033
 --- !u!43 &2012462113
 Mesh:
   m_ObjectHideFlags: 0

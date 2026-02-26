@@ -27,6 +27,22 @@ public class Defensa : PlayerID, IResettable
 
     private CharacterManager characterManager;
 
+    [System.Serializable]
+    public class Marcaje
+    {
+        public Delantero delantero;
+        public Defensa defensa;
+
+        public Marcaje(Delantero del, Defensa def)
+        {
+            delantero = del;
+            defensa = def;
+        }
+    }
+
+    public Marcaje marcajeActual;
+
+
     //Probabilidad de efectuar pase 
     private float npcPass = 0.02f; //PROVISIONAL
 
@@ -279,5 +295,24 @@ public class Defensa : PlayerID, IResettable
     public void setPase(bool pase)
     {
         this.pase = pase;
+    }
+
+
+    public void AsignarMarcaje(Delantero d)
+    {
+        Debug.Log("Marcaje");
+        if (d == null) return;
+
+        marcajeActual = new Marcaje(d, this);
+        activarDefensa(d.transform);
+    }
+
+    public void QuitarMarcaje(Delantero d)
+    {
+        if (marcajeActual == null) return;
+        if (marcajeActual.delantero != d) return;
+
+        marcajeActual = null;
+        DejarDeDefender();
     }
 }
