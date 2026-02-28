@@ -254,6 +254,14 @@ PrefabInstance:
       propertyPath: posicion
       value: Lateral
       objectReference: {fileID: 0}
+    - target: {fileID: 1740308490765413575, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.08644706
+      objectReference: {fileID: 0}
+    - target: {fileID: 1740308490765413575, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.08960932
+      objectReference: {fileID: 0}
     - target: {fileID: 2552737448833528377, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -353,6 +361,14 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  marcajeActual:
+    delantero: {fileID: 0}
+    defensa: {fileID: 0}
+  defaultMove: 1
+  defender: 0
 --- !u!1001 &283558378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -472,6 +488,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &292062939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -591,6 +611,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &297937649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -706,7 +730,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.9700801, z: -0, w: 0.24278523}
   m_LocalPosition: {x: 0.100000255, y: 0, z: 0.020000728}
-  m_LocalScale: {x: 3.0182776, y: 3.0182755, z: 3.0182776}
+  m_LocalScale: {x: 3.509051, y: 3.0182755, z: 3.0182776}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3345642324323717114}
@@ -1281,7 +1305,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.23933506, z: -0, w: -0.9709371}
   m_LocalPosition: {x: 0.27212718, y: 0, z: 0.004942264}
-  m_LocalScale: {x: 3.0182762, y: 3.0182755, z: 3.0182762}
+  m_LocalScale: {x: 3.509051, y: 3.509051, z: 3.0182762}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1528111958}
@@ -1617,6 +1641,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1 &1010783935
 GameObject:
   m_ObjectHideFlags: 0
@@ -1770,7 +1798,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.20825021, z: -0, w: 0.9780756}
   m_LocalPosition: {x: -0.17246024, y: 0, z: 0.120971724}
-  m_LocalScale: {x: 3.0182765, y: 3.0182755, z: 3.0182765}
+  m_LocalScale: {x: 3.509051, y: 3.509051, z: 3.0182765}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 202939607}
@@ -1983,6 +2011,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &1528111957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2038,6 +2070,14 @@ PrefabInstance:
     - target: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381193485126988810, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.08644706
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381193485126988810, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.08960932
       objectReference: {fileID: 0}
     - target: {fileID: 5443927778574284407, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -2102,6 +2142,14 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  marcajeActual:
+    delantero: {fileID: 0}
+    defensa: {fileID: 0}
+  defaultMove: 1
+  defender: 0
 --- !u!1 &1741050838
 GameObject:
   m_ObjectHideFlags: 0
@@ -2378,7 +2426,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.95407915, z: -0, w: 0.2995546}
   m_LocalPosition: {x: 0.08799378, y: 0, z: 0.20093976}
-  m_LocalScale: {x: 3.0182788, y: 3.0182755, z: 3.0182788}
+  m_LocalScale: {x: 3.509051, y: 3.5090473, z: 3.509051}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1026487310500677387}
@@ -2691,6 +2739,18 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Defensa
       objectReference: {fileID: 0}
+    - target: {fileID: 6952591168524956029, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.08644706
+      objectReference: {fileID: 0}
+    - target: {fileID: 6952591168524956029, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.08960932
+      objectReference: {fileID: 0}
+    - target: {fileID: 6952591168524956029, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.1725216
+      objectReference: {fileID: 0}
     - target: {fileID: 7983882802795531582, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: m_LocalPosition.x
       value: -293.6
@@ -2770,6 +2830,14 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  marcajeActual:
+    delantero: {fileID: 0}
+    defensa: {fileID: 0}
+  defaultMove: 1
+  defender: 0
 --- !u!1001 &3345642324323717113
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2854,6 +2922,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Defensa
       objectReference: {fileID: 0}
+    - target: {fileID: 6054047003477937071, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.08644706
+      objectReference: {fileID: 0}
+    - target: {fileID: 6054047003477937071, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.08960932
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2893,6 +2969,14 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  marcajeActual:
+    delantero: {fileID: 0}
+    defensa: {fileID: 0}
+  defaultMove: 1
+  defender: 0
 --- !u!1001 &3625312987260654811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3009,6 +3093,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3128,6 +3216,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &7727232850989682730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3247,6 +3339,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1001 &8757151642796768867
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3366,6 +3462,10 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  pase: 0
+  turnSpeedDeg: 540
+  directionLerp: 12
+  defaultMove: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

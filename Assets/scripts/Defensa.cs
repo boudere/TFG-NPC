@@ -232,7 +232,7 @@ public class Defensa : PlayerID, IResettable
 
     public void activarDefensa(Transform target)
     {
-        // Si detecta delanteros en el area -> Olvida su target 
+        //float dist = 30f;
         defender = true;
         targetDelantero = target;
     }
@@ -245,21 +245,30 @@ public class Defensa : PlayerID, IResettable
             return;
         }
 
+        float distanciaDefensa = 15f;
+
         Vector3 dir = (targetDelantero.position - transform.position);
         dir.y = 0f;
 
-        if (dir.sqrMagnitude < 0.01f)
+        float sqrDist = dir.sqrMagnitude;
+        float sqrDistanciaDefensa = distanciaDefensa * distanciaDefensa;
+
+        if (sqrDist <= sqrDistanciaDefensa)
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+
+            if (sqrDist > 0.001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, 10f * Time.deltaTime));
+            }
             return;
         }
-
-      
         Vector3 velocity = dir.normalized * npcSpeed;
         rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
 
-        Quaternion targetRot = Quaternion.LookRotation(dir);
-        rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, 10f * Time.deltaTime));
+        Quaternion rot = Quaternion.LookRotation(dir);
+        rb.MoveRotation(Quaternion.Slerp(rb.rotation, rot, 10f * Time.deltaTime));
     }
 
     public void DejarDeDefender()
