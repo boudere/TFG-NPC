@@ -102,7 +102,7 @@ public class Defensa : PlayerID, IResettable
         PickNewTarget();
     }
 
-    
+
     void Update()
     {
 
@@ -112,23 +112,23 @@ public class Defensa : PlayerID, IResettable
             return;
         }
 
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+if (frozen && playerStop)
+{
+    StartCoroutine(StopAndRetargetRoutine(playerStop));
+}
 
-        if (resetPos)
-        {
-            return;
-        }
+if (resetPos)
+{
+    return;
+}
 
 
-        move();
+move();
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            opcionPase();
-        }
+if (Bola.instance.transform.IsChildOf(transform))
+{
+    opcionPase();
+}
 
         // Perseguir a delantero si está en área de defensa 
         /*

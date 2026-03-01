@@ -7,6 +7,9 @@ public class AreaPeligro2 : MonoBehaviour
     List<PlayerID> playersInArea = new List<PlayerID>();
     [SerializeField] private Transform[] puntos = new Transform[4];
     private Dictionary<Delantero, Defensa> marcajes = new Dictionary<Delantero, Defensa>();
+    private bool bolaArea = false;
+    List<Defensa> defensas = new List<Defensa>();
+    List<Delantero> delanterosSinMarcar = new List<Delantero>();
 
     public float minX;
     public float maxX;
@@ -22,8 +25,27 @@ public class AreaPeligro2 : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        if (bolaArea)
+        {
+            //Saber si ese delantero tiene algún marcaje (desde la clase delantero) si no lo tiene se le añade
+            foreach (Delantero d in delanterosSinMarcar)
+            {
+                LlamarDefensa(d);
+                delanterosSinMarcar.Remove(d);
+            }
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
+        if (other == other.CompareTag("Ball"))
+        {
+            bolaArea = true;
+            return;
+        }
+
         if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero"))
             return;
 
@@ -31,11 +53,16 @@ public class AreaPeligro2 : MonoBehaviour
         if (jugador != null && !playersInArea.Contains(jugador))
             playersInArea.Add(jugador);
 
-        if (other.CompareTag("Delantero"))
+        if (other.CompareTag("Delantero") && Bola.instance.transform.IsChildOf(other.transform))
         {
             Delantero d = other.GetComponent<Delantero>();
+
             if (d != null)
                 LlamarDefensa(d);
+        } else if (other.CompareTag("Delantero") && !Bola.instance.transform.IsChildOf(other.transform))
+        {
+            Delantero d = other.GetComponent<Delantero>();
+            delanterosSinMarcar.Add(d);
         }
     }
 
@@ -71,6 +98,26 @@ public class AreaPeligro2 : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (other.CompareTag("Ball"))
+        {
+            bolaArea = false;
+            GameObject[] delanteros = GameObject.FindGameObjectsWithTag("Delantero");
+            foreach (GameObject del in delanteros)
+            {
+                Delantero d = del.GetComponent<Delantero>();
+                if (d == null) return;
+
+                if (marcajes.TryGetValue(d, out Defensa def) && def != null)
+                {
+                    def.QuitarMarcaje(d);
+                }
+                marcajes.Remove(d);
+                delanterosSinMarcar.Add(d); 
+            }
+
+            return;
+        }
+
         if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero"))
             return;
 
@@ -81,11 +128,12 @@ public class AreaPeligro2 : MonoBehaviour
         if (other.CompareTag("Delantero"))
         {
             Delantero d = other.GetComponent<Delantero>();
+            
             if (d == null) return;
 
             if (marcajes.TryGetValue(d, out Defensa def) && def != null)
             {
-                def.QuitarMarcaje(d);   // <-- rompe vínculo y deja de defender
+                def.QuitarMarcaje(d); 
             }
             marcajes.Remove(d);
         }

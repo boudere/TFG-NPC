@@ -33,6 +33,11 @@ public class CentroCampista : PlayerID, IResettable
     private bool frozen = false;
     private GameObject playerStop = null;
 
+    private float moveInArea = 0.5f;
+
+    private AreaPeligro1 ap1;
+    private AreaPeligro2 ap2;
+
 
 
     private void Awake()
@@ -47,24 +52,26 @@ public class CentroCampista : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
+        ap1 = AreaPeligro1.instance;
+        ap2 = AreaPeligro2.instance;
         PickNewTarget(); 
     }
 
 
-    void Update()
-    {
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+    //void Update()
+    //{
+    //    if (frozen && playerStop)
+    //    {
+    //        StartCoroutine(StopAndRetargetRoutine(playerStop));
+    //    }
 
-        if (resetPos)
-        {
-            return;
-        }
-        move();
+    //    if (resetPos)
+    //    {
+    //        return;
+    //    }
+    //    move();
 
-    }
+    //}
 
     void FixedUpdate()
     {
@@ -108,13 +115,21 @@ public class CentroCampista : PlayerID, IResettable
 
     void PickNewTarget()
     {
-        float x = Random.Range(field.minX, field.maxX);
-        float z = Random.Range(field.minZ, field.maxZ);
+  
 
-        npcTarget = new Vector3(x, transform.position.y, z);
+        float x, z;
+        if (Random.value < moveInArea)
+        {
+            x = Random.Range(field.minX, field.maxX);
+            z = Random.Range(field.minZ, field.maxZ);
+        }
+        else
+        {
+                x = Random.Range(ap2.minX, ap1.maxX);
+                z = Random.Range(field.minZ, field.maxZ);
+        }
 
-       
-      
+            npcTarget = new Vector3(x, transform.position.y, z);
     }
 
     private void OnEnable()

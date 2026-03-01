@@ -5,7 +5,13 @@ public class MedioCampo : MonoBehaviour
 {
 
     List<PlayerID> playersInArea = new List<PlayerID>();
+    public static MedioCampo instance;
 
+    private void Awake()
+    {
+        instance = this;
+
+    }
 
     private void OnTriggerEnter(Collider other)
     {

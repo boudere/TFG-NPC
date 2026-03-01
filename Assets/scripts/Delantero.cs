@@ -27,7 +27,7 @@ public class Delantero : PlayerID, IResettable
     private CharacterManager characterManager;
 
     //Probabilidad de efectuar pase 
-    private float npcPass = 0.002f; //PROVISIONAL
+    private float npcPass = 0.01f; //PROVISIONAL
 
     public bool defaultMove = true;
 
@@ -38,8 +38,8 @@ public class Delantero : PlayerID, IResettable
     private AreaPeligro1 ap1;
     private AreaPeligro2 ap2;
 
-    private float tiroCase1 = 0.3f; // Tiro aleatorio
-    private float tiroCase2 = 0.7f; //Pase a un npc
+    private float tiroCase1 = 0.2f; // Tiro aleatorio
+    private float tiroCase2 = 0.5f; //Pase a un npc
                                     // Ir hacia porteria y tirar si no se la roban 
 
     private bool disparoPorteria = false;
@@ -80,17 +80,15 @@ public class Delantero : PlayerID, IResettable
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
-          
-            tiroPorteria();
-            
-            
+            opcionPase();  
         } else
         {
             disparoPorteria = false;
-            move();
         }
 
-        }
+        move();
+
+    }
 
     void FixedUpdate()
     {
@@ -150,19 +148,14 @@ public class Delantero : PlayerID, IResettable
             if (aux < tiroCase1)
             {
                 Shoot.instance.disparoLibre();
-                move();
             }
             else if (tiroCase1 < aux && aux < tiroCase2)
             {
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-                move();
             }
             else
             {
-            
-
                 tiroPorteria();
-
             }
         }
     }
@@ -236,7 +229,7 @@ public class Delantero : PlayerID, IResettable
         {
             Porteria porteria = p.GetComponent<Porteria>();
             Transform breakGol = p.transform.Find("BreakGol");
-            if (this.id % 2 == porteria.team % 2)
+            if (this.id % 2 != porteria.team % 2)
             {
                 npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
 
