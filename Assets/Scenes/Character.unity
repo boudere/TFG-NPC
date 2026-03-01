@@ -251,6 +251,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -5274288742510349136, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 202939608}
+    - target: {fileID: -5274288742510349136, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       propertyPath: posicion
       value: Lateral
       objectReference: {fileID: 0}
@@ -322,7 +326,8 @@ PrefabInstance:
       propertyPath: posicion
       value: Central
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -5274288742510349136, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7983882802795531582, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
@@ -361,6 +366,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 202939608}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -381,6 +387,10 @@ PrefabInstance:
       propertyPath: id
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: -8448274243675753509, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 283558380}
     - target: {fileID: -8448274243675753509, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       propertyPath: posicion
       value: CentroCampista
@@ -449,7 +459,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: CentroCampista
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -8448274243675753509, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2504513754475155251, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
@@ -482,12 +493,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93d6c9085fcdfb84790bd0524c767bcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 4
+  id: 5
   posicion: CentroCampista
   haveBall: 0
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 283558380}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -504,6 +516,10 @@ PrefabInstance:
       propertyPath: id
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: -3598338452732011170, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 292062941}
     - target: {fileID: -3598338452732011170, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       propertyPath: posicion
       value: CentroCampista
@@ -572,7 +588,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: CentroCampista
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -3598338452732011170, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3382706427788966616, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
@@ -611,6 +628,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 292062941}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -623,6 +641,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2015104785228139664, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 297937650}
     - target: {fileID: 2015104785228139664, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
       propertyPath: posicion
       value: Portero
@@ -684,6 +706,10 @@ PrefabInstance:
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 4125003077595180490, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 297937650}
+    - target: {fileID: 4125003077595180490, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
       propertyPath: lineaGolMax
       value: 139
       objectReference: {fileID: 0}
@@ -695,11 +721,17 @@ PrefabInstance:
       propertyPath: velocidadDefensa
       value: 75
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2015104785228139664, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
+--- !u!1 &297937650 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3661868622780886336, guid: 8cd91268be87b454ea19199f7c824e9d, type: 3}
+  m_PrefabInstance: {fileID: 297937649}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &524377865
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,6 +1164,10 @@ PrefabInstance:
       value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 5359749061842669093, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 692622415}
+    - target: {fileID: 5359749061842669093, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
       propertyPath: lineaGolMax
       value: 139
       objectReference: {fileID: 0}
@@ -1144,14 +1180,24 @@ PrefabInstance:
       value: 75
       objectReference: {fileID: 0}
     - target: {fileID: 7532456671956861460, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 692622415}
+    - target: {fileID: 7532456671956861460, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
       propertyPath: posicion
       value: Portero
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7532456671956861460, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
+--- !u!1 &692622415 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3028921754625628483, guid: 0136b16580aff354daf6ee11670551fb, type: 3}
+  m_PrefabInstance: {fileID: 692622414}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &708110846
 GameObject:
   m_ObjectHideFlags: 0
@@ -1542,6 +1588,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4334170299427478599, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 980140374}
+    - target: {fileID: 4334170299427478599, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       propertyPath: posicion
       value: Delantero
       objectReference: {fileID: 0}
@@ -1601,7 +1651,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4334170299427478599, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
     m_RemovedGameObjects:
     - {fileID: 4121797093564927378, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
     m_AddedGameObjects:
@@ -1635,12 +1686,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a4f0657af750c34597be191fa9054cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 3
+  id: 2
   posicion: Delantero
   haveBall: 0
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 980140374}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -1924,6 +1976,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4334170299427478599, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1490026766}
+    - target: {fileID: 4334170299427478599, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       propertyPath: posicion
       value: Delantero
       objectReference: {fileID: 0}
@@ -1971,7 +2027,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4334170299427478599, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
     m_RemovedGameObjects:
     - {fileID: 3512888225656458515, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
     m_AddedGameObjects:
@@ -2011,6 +2068,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 1490026766}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2027,6 +2085,10 @@ PrefabInstance:
       propertyPath: id
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: -2977776892259783664, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1528111959}
     - target: {fileID: -2977776892259783664, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       propertyPath: posicion
       value: Central
@@ -2103,7 +2165,8 @@ PrefabInstance:
       propertyPath: posicion
       value: Central
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -2977776892259783664, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 445259655497140592, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
@@ -2142,6 +2205,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 1528111959}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2650,6 +2714,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1241401747115340048, guid: 4e3b6ba58fce97840a94f67c904363c3, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 158806259858777124}
     - target: {fileID: 5811975153208713663, guid: 4e3b6ba58fce97840a94f67c904363c3, type: 3}
       propertyPath: m_Name
       value: arbitro
@@ -2699,6 +2767,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4e3b6ba58fce97840a94f67c904363c3, type: 3}
+--- !u!1 &158806259858777124 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5811975153208713663, guid: 4e3b6ba58fce97840a94f67c904363c3, type: 3}
+  m_PrefabInstance: {fileID: 158806259858777123}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1026487310500677386
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2711,6 +2784,10 @@ PrefabInstance:
       propertyPath: id
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: -5274288742510349136, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1026487310500677388}
     - target: {fileID: -5274288742510349136, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       propertyPath: posicion
       value: Lateral
@@ -2791,7 +2868,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -5274288742510349136, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7983882802795531582, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
@@ -2830,6 +2908,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 1026487310500677388}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2850,6 +2929,10 @@ PrefabInstance:
       propertyPath: id
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: -2977776892259783664, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 3345642324323717115}
     - target: {fileID: -2977776892259783664, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       propertyPath: posicion
       value: Central
@@ -2930,7 +3013,8 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 0.08960932
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -2977776892259783664, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 445259655497140592, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
@@ -2969,6 +3053,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 3345642324323717115}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3050,10 +3135,15 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 3625312987260654813}
+    - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: posicion
       value: Delantero
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
     m_RemovedGameObjects:
     - {fileID: 3709708058000459944, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
     m_AddedGameObjects:
@@ -3093,6 +3183,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 3625312987260654813}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3150,6 +3241,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4978382398154392265, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 6738770865320173678}
+    - target: {fileID: 4978382398154392265, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       propertyPath: posicion
       value: Delantero
       objectReference: {fileID: 0}
@@ -3177,7 +3272,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Delantero
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4978382398154392265, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1379617827807566674, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
@@ -3216,6 +3312,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 6738770865320173678}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3232,6 +3329,10 @@ PrefabInstance:
       propertyPath: id
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: -8448274243675753509, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 7727232850989682732}
     - target: {fileID: -8448274243675753509, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       propertyPath: posicion
       value: CentroCampista
@@ -3300,7 +3401,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: CentroCampista
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -8448274243675753509, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2504513754475155251, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
@@ -3339,6 +3441,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 7727232850989682732}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3355,6 +3458,10 @@ PrefabInstance:
       propertyPath: id
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: -3598338452732011170, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 8757151642796768869}
     - target: {fileID: -3598338452732011170, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       propertyPath: posicion
       value: CentroCampista
@@ -3423,7 +3530,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: CentroCampista
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -3598338452732011170, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3382706427788966616, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
@@ -3462,6 +3570,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 8757151642796768869}
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12

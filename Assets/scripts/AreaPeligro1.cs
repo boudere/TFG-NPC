@@ -33,7 +33,7 @@ public class AreaPeligro1 : MonoBehaviour
         {
             Delantero d = other.GetComponent<Delantero>();
             if (d != null)
-                LlamarDefensaYCrearMarcaje(d);
+                LlamarDefensa(d);
         }
     }
 
@@ -59,7 +59,7 @@ public class AreaPeligro1 : MonoBehaviour
         }
     }
 
-    private void LlamarDefensaYCrearMarcaje(Delantero d)
+    private void LlamarDefensa(Delantero d)
     {
        
         if (marcajes.ContainsKey(d)) return;

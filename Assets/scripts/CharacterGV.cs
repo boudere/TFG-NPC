@@ -70,6 +70,7 @@ public class CharacterGV : PlayerID
 
             smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
 
+
             Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
             rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
         }

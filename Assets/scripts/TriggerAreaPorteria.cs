@@ -55,6 +55,13 @@ public class TriggerAreaPorteria : MonoBehaviour
                 porteroDefender();
 
             }
+
+            if (other.CompareTag("Delantero"))
+            {
+                Delantero d = other.GetComponent<Delantero>();
+                if (d != null)
+                    llamarDelanteroDisparo(d);
+            }
         }
     }
 
@@ -63,6 +70,11 @@ public class TriggerAreaPorteria : MonoBehaviour
         if (!other.CompareTag("Ball") && !Bola.instance.transform.IsChildOf(other.transform)) return;
 
         pararDefensa();
+    }
+
+    void llamarDelanteroDisparo(Delantero d)
+    {
+        d.activarTiro();
     }
 
     void porteroDefender()

@@ -13,6 +13,7 @@ TagManager:
   - Defensa
   - CentroCampista
   - Delantero
+  - breakGol
   layers:
   - Default
   - TransparentFX

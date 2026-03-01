@@ -34,18 +34,15 @@ public class AreaPeligro2 : MonoBehaviour
         if (other.CompareTag("Delantero"))
         {
             Delantero d = other.GetComponent<Delantero>();
-            Debug.Log(d.id);
             if (d != null)
-                LlamarDefensaYCrearMarcaje(d);
+                LlamarDefensa(d);
         }
     }
 
-    private void LlamarDefensaYCrearMarcaje(Delantero d)
+    private void LlamarDefensa(Delantero d)
     {
        
         if (marcajes.ContainsKey(d)) return;
-
-        Debug.Log(d.id);
         if (d.id % 2 != 0) return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Defensa");

@@ -66,6 +66,27 @@ public class CentroCampista : PlayerID, IResettable
 
     }
 
+    void FixedUpdate()
+    {
+        rotacion();
+    }
+
+    void rotacion()
+    {
+        if (this.id == characterManager.index) { return; }
+        Vector3 dir = npcTarget - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude <= 0.001f) return;
+
+        dir.Normalize();
+
+        smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
+
+        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime));
+    }
+
 
     private void move()
     {
@@ -91,7 +112,11 @@ public class CentroCampista : PlayerID, IResettable
         float z = Random.Range(field.minZ, field.maxZ);
 
         npcTarget = new Vector3(x, transform.position.y, z);
+
+       
+      
     }
+
     private void OnEnable()
     {
         Pase.OnCharacterGVSelected += OnSelected;

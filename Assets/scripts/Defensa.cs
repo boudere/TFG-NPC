@@ -94,7 +94,11 @@ public class Defensa : PlayerID, IResettable
         field = FieldLimits.instance;
         ap1 = AreaPeligro1.instance;
         ap2 = AreaPeligro2.instance;
-     
+
+    
+        Debug.Log(this.player.name);
+
+
         PickNewTarget();
     }
 
@@ -119,7 +123,7 @@ public class Defensa : PlayerID, IResettable
         }
 
 
-        move(); 
+        move();
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
@@ -131,17 +135,38 @@ public class Defensa : PlayerID, IResettable
          Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
          
          */
-         
+
         // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
 
-      
+
+    }
+
+    void FixedUpdate()
+    {
+        rotacion();
+    }
+
+    void rotacion()
+    {
+        if (this.id == characterManager.index) { return; }
+        Vector3 dir = npcTarget - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude <= 0.001f) return;
+
+        dir.Normalize();
+
+        smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
+
+        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime));
     }
 
 
     private void move()
     {
         if (this.id == characterManager.index) { return; }
-
+      
 
         Vector3 direction = (npcTarget - transform.position).normalized;
 
@@ -157,6 +182,9 @@ public class Defensa : PlayerID, IResettable
 
     private void opcionPase()
     {
+
+        if (this.id == characterManager.index) { return; }
+
         if (Random.value < npcPass)
         {
             float aux = Random.value;
@@ -198,7 +226,6 @@ public class Defensa : PlayerID, IResettable
             x = Random.Range(field.minX, field.maxX);
             z = Random.Range(field.minZ, field.maxZ);
         }
-         
 
         npcTarget = new Vector3(x, transform.position.y, z);
     }
@@ -232,7 +259,6 @@ public class Defensa : PlayerID, IResettable
 
     public void activarDefensa(Transform target)
     {
-        //float dist = 30f;
         defender = true;
         targetDelantero = target;
     }
@@ -245,7 +271,7 @@ public class Defensa : PlayerID, IResettable
             return;
         }
 
-        float distanciaDefensa = 15f;
+        float distanciaDefensa = 20f;
 
         Vector3 dir = (targetDelantero.position - transform.position);
         dir.y = 0f;
@@ -309,8 +335,16 @@ public class Defensa : PlayerID, IResettable
 
     public void AsignarMarcaje(Delantero d)
     {
-        Debug.Log("Marcaje");
         if (d == null) return;
+
+        Transform area = this.player.transform.Find("area");
+        CapsuleCollider col = area.GetComponent<CapsuleCollider>();
+
+        col.radius *= 1.3f;
+        Transform canvas = transform.Find("shoot/Canvas/Image");
+        RectTransform imageRect = canvas.GetComponentInChildren<RectTransform>();
+
+        imageRect.localScale *= 1.3f;
 
         marcajeActual = new Marcaje(d, this);
         activarDefensa(d.transform);
@@ -320,6 +354,15 @@ public class Defensa : PlayerID, IResettable
     {
         if (marcajeActual == null) return;
         if (marcajeActual.delantero != d) return;
+
+        Transform area = this.player.transform.Find("area");
+        CapsuleCollider col = area.GetComponent<CapsuleCollider>();
+
+        col.radius /= 1.3f;
+        Transform canvas = transform.Find("shoot/Canvas/Image");
+        RectTransform imageRect = canvas.GetComponentInChildren<RectTransform>();
+
+        imageRect.localScale /= 1.3f;
 
         marcajeActual = null;
         DejarDeDefender();

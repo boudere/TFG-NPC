@@ -748,6 +748,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 0}
 --- !u!114 &5505991660044748958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -766,6 +767,7 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   self: {fileID: 0}
   probabilidadAciertoPase: 0
+  player: {fileID: 0}
   turnSpeedDeg: 720
   directionLerp: 12
   index: 1

@@ -9,10 +9,12 @@ public class PlayerID : MonoBehaviour
     public Transform holdPoint;
     public PlayerID self;
     public float probabilidadAciertoPase;
+    public GameObject player;
 
     void Awake()
     {
         self = this;
+        player = gameObject;
     }
 
 }
