@@ -1,49 +1,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AreaPeligro1 : MonoBehaviour
-{
+public class AreaPeligro : MonoBehaviour { 
 
-    List<PlayerID> playersInArea1 = new List<PlayerID>();
-    [SerializeField] private Transform[] puntos = new Transform[4];
-    private Dictionary<Delantero, Defensa> marcajes = new Dictionary<Delantero, Defensa>();
-   
-    public float minX;
-    public float maxX;
-    public float minZ;
-    public float maxZ;
-    public static AreaPeligro1 instance;
 
-    private bool bolaArea = false;
-    
-    List<Delantero> delanterosSinMarcar1 = new List<Delantero>();
-    List<CentroCampista> centros1 = new List<CentroCampista>();
-    List<Delantero> delanteros1 = new List<Delantero>();
-    List<Defensa> defensas1 = new List<Defensa>();
 
-    public static int TEAM = 0;
+    List<PlayerID> playersInArea = new List<PlayerID>();
+    List<int> playersInAreaId = new List<int>();
+[SerializeField] private Transform[] puntos = new Transform[4];
+private Dictionary<Delantero, Defensa> marcajes = new Dictionary<Delantero, Defensa>();
+
+public float minX;
+public float maxX;
+public float minZ;
+public float maxZ;
+public static AreaPeligro instance;
+
+private bool bolaArea = false;
+
+List<Delantero> delanterosSinMarcar = new List<Delantero>();
+List<CentroCampista> centros = new List<CentroCampista>();
+List<Delantero> delanteros = new List<Delantero>();
+List<Defensa> defensas = new List<Defensa>();
+
+public int TEAM;
 
     private void Awake()
     {
         instance = this;
 
     }
+
     private void Update()
     {
         if (bolaArea)
         {
-            for (int i = delanterosSinMarcar1.Count - 1; i >= 0; i--)
+            for (int i = delanterosSinMarcar.Count - 1; i >= 0; i--)
             {
-                LlamarDefensa(delanterosSinMarcar1[i]);
-                delanterosSinMarcar1.RemoveAt(i);
+                LlamarDefensa(delanterosSinMarcar[i]);
+                delanterosSinMarcar.RemoveAt(i);
             }
         }
     }
 
-
     private void OnTriggerEnter(Collider other)
     {
-        if (other == other.CompareTag("Ball"))
+        if (other.CompareTag("Ball") || Bola.instance.transform.IsChildOf(other.transform))
         {
             bolaArea = true;
             return;
@@ -53,13 +55,17 @@ public class AreaPeligro1 : MonoBehaviour
             return;
 
         PlayerID jugador = other.GetComponent<PlayerID>();
-        if (jugador != null && !playersInArea1.Contains(jugador))
-            playersInArea1.Add(jugador);
+        if (jugador != null && !playersInArea.Contains(jugador))
+        {
+            playersInArea.Add(jugador);
+            playersInAreaId.Add(jugador.id);
+        }
+           
 
         if (other.CompareTag("Delantero") && Bola.instance.transform.IsChildOf(other.transform))
         {
             Delantero d = other.GetComponent<Delantero>();
-            delanteros1.Add(d);
+            delanteros.Add(d);
 
             if (d != null)
                 LlamarDefensa(d);
@@ -67,30 +73,30 @@ public class AreaPeligro1 : MonoBehaviour
         else if (other.CompareTag("Delantero") && !Bola.instance.transform.IsChildOf(other.transform))
         {
             Delantero d = other.GetComponent<Delantero>();
-            delanterosSinMarcar1.Add(d);
-            delanteros1.Add(d);
+            delanterosSinMarcar.Add(d);
+            delanteros.Add(d);
         }
 
         if (other.CompareTag("CentroCampista"))
         {
             CentroCampista c = other.GetComponent<CentroCampista>();
-            centros1.Add(c);
+            centros.Add(c);
         }
 
         if (other.CompareTag("Defensa"))
         {
             Defensa def = other.GetComponent<Defensa>();
-            defensas1.Add(def);
+            defensas.Add(def);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Ball"))
+        if (other.CompareTag("Ball") || Bola.instance.transform.IsChildOf(other.transform))
         {
             bolaArea = false;
             GameObject[] delanteros = GameObject.FindGameObjectsWithTag("Delantero");
-           
+
             foreach (GameObject del in delanteros)
             {
                 Delantero d = del.GetComponent<Delantero>();
@@ -101,7 +107,7 @@ public class AreaPeligro1 : MonoBehaviour
                     def.QuitarMarcaje(d);
                 }
                 marcajes.Remove(d);
-                delanterosSinMarcar1.Add(d);
+                delanterosSinMarcar.Add(d);
 
             }
 
@@ -114,7 +120,11 @@ public class AreaPeligro1 : MonoBehaviour
 
         PlayerID jugador = other.GetComponent<PlayerID>();
         if (jugador != null)
-            playersInArea1.Remove(jugador);
+        {
+            playersInArea.Remove(jugador);
+            playersInAreaId.Remove(jugador.id);
+        }
+           
 
         if (other.CompareTag("Delantero"))
         {
@@ -123,35 +133,36 @@ public class AreaPeligro1 : MonoBehaviour
 
             if (marcajes.TryGetValue(d, out Defensa def) && def != null)
             {
-                def.QuitarMarcaje(d);   
+                def.QuitarMarcaje(d);
             }
             marcajes.Remove(d);
-            delanteros1.Remove(d);
+            delanteros.Remove(d);
         }
 
         if (other.CompareTag("CentroCampista"))
         {
             CentroCampista c = other.GetComponent<CentroCampista>();
-            centros1.Remove(c);
+            centros.Remove(c);
         }
 
         if (other.CompareTag("Defensa"))
         {
             Defensa def = other.GetComponent<Defensa>();
-            defensas1.Remove(def);
+            defensas.Remove(def);
         }
 
-        
+
     }
 
     private void LlamarDefensa(Delantero d)
     {
-       
+
         if (marcajes.ContainsKey(d)) return;
-        if (d.id % 2 != 1) return;
+        if (d.id % 2 == TEAM) return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Defensa");
 
+        // Shuffle
         for (int i = players.Length - 1; i > 0; i--)
         {
             int randomIndex = Random.Range(0, i + 1);
@@ -163,69 +174,44 @@ public class AreaPeligro1 : MonoBehaviour
             Defensa def = players[i].GetComponent<Defensa>();
             if (def == null) continue;
 
-        
-            if (def.id % 2 == 0 && !def.defender)
+
+            if (def.id % 2 == TEAM && !def.defender)
             {
-                def.AsignarMarcaje(d);    
-                marcajes[d] = def;         
+                def.AsignarMarcaje(d);
+                marcajes[d] = def;
                 break;
             }
         }
     }
 
-    public int getPlayersInArea1()
+    public int getPlayersInArea()
     {
-        return playersInArea1.Count;
+        return playersInArea.Count;
     }
 
-    public List<Defensa> getDefensas1()
+    public List<Defensa> getDefensas()
     {
-        return defensas1;
+        return defensas;
     }
 
-    public List<CentroCampista> getCentroCampista1()
+    public List<CentroCampista> getCentroCampista()
     {
-        return centros1;
+        return centros;
     }
 
-    public List<Delantero> getDelanteros1()
+    public List<Delantero> getDelanteros()
     {
-        return delanteros1;
+        return delanteros;
     }
 
 
-    public int getPlayersInArea1ByTeam(int team)
+    public int getPlayersByTeam(int team)
     {
         int team0 = 0, team1 = 0;
 
-        for (int i = 0; i < playersInArea1.Count; i++)
+        for (int i = 0; i < playersInArea.Count; i++)
         {
-            PlayerID jugador = playersInArea1[i];
-            if (jugador.id % 2 == 0)
-            {
-                team0++;
-            } else if (jugador.id % 2 == 1)
-            {
-                team1++;
-            }
-        }
-
-        if (team == 0)
-        {
-            return team0;
-        } else
-        {
-            return team1;
-        }
-    }
-
-    public int getDefensas1ByTeam(int team)
-    {
-        int team0 = 0, team1 = 0;
-
-        for (int i = 0; i < defensas1.Count; i++)
-        {
-            Defensa jugador = defensas1[i];
+            PlayerID jugador = playersInArea[i];
 
             if (jugador.id % 2 == 0)
             {
@@ -240,49 +226,13 @@ public class AreaPeligro1 : MonoBehaviour
         return team == 0 ? team0 : team1;
     }
 
-    public int getCentros1ByTeam(int team)
+    public bool isBallInArea()
     {
-        int team0 = 0, team1 = 0;
-
-        for (int i = 0; i < centros1.Count; i++)
-        {
-            CentroCampista jugador = centros1[i];
-
-            if (jugador.id % 2 == 0)
-            {
-                team0++;
-            }
-            else
-            {
-                team1++;
-            }
-        }
-
-        return team == 0 ? team0 : team1;
+        return bolaArea;
     }
 
-    public int getDelanteros1ByTeam(int team)
+    public bool isPlayerInArea(int id)
     {
-        int team0 = 0, team1 = 0;
-
-        for (int i = 0; i < delanteros1.Count; i++)
-        {
-            Delantero jugador = delanteros1[i];
-
-            if (jugador.id % 2 == 0)
-            {
-                team0++;
-            }
-            else
-            {
-                team1++;
-            }
-        }
-
-        return team == 0 ? team0 : team1;
+        return id != null && playersInAreaId.Contains(id);
     }
-
 }
-
-
-

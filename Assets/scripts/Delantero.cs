@@ -37,6 +37,7 @@ public class Delantero : PlayerID, IResettable
     private float moveInArea = 0.5f;
     private AreaPeligro1 ap1;
     private AreaPeligro2 ap2;
+    private AreaPeligro ap;
 
     private float tiroCase1 = 0.2f; // Tiro aleatorio
     private float tiroCase2 = 0.5f; //Pase a un npc
@@ -57,8 +58,7 @@ public class Delantero : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
-        ap1 = AreaPeligro1.instance;
-        ap2 = AreaPeligro2.instance;
+        ap = AreaPeligro.instance;
         PickNewTarget(); 
     }
 
@@ -67,26 +67,26 @@ public class Delantero : PlayerID, IResettable
      */
     void Update()
     {
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+        //if (frozen && playerStop)
+        //{
+        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
+        //}
 
-        if (resetPos)
-        {
-            return;
-        }
+        //if (resetPos)
+        //{
+        //    return;
+        //}
 
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            opcionPase();  
-        } else
-        {
-            disparoPorteria = false;
-        }
+        //if (Bola.instance.transform.IsChildOf(transform))
+        //{
+        //    opcionPase();  
+        //} else
+        //{
+        //    disparoPorteria = false;
+        //}
 
-        move();
+        //move();
 
     }
 
@@ -162,22 +162,34 @@ public class Delantero : PlayerID, IResettable
 
     void PickNewTarget()
     {
-        float x, z;
+        float x = 0, z = 0;
         if (Random.value < moveInArea)
         {
 
+            GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
 
-            if (this.id % 2 == 1)
+            foreach (GameObject a in areas)
             {
-                x = Random.Range(ap1.minX, ap1.maxX);
-                z = Random.Range(ap1.minZ, ap1.maxZ);
+                AreaPeligro area = a.GetComponent<AreaPeligro>();
 
+                if (area != null && area.TEAM != this.id % 2)
+                { 
+                    x = Random.Range(area.minX, area.maxX);
+                    z = Random.Range(area.minZ, area.maxZ);
+                }
             }
-            else
-            {
-                x = Random.Range(ap2.minX, ap2.maxX);
-                z = Random.Range(ap2.minZ, ap2.maxZ);
-            }
+
+            //if (this.id % 2 == 1)
+            //{
+            //    x = Random.Range(ap1.minX, ap1.maxX);
+            //    z = Random.Range(ap1.minZ, ap1.maxZ);
+
+            //}
+            //else
+            //{
+            //    x = Random.Range(ap2.minX, ap2.maxX);
+            //    z = Random.Range(ap2.minZ, ap2.maxZ);
+            //}
 
         }
         else

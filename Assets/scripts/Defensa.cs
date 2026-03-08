@@ -16,6 +16,7 @@ public class Defensa : PlayerID, IResettable
     private FieldLimits field;
     private AreaPeligro1 ap1;
     private AreaPeligro2 ap2;
+    private AreaPeligro ap;
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
@@ -92,13 +93,7 @@ public class Defensa : PlayerID, IResettable
     {
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
-        ap1 = AreaPeligro1.instance;
-        ap2 = AreaPeligro2.instance;
-
-    
-        Debug.Log(this.player.name);
-
-
+        ap = AreaPeligro.instance;
         PickNewTarget();
     }
 
@@ -106,29 +101,29 @@ public class Defensa : PlayerID, IResettable
     void Update()
     {
 
-        if (defender && !Bola.instance.transform.IsChildOf(transform))
-        {
-            defenderJug();
-            return;
-        }
+        //     if (defender && !Bola.instance.transform.IsChildOf(transform))
+        //      {
+        //            defenderJug();
+        //            return;
+        //        }
 
-if (frozen && playerStop)
-{
-    StartCoroutine(StopAndRetargetRoutine(playerStop));
-}
+        //if (frozen && playerStop)
+        //{
+        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
+        //}
 
-if (resetPos)
-{
-    return;
-}
+        //if (resetPos)
+        //{
+        //    return;
+        //}
 
 
-move();
+        //move();
 
-if (Bola.instance.transform.IsChildOf(transform))
-{
-    opcionPase();
-}
+        //if (Bola.instance.transform.IsChildOf(transform))
+        //{
+        //    opcionPase();
+        //}
 
         // Perseguir a delantero si está en área de defensa 
         /*
@@ -190,7 +185,7 @@ if (Bola.instance.transform.IsChildOf(transform))
             float aux = Random.value;
             if (aux < tiroCase1)
             {
-                Shoot.instance.disparoLibre();
+               Shoot.instance.disparoLibre();
             }
             else if (tiroCase1 < aux && aux < tiroCase2)
             {
@@ -205,21 +200,32 @@ if (Bola.instance.transform.IsChildOf(transform))
 
     void PickNewTarget()
     {
-        float x, z;
+        float x = 0, z = 0;
         if (Random.value < moveInArea)
         {
+            GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
 
-            
-            if (this.id % 2 == 0)
+            foreach (GameObject a in areas)
             {
-                x = Random.Range(ap1.minX, ap1.maxX);
-                z = Random.Range(ap1.minZ, ap1.maxZ);
+                AreaPeligro area = a.GetComponent<AreaPeligro>();
 
-            } else
-            {
-                x = Random.Range(ap2.minX, ap2.maxX);
-                z = Random.Range(ap2.minZ, ap2.maxZ);
+                if (area != null && area.TEAM == this.id % 2)
+                {
+                    x = Random.Range(area.minX, area.maxX);
+                    z = Random.Range(area.minZ, area.maxZ);
+                }
             }
+
+            //if (this.id % 2 == 0)
+            //{
+            //    x = Random.Range(ap1.minX, ap1.maxX);
+            //    z = Random.Range(ap1.minZ, ap1.maxZ);
+
+            //} else
+            //{
+            //    x = Random.Range(ap2.minX, ap2.maxX);
+            //    z = Random.Range(ap2.minZ, ap2.maxZ);
+            //}
          
         } else
         {

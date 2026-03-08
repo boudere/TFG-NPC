@@ -15,7 +15,7 @@ public class Arbitro : MonoBehaviour
 
     public void BallEntraEnArea(PlayerID player)
     {
-        Debug.Log($"La pelota ENTRÓ en el área del jugador ID: {player.id}");
+        //Debug.Log($"La pelota ENTRÓ en el área del jugador ID: {player.id}");
         currentBallOwner = player;
         quienTieneLaBola(player);
 
@@ -23,23 +23,31 @@ public class Arbitro : MonoBehaviour
 
     public void BallSaleDeArea(PlayerID player)
     {
-        Debug.Log($"La pelota SALIÓ del área del jugador ID: {player.id}");
-        currentBallOwner = player;
-        quienTieneLaBola(player);
+       // Debug.Log($"La pelota SALIÓ del área del jugador ID: {player.id}");
+
+        if (currentBallOwner == player)
+        {
+            currentBallOwner = null;
+        }
+
+        quienTieneLaBola(currentBallOwner);
     }
 
     public void quienTieneLaBola(PlayerID player)
     {
-        if (player.id % 2 == 0)
+        if (player == null)
         {
-            teamBola = 1;
-            Debug.Log($"La bola la tiene el equipo 1, el jugador {player}");
-
-        } else if (player.id % 2 == 1)
-        {
-            teamBola = 2;
-            Debug.Log($"La bola la tiene el equipo 2, el jugador {player}");
+            teamBola = -1;
+            //Debug.Log("La bola está libre");
+            return;
         }
+
+        teamBola = player.id % 2;
+    }
+
+    public int idTeamBola()
+    {
+        return teamBola;
     }
 
     public void AsignarBola(PlayerID newOwner, Collider ball)

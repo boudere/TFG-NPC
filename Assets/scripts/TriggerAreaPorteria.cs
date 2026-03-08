@@ -50,7 +50,7 @@ public class TriggerAreaPorteria : MonoBehaviour
             // comprobamos si es del equipo contrario usando % 2
             if (bola != null && teamJugador % 2 != team)
             {
-                Debug.Log("TRIGGER ENTER con: " + jugador.name);
+                //Debug.Log("TRIGGER ENTER con: " + jugador.name);
 
                 porteroDefender();
 
@@ -93,7 +93,7 @@ public class TriggerAreaPorteria : MonoBehaviour
                 porteroActivo = portero;
                 porteroActivo.defendiendo = true;
 
-                Debug.Log("PORTERO DEFENDIENDO: " + p.name);
+                //Debug.Log("PORTERO DEFENDIENDO: " + p.name);
                 break;
             }
         }
@@ -104,7 +104,7 @@ public class TriggerAreaPorteria : MonoBehaviour
     {
         if (porteroActivo == null) return;
 
-        Debug.Log("PORTERO DESCANSA: ");
+        //Debug.Log("PORTERO DESCANSA: ");
 
         porteroActivo.defendiendo = false;
         porteroActivo.PararDefensa();
