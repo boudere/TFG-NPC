@@ -101,29 +101,29 @@ public class Defensa : PlayerID, IResettable
     void Update()
     {
 
-        //     if (defender && !Bola.instance.transform.IsChildOf(transform))
-        //      {
-        //            defenderJug();
-        //            return;
-        //        }
+        if (defender && !Bola.instance.transform.IsChildOf(transform))
+        {
+            defenderJug();
+            return;
+        }
 
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
+        if (resetPos)
+        {
+            return;
+        }
 
 
-        //move();
+        move();
 
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    opcionPase();
-        //}
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            opcionPase();
+        }
 
         // Perseguir a delantero si está en área de defensa 
         /*
@@ -143,7 +143,9 @@ public class Defensa : PlayerID, IResettable
 
     void rotacion()
     {
-        if (this.id == characterManager.index) { return; }
+        if (this.id == characterManager.index) return;
+        if (defender) return;
+
         Vector3 dir = npcTarget - transform.position;
         dir.y = 0f;
 

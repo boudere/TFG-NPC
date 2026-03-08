@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class AreaPeligro : MonoBehaviour { 
 
@@ -25,11 +27,11 @@ List<Defensa> defensas = new List<Defensa>();
 
 public int TEAM;
 
-    private void Awake()
-    {
-        instance = this;
+    //private void Awake()
+    //{
+    //    instance = this;
 
-    }
+    //}
 
     private void Update()
     {
@@ -45,10 +47,19 @@ public int TEAM;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball") || Bola.instance.transform.IsChildOf(other.transform))
+
+
+        if (other.CompareTag("Ball"))
         {
+            Debug.Log("AAA");
             bolaArea = true;
             return;
+        }
+
+        if (Bola.instance.transform.IsChildOf(other.transform))
+        {
+            Debug.Log("BBB");
+            bolaArea = true;
         }
 
         if (!other.CompareTag("Defensa") && !other.CompareTag("CentroCampista") && !other.CompareTag("Delantero"))
@@ -62,18 +73,23 @@ public int TEAM;
         }
            
 
-        if (other.CompareTag("Delantero") && Bola.instance.transform.IsChildOf(other.transform))
+        if ((other.CompareTag("Delantero") && Bola.instance.transform.IsChildOf(other.transform)) || (other.CompareTag("Delantero") && bolaArea))
         {
+            bolaArea = true;
             Delantero d = other.GetComponent<Delantero>();
             delanteros.Add(d);
 
             if (d != null)
                 LlamarDefensa(d);
+
         }
         else if (other.CompareTag("Delantero") && !Bola.instance.transform.IsChildOf(other.transform))
         {
             Delantero d = other.GetComponent<Delantero>();
-            delanterosSinMarcar.Add(d);
+            if (!delanterosSinMarcar.Contains(d))
+            {
+                delanterosSinMarcar.Add(d);
+            }
             delanteros.Add(d);
         }
 
@@ -92,14 +108,15 @@ public int TEAM;
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Ball") || Bola.instance.transform.IsChildOf(other.transform))
+        if (other.CompareTag("Ball"))
         {
+            Debug.Log("CCC");
             bolaArea = false;
-            GameObject[] delanteros = GameObject.FindGameObjectsWithTag("Delantero");
 
-            foreach (GameObject del in delanteros)
+  
+
+            foreach (Delantero d in delanteros)
             {
-                Delantero d = del.GetComponent<Delantero>();
                 if (d == null) return;
 
                 if (marcajes.TryGetValue(d, out Defensa def) && def != null)
@@ -107,11 +124,20 @@ public int TEAM;
                     def.QuitarMarcaje(d);
                 }
                 marcajes.Remove(d);
-                delanterosSinMarcar.Add(d);
-
+                if (!delanterosSinMarcar.Contains(d))
+                {
+                    delanterosSinMarcar.Add(d);
+                }
             }
 
             return;
+        }
+
+        if (Bola.instance.transform.IsChildOf(other.transform))
+        {
+            Debug.Log("DDD");
+            bolaArea = false;
+          
         }
 
 
@@ -119,7 +145,7 @@ public int TEAM;
             return;
 
         PlayerID jugador = other.GetComponent<PlayerID>();
-        if (jugador != null)
+        if (jugador != null && !playersInArea.Contains(jugador))
         {
             playersInArea.Remove(jugador);
             playersInAreaId.Remove(jugador.id);
@@ -137,6 +163,7 @@ public int TEAM;
             }
             marcajes.Remove(d);
             delanteros.Remove(d);
+            delanterosSinMarcar.Remove(d);
         }
 
         if (other.CompareTag("CentroCampista"))
@@ -156,7 +183,6 @@ public int TEAM;
 
     private void LlamarDefensa(Delantero d)
     {
-
         if (marcajes.ContainsKey(d)) return;
         if (d.id % 2 == TEAM) return;
 
@@ -233,6 +259,6 @@ public int TEAM;
 
     public bool isPlayerInArea(int id)
     {
-        return id != null && playersInAreaId.Contains(id);
+        return playersInAreaId.Contains(id);
     }
 }
