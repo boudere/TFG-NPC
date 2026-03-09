@@ -80,8 +80,9 @@ public class Delantero : PlayerID, IResettable
 
         //if (Bola.instance.transform.IsChildOf(transform))
         //{
-        //    opcionPase();  
-        //} else
+        //    opcionPase();
+        //}
+        //else
         //{
         //    disparoPorteria = false;
         //}

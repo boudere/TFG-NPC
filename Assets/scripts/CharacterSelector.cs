@@ -125,6 +125,35 @@ public class CharacterSelector : MonoBehaviour
 
     }
 
+    public void PlayStart2()
+    {
+        resetMaterial();
+        putNewMaterial(characterManager.index);
+
+
+        characterManager.index = index;
+
+        for (int i = 0; i < characterManager.characterList.Count; i++)
+        {
+
+            if (characterManager.characterList[i].id == index)
+            {
+                characterManager.characterList[i].selected = true;
+                break;
+            }
+        }
+
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 5);
+        SceneManager.LoadScene(
+    SceneManager.GetActiveScene().buildIndex + 6,
+    LoadSceneMode.Additive
+);
+
+
+
+    }
+
 
 
     private void putNewMaterial(int index)

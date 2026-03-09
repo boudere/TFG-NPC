@@ -75,94 +75,99 @@ public class CentroCampista : PlayerID, IResettable
 
     void Update()
     {
-        //whereIsBall();
-        //areaPlayer = whereIsPlayer();
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+        whereIsBall();
+        areaPlayer = whereIsPlayer();
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
-    
+        if (resetPos)
+        {
+            return;
+        }
 
-        //cerebro();
 
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    runTowardsBall = false;
+        cerebro();
 
-        //        if (Random.value < 0.05 )
-        //        {
-           
-        //            if (areaPlayer == -1 || areaPlayer == this.id % 2)
-        //            {
-        //                if (Random.value < 0.005)
-        //                {
-        //                    opcionPase();
-        //                }
-        //            } else
-        //            {
-                   
-        //                opcionPase();
-        //            }
-        //        }
-        //        else
-        //        {
-        //           goToOtherArea(); 
-        //        }
-            
-        //    move();
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            runTowardsBall = false;
 
-        //} else 
-        //{
+            if (Random.value < 0.05)
+            {
 
-        //    if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
-        //    {
-        //        if (!runTowardsBall && Random.value < 0.0005f)
-        //        {
-        //            runTowardsBall = true;
-        //        }
+                if (areaPlayer == -1 || areaPlayer == this.id % 2)
+                {
+                    if (Random.value < 0.005)
+                    {
+                        opcionPase();
+                    }
+                }
+                else
+                {
 
-        //        if (runTowardsBall)
-        //            runToBall();
-        //        else
-        //            move();
-        //    }
-        //    else if (areaConBola != -1 && areaConBola != this.id % 2)
-        //    {
-        //        runTowardsBall = false;
-        //        goToOtherArea();
-        //        move();
-        //    }
-        //    else if (areaConBola == -1)
-        //    {
-        //        if (!runTowardsBall && Random.value < 0.0005f )
-        //        {
-        //            runTowardsBall = true;
-        //        }
+                    opcionPase();
+                }
+            }
+            else
+            {
+                goToOtherArea();
+            }
 
-        //        if (runTowardsBall)
-        //        {
-        //            if (Random.value < 0.0001f)
-        //            {
-        //                runTowardsBall = false;
-        //            } else
-        //            {
-        //                runToBall();
-        //            }
-        //        } else
-        //        {
-        //            move();
-        //        }
-        //    } else
-        //    {
-        //        move();
-        //    }
-        //}
-     }
+            move();
+
+        }
+        else
+        {
+
+            if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
+            {
+                if (!runTowardsBall && Random.value < 0.0005f)
+                {
+                    runTowardsBall = true;
+                }
+
+                if (runTowardsBall)
+                    runToBall();
+                else
+                    move();
+            }
+            else if (areaConBola != -1 && areaConBola != this.id % 2)
+            {
+                runTowardsBall = false;
+                goToOtherArea();
+                move();
+            }
+            else if (areaConBola == -1)
+            {
+                if (!runTowardsBall && Random.value < 0.0005f)
+                {
+                    runTowardsBall = true;
+                }
+
+                if (runTowardsBall)
+                {
+                    if (Random.value < 0.0001f)
+                    {
+                        runTowardsBall = false;
+                    }
+                    else
+                    {
+                        runToBall();
+                    }
+                }
+                else
+                {
+                    move();
+                }
+            }
+            else
+            {
+                move();
+            }
+        }
+    }
 
     void FixedUpdate()
     {
