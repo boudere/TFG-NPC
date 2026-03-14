@@ -10,11 +10,25 @@ public class PlayerID : MonoBehaviour
     public PlayerID self;
     public float probabilidadAciertoPase;
     public GameObject player;
+    private float secondTimer = 0f;
 
     void Awake()
     {
         self = this;
         player = gameObject;
+    }
+
+    protected bool Every(float interval)
+    {
+        secondTimer += Time.deltaTime;
+
+        if (secondTimer >= interval)
+        {
+            secondTimer -= interval;
+            return true;
+        }
+
+        return false;
     }
 
 }

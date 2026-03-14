@@ -1,0 +1,37 @@
+using UnityEngine;
+
+public class Timer : MonoBehaviour
+{
+    public int matchSeconds = 300;
+    private float timer = 0f;
+
+    void Start()
+    {
+        ShowTime.instance.SetTime(matchSeconds);
+    }
+
+    void Update()
+    {
+        timer += Time.deltaTime;
+
+        if (timer >= 1f)
+        {
+            timer -= 1f;
+            matchSeconds--;
+
+            if (ShowTime.instance != null)
+                ShowTime.instance.SetTime(matchSeconds);
+
+            if (matchSeconds <= 0)
+            {
+                EndMatch();
+            }
+        }
+    }
+
+    void EndMatch()
+    {
+        Debug.Log("Fin del partido");
+        Time.timeScale = 0f;
+    }
+}

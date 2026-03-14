@@ -26,6 +26,7 @@ public class Defensa : PlayerID, IResettable
     private float changeTargetDistance = 50f;
     private Vector3 npcTarget;
 
+
     private CharacterManager characterManager;
 
     [System.Serializable]
@@ -73,8 +74,9 @@ public class Defensa : PlayerID, IResettable
     private float moveInArea = 0.5f;
 
     public bool defender = false;
+    private float tiempoMarcar = 0f;
     private Transform targetDelantero;
-
+    private bool puedePerseguir = false;
 
     /*
      En caso de que se pueda dar asistencia ...
@@ -100,45 +102,66 @@ public class Defensa : PlayerID, IResettable
 
     void Update()
     {
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        //if (defender && !Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    defenderJug();
-        //    return;
-        //}
+        if (resetPos)
+        {
+            return;
+        }
 
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+        if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
+        {
+            defenderJug();
+            return;
+        }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
+        move();
 
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            opcionPase();
+        }
+   
 
-        //move();
+    // Perseguir a delantero si está en área de defensa 
+    /*
+     Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
 
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    opcionPase();
-        //}
+     */
 
-        // Perseguir a delantero si está en área de defensa 
-        /*
-         Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
-         
-         */
-
-        // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
+    // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
 
 
-    }
+}
 
     void FixedUpdate()
     {
         rotacion();
+    }
+
+    private float tiempoIrMarca()
+    {
+        float aux = Random.value;
+
+        if (aux < 0.25) {
+            return 0.5f;
+        } else if (aux > 0.25 && aux < 0.5) {
+            return 1f;
+        } else if (aux > 0.5 && aux < 0.75) {
+            return 1.5f;
+        } else {
+            return 2f;
+        }
+
+    }
+
+    private IEnumerator EsperarParaPerseguir()
+    {
+        yield return new WaitForSeconds(tiempoMarcar);
+        puedePerseguir = true;
     }
 
     void rotacion()
@@ -217,17 +240,6 @@ public class Defensa : PlayerID, IResettable
                     z = Random.Range(area.minZ, area.maxZ);
                 }
             }
-
-            //if (this.id % 2 == 0)
-            //{
-            //    x = Random.Range(ap1.minX, ap1.maxX);
-            //    z = Random.Range(ap1.minZ, ap1.maxZ);
-
-            //} else
-            //{
-            //    x = Random.Range(ap2.minX, ap2.maxX);
-            //    z = Random.Range(ap2.minZ, ap2.maxZ);
-            //}
          
         } else
         {
@@ -269,10 +281,13 @@ public class Defensa : PlayerID, IResettable
     {
         defender = true;
         targetDelantero = target;
+        puedePerseguir = false;
     }
 
+  
     private void defenderJug()
     {
+
         if (targetDelantero == null)
         {
             DejarDeDefender();
@@ -308,6 +323,7 @@ public class Defensa : PlayerID, IResettable
     public void DejarDeDefender()
     {
         defender = false;
+        tiempoMarcar = 0f;
         targetDelantero = null;
 
         PickNewTarget();
@@ -345,17 +361,21 @@ public class Defensa : PlayerID, IResettable
     {
         if (d == null) return;
 
+        tiempoMarcar = tiempoIrMarca();
+        StartCoroutine(EsperarParaPerseguir());
+
+        marcajeActual = new Marcaje(d, this);
+        activarDefensa(d.transform);
+
+
         Transform area = this.player.transform.Find("area");
         CapsuleCollider col = area.GetComponent<CapsuleCollider>();
 
         col.radius *= 1.3f;
         Transform canvas = transform.Find("shoot/Canvas/Image");
         RectTransform imageRect = canvas.GetComponentInChildren<RectTransform>();
-
         imageRect.localScale *= 1.3f;
 
-        marcajeActual = new Marcaje(d, this);
-        activarDefensa(d.transform);
     }
 
     public void QuitarMarcaje(Delantero d)
