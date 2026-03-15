@@ -12,6 +12,7 @@ public class Delantero : PlayerID, IResettable
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool resetPos = false;
+    private Rigidbody rb;
     public bool pase = false;
     private FieldLimits field;
 
@@ -29,6 +30,9 @@ public class Delantero : PlayerID, IResettable
     private float npcPass = 0.01f; //PROVISIONAL
 
     public bool defaultMove = true;
+
+    private bool frozen = false;
+    private GameObject playerStop = null;
 
     private float moveInArea = 0.5f;
     private AreaPeligro1 ap1;
@@ -114,11 +118,6 @@ public class Delantero : PlayerID, IResettable
 
     private void move()
     {
-        if (frozen)
-        {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-            return;
-        }
 
         if (this.id == characterManager.index) { return; }
 
