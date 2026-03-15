@@ -12,37 +12,9 @@ public class TriggerHavePlayer : MonoBehaviour
 
     private bool locked = false;
 
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (locked) return;
-
-    //    owner = GetComponentInParent<PlayerID>();
-    //    if (owner == null) return;
-
-    //    PlayerID otherPlayer = other.GetComponentInParent<PlayerID>();
-    //    if (otherPlayer != null)
-    //    {
-    //        if (otherPlayer.id % 2 == owner.id)
-    //        {
-    //            return;
-    //        }
-    //    }
-
-    //    var rb = other.attachedRigidbody;
-    //    if (rb == null) return;
-    //    if (!rb.CompareTag("Ball")) return;
-
-    //    if (!Bola.instance.PuedeSerRecogida()) return;
-
-    //    locked = true;
-    //    //Debug.Log($"TriggerHavePlayer ENTER -> this={name} id={GetInstanceID()} root={transform.root.name} other={other.name}");
-    //    Bola.instance.AsignarPosesion(owner);
-    //    Arbitro.instance.BallEntraEnArea(owner);
-    //}
-
     private void OnTriggerEnter(Collider other)
     {
-        if (locked) return;
+       
 
         owner = GetComponentInParent<PlayerID>();
         if (owner == null) return;
@@ -66,7 +38,7 @@ public class TriggerHavePlayer : MonoBehaviour
 
         }
 
-   
+        if (locked) return;
 
         var rb = other.attachedRigidbody;
         if (rb == null) return;
@@ -75,7 +47,6 @@ public class TriggerHavePlayer : MonoBehaviour
         if (!Bola.instance.PuedeSerRecogida()) return;
 
         locked = true;
-        //Debug.Log($"TriggerHavePlayer ENTER -> this={name} id={GetInstanceID()} root={transform.root.name} other={other.name}");
         Bola.instance.AsignarPosesion(owner);
         Arbitro.instance.BallEntraEnArea(owner);
     }

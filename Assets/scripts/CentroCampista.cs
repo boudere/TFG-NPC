@@ -71,98 +71,98 @@ public class CentroCampista : PlayerID, IResettable
 
     void Update()
     {
-        whereIsBall();
-        areaPlayer = whereIsPlayer();
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+        //whereIsBall();
+        //areaPlayer = whereIsPlayer();
+        //if (frozen && playerStop)
+        //{
+        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
+        //}
 
-        if (resetPos)
-        {
-            return;
-        }
+        //if (resetPos)
+        //{
+        //    return;
+        //}
 
 
-        cerebro();
+        //cerebro();
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            chasingBall = false;
+        //if (Bola.instance.transform.IsChildOf(transform))
+        //{
+        //    chasingBall = false;
 
-            if (Random.value < 0.05)
-            {
+        //    if (Random.value < 0.05)
+        //    {
 
-                if (areaPlayer == -1 || areaPlayer == this.id % 2)
-                {
-                    if (Random.value < 0.005)
-                    {
-                        opcionPase();
-                    }
-                }
-                else
-                {
+        //        if (areaPlayer == -1 || areaPlayer == this.id % 2)
+        //        {
+        //            if (Random.value < 0.005)
+        //            {
+        //                opcionPase();
+        //            }
+        //        }
+        //        else
+        //        {
 
-                    opcionPase();
-                }
-            }
-            else
-            {
-                goToOtherArea();
-            }
+        //            opcionPase();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        goToOtherArea();
+        //    }
 
-            move();
+        //    move();
 
-        }
-        else
-        {
+        //}
+        //else
+        //{
 
-            if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
-            {
-                if (!chasingBall && Random.value < 0.0005f)
-                {
-                    chasingBall = true;
-                }
+        //    if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
+        //    {
+        //        if (!chasingBall && Random.value < 0.0005f)
+        //        {
+        //            chasingBall = true;
+        //        }
 
-                if (chasingBall)
-                    runToBall();
-                else
-                    move();
-            }
-            else if (areaConBola != -1 && areaConBola != this.id % 2)
-            {
-                chasingBall = false;
-                goToOtherArea();
-                move();
-            }
-            else if (areaConBola == -1)
-            {
-                if (!chasingBall && Random.value < 0.0005f)
-                {
-                    chasingBall = true;
-                }
+        //        if (chasingBall)
+        //            runToBall();
+        //        else
+        //            move();
+        //    }
+        //    else if (areaConBola != -1 && areaConBola != this.id % 2)
+        //    {
+        //        chasingBall = false;
+        //        goToOtherArea();
+        //        move();
+        //    }
+        //    else if (areaConBola == -1)
+        //    {
+        //        if (!chasingBall && Random.value < 0.0005f)
+        //        {
+        //            chasingBall = true;
+        //        }
 
-                if (chasingBall)
-                {
-                    if (Random.value < 0.0001f)
-                    {
-                        chasingBall = false;
-                    }
-                    else
-                    {
-                        runToBall();
-                    }
-                }
-                else
-                {
-                    move();
-                }
-            }
-            else
-            {
-                move();
-            }
-        }
+        //        if (chasingBall)
+        //        {
+        //            if (Random.value < 0.0001f)
+        //            {
+        //                chasingBall = false;
+        //            }
+        //            else
+        //            {
+        //                runToBall();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            move();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        move();
+        //    }
+        //}
     }
 
     void FixedUpdate()

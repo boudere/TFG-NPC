@@ -63,30 +63,30 @@ public class Delantero : PlayerID, IResettable
      */
     void Update()
     {
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+        //if (frozen && playerStop)
+        //{
+        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
+        //}
 
-        if (resetPos)
-        {
-            return;
-        }
+        //if (resetPos)
+        //{
+        //    return;
+        //}
 
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            opcionPase();
-        }
-        else
-        {
-            disparoPorteria = false;
-        }
+        //if (Bola.instance.transform.IsChildOf(transform))
+        //{
+        //    opcionPase();
+        //}
+        //else
+        //{
+        //    disparoPorteria = false;
+        //}
 
-        if (chasingBall)
-            runToBall();
-        else
-            move();
+        //if (chasingBall)
+        //    runToBall();
+        //else
+        //    move();
 
     }
 
