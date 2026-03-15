@@ -54,7 +54,19 @@ public class TriggerHavePlayer : MonoBehaviour
             {
                 return;
             }
+
+
+
+            Defensa defensa = otherPlayer.GetComponent<Defensa>();
+
+            if (defensa != null)
+            {
+                StartCoroutine(owner.PararJugador(owner.gameObject));
+            }
+
         }
+
+   
 
         var rb = other.attachedRigidbody;
         if (rb == null) return;
@@ -67,6 +79,8 @@ public class TriggerHavePlayer : MonoBehaviour
         Bola.instance.AsignarPosesion(owner);
         Arbitro.instance.BallEntraEnArea(owner);
     }
+
+   
 
     private void OnTriggerExit(Collider other)
     {
