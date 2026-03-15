@@ -2039,6 +2039,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1490026767}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026773}
   m_SourcePrefab: {fileID: 100100000, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
 --- !u!4 &1490026765 stripped
 Transform:
@@ -2073,6 +2076,24 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &1490026773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ec9989181b1c98409d6d99f5da5432b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordMode: 1
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
 --- !u!1001 &1528111957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3154,6 +3175,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3625312987260654814}
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654815}
   m_SourcePrefab: {fileID: 100100000, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
 --- !u!4 &3625312987260654812 stripped
 Transform:
@@ -3188,6 +3212,24 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &3625312987260654815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ec9989181b1c98409d6d99f5da5432b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordMode: 1
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0

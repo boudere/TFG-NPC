@@ -76,7 +76,10 @@ public class Recorder : MonoBehaviour
         {
             if (Bola.instance.Owner != null)
             {
-               hasBallTeam = Bola.instance.Owner.CompareTag("Team1") ? 1 : 2; // Ajustar según tus tags
+               PlayerID ownerID = Bola.instance.Owner.GetComponent<PlayerID>();
+               if (ownerID != null) {
+                   hasBallTeam = (ownerID.id % 2 == myPlayer.id % 2) ? 1 : 2; 
+               }
             }
         }
 
@@ -102,8 +105,8 @@ public class Recorder : MonoBehaviour
 
             float d = Vector3.Distance(myPos, p.transform.position);
             
-            // Asumiendo que usas Tags para diferenciar equipos
-            if (p.CompareTag(myPlayer.tag))
+            // Usamos ID par/impar para equipos
+            if (p.id % 2 == myPlayer.id % 2)
             {
                 if (d < distClosestAlly) distClosestAlly = d;
             }
@@ -122,18 +125,18 @@ public class Recorder : MonoBehaviour
         int actionPass = Input.GetKey(KeyCode.LeftControl) ? 1 : 0; // Ejemplo
 
 
-        // Construir la fila CSV
-        string row = $"{totalTime:F2}," +
-                     $"{myPos.x:F2},{myPos.z:F2}," +
-                     $"{ballPos.x:F2},{ballPos.z:F2}," +
-                     $"{distToBall:F2}," +
+        // Construir la fila CSV usando InvariantCulture para que los decimales sean SIEMPRE un punto '.'
+        string row = $"{totalTime.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{myPos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{myPos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{ballPos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{ballPos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{distToBall.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
                      $"{hasBallTeam}," +
-                     $"{distToRivalGoal:F2}," +
+                     $"{distToRivalGoal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
                      $"{scoreT1},{scoreT2}," +
-                     $"{distBallToMyGoal:F2}," +
-                     $"{distClosestAlly:F2}," +
-                     $"{distClosestEnemy:F2}," +
-                     $"{inputX:F2},{inputZ:F2}," +
+                     $"{distBallToMyGoal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{distClosestAlly.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{distClosestEnemy.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
+                     $"{inputX.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{inputZ.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
                      $"{actionShoot},{actionPass}";
 
         recordedLines.Add(row);

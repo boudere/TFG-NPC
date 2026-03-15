@@ -412,6 +412,8 @@ GameObject:
   - component: {fileID: 6682102666419540453}
   - component: {fileID: 5398021544228664392}
   - component: {fileID: 1827199058330523307}
+  - component: {fileID: 2938493391448555210}
+  - component: {fileID: -4207268408474081122}
   m_Layer: 6
   m_Name: t1 delantero
   m_TagString: Player
@@ -583,6 +585,41 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &2938493391448555210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4302736966775426911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0993845732c49fc449c1c36d0f69148d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 5022602860645237092, guid: d0e9b5bacfa26cd4d8cf4d172a72d4d9, type: 3}
+  scalerJson: {fileID: 4900000, guid: e843cde833bebc1418ea640ed9dbedb4, type: 3}
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+--- !u!114 &-4207268408474081122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4302736966775426911}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ec9989181b1c98409d6d99f5da5432b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordMode: 1
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
 --- !u!1 &5688988184054912042
 GameObject:
   m_ObjectHideFlags: 0
