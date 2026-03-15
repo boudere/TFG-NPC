@@ -11,7 +11,6 @@ public class CentroCampista : PlayerID, IResettable
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool resetPos = false;
-    private Rigidbody rb;
     public bool pase = false;
     private FieldLimits field;
 
@@ -29,9 +28,6 @@ public class CentroCampista : PlayerID, IResettable
     private float npcPass = 0.002f; //PROVISIONAL
 
     public bool defaultMove = true;
-
-    private bool frozen = false;
-    private GameObject playerStop = null;
 
     private float moveInArea = 0.000005f;
 
@@ -261,6 +257,12 @@ public class CentroCampista : PlayerID, IResettable
 
     private void move()
     {
+        if (frozen)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
         if (this.id == characterManager.index) return;
 
         Vector3 direction = (npcTarget - transform.position).normalized;

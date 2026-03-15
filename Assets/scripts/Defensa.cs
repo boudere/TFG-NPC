@@ -11,7 +11,6 @@ public class Defensa : PlayerID, IResettable
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool resetPos = false;
-    private Rigidbody rb;
     public bool pase = false;
     private FieldLimits field;
     private AreaPeligro1 ap1;
@@ -68,8 +67,6 @@ public class Defensa : PlayerID, IResettable
 
     public bool defaultMove = true;
 
-    private bool frozen = false;
-    private GameObject playerStop = null;
 
     private float moveInArea = 0.5f;
 
@@ -185,6 +182,12 @@ public class Defensa : PlayerID, IResettable
 
     private void move()
     {
+        if (frozen)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
         if (this.id == characterManager.index) { return; }
       
 
@@ -318,6 +321,13 @@ public class Defensa : PlayerID, IResettable
 
         Quaternion rot = Quaternion.LookRotation(dir);
         rb.MoveRotation(Quaternion.Slerp(rb.rotation, rot, 10f * Time.deltaTime));
+
+        //if () // POSICION
+        /*
+         Si le ha robado la pelota al jugador, que se noquee
+         */
+
+
     }
 
     public void DejarDeDefender()

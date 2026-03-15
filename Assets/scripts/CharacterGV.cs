@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.LowLevel;
 
 public class CharacterGV : PlayerID
 {
@@ -12,8 +13,6 @@ public class CharacterGV : PlayerID
     private float changeTargetDistance = 50f;
     private Vector3 npcTarget;
 
-
-    private Rigidbody rb;
     public int index;
     private CharacterManager characterManager;
    
@@ -44,13 +43,60 @@ public class CharacterGV : PlayerID
 
     private void Update()
     {
+
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopRoutine(playerStop));
+        }
+
         movePlayer();
+        
     }
 
+    private IEnumerator StopRoutine(GameObject playerStop)
+    {
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        rbPlayer.linearVelocity = Vector3.zero;
+        rbPlayer.angularVelocity = Vector3.zero;
+        yield return new WaitForSeconds(2f);
+        frozen = false;
+    }
 
+    //void movePlayer()
+    //{
+    //    if (index != characterManager.index)
+    //        return;
+
+    //    float h = Input.GetAxisRaw("Horizontal");
+    //    float v = Input.GetAxisRaw("Vertical");
+
+    //    Vector3 inputDir = new Vector3(h, 0f, v);
+
+    //    // Movimiento (en la dirección que toca)
+    //    Vector3 moveDir = inputDir.normalized;
+    //    Vector3 movement = moveDir * speed;
+    //    rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
+
+
+    //    if (inputDir.sqrMagnitude > 0.001f)
+    //    {
+
+    //        smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
+
+
+    //        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+    //        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
+    //    }
+    //}
 
     void movePlayer()
     {
+        if (frozen)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
         if (index != characterManager.index)
             return;
 
@@ -59,17 +105,13 @@ public class CharacterGV : PlayerID
 
         Vector3 inputDir = new Vector3(h, 0f, v);
 
-        // Movimiento (en la dirección que toca)
         Vector3 moveDir = inputDir.normalized;
         Vector3 movement = moveDir * speed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
-
         if (inputDir.sqrMagnitude > 0.001f)
         {
-
             smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
-
 
             Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
             rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
