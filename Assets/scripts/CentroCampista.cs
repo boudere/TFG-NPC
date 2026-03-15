@@ -18,7 +18,7 @@ public class CentroCampista : PlayerID, IResettable
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
-    private float npcSpeed = 75;
+  
     private float changeTargetDistance = 50f;
     private Vector3 npcTarget;
 
@@ -46,7 +46,7 @@ public class CentroCampista : PlayerID, IResettable
     private int areaPlayer;
 
     //IR A POR LA BOLA
-    private bool runTowardsBall = false;
+    //private bool runTowardsBall = false;
    
     private float passBallCase1 = 0.2f, passBallCase2 = 0.40f, passBallCase3 = 0.70f; // 1: Disparo random, 2: Disparo a cualquiera, 3: Disparo a otro centro, 4:Disparo a delantero
 
@@ -71,98 +71,98 @@ public class CentroCampista : PlayerID, IResettable
 
     void Update()
     {
-        //whereIsBall();
-        //areaPlayer = whereIsPlayer();
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+        whereIsBall();
+        areaPlayer = whereIsPlayer();
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
+        if (resetPos)
+        {
+            return;
+        }
 
 
-        //cerebro();
+        cerebro();
 
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    runTowardsBall = false;
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            chasingBall = false;
 
-        //    if (Random.value < 0.05)
-        //    {
+            if (Random.value < 0.05)
+            {
 
-        //        if (areaPlayer == -1 || areaPlayer == this.id % 2)
-        //        {
-        //            if (Random.value < 0.005)
-        //            {
-        //                opcionPase();
-        //            }
-        //        }
-        //        else
-        //        {
+                if (areaPlayer == -1 || areaPlayer == this.id % 2)
+                {
+                    if (Random.value < 0.005)
+                    {
+                        opcionPase();
+                    }
+                }
+                else
+                {
 
-        //            opcionPase();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        goToOtherArea();
-        //    }
+                    opcionPase();
+                }
+            }
+            else
+            {
+                goToOtherArea();
+            }
 
-        //    move();
+            move();
 
-        //}
-        //else
-        //{
+        }
+        else
+        {
 
-        //    if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
-        //    {
-        //        if (!runTowardsBall && Random.value < 0.0005f)
-        //        {
-        //            runTowardsBall = true;
-        //        }
+            if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
+            {
+                if (!chasingBall && Random.value < 0.0005f)
+                {
+                    chasingBall = true;
+                }
 
-        //        if (runTowardsBall)
-        //            runToBall();
-        //        else
-        //            move();
-        //    }
-        //    else if (areaConBola != -1 && areaConBola != this.id % 2)
-        //    {
-        //        runTowardsBall = false;
-        //        goToOtherArea();
-        //        move();
-        //    }
-        //    else if (areaConBola == -1)
-        //    {
-        //        if (!runTowardsBall && Random.value < 0.0005f)
-        //        {
-        //            runTowardsBall = true;
-        //        }
+                if (chasingBall)
+                    runToBall();
+                else
+                    move();
+            }
+            else if (areaConBola != -1 && areaConBola != this.id % 2)
+            {
+                chasingBall = false;
+                goToOtherArea();
+                move();
+            }
+            else if (areaConBola == -1)
+            {
+                if (!chasingBall && Random.value < 0.0005f)
+                {
+                    chasingBall = true;
+                }
 
-        //        if (runTowardsBall)
-        //        {
-        //            if (Random.value < 0.0001f)
-        //            {
-        //                runTowardsBall = false;
-        //            }
-        //            else
-        //            {
-        //                runToBall();
-        //            }
-        //        }
-        //        else
-        //        {
-        //            move();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        move();
-        //    }
-        //}
+                if (chasingBall)
+                {
+                    if (Random.value < 0.0001f)
+                    {
+                        chasingBall = false;
+                    }
+                    else
+                    {
+                        runToBall();
+                    }
+                }
+                else
+                {
+                    move();
+                }
+            }
+            else
+            {
+                move();
+            }
+        }
     }
 
     void FixedUpdate()
@@ -177,7 +177,7 @@ public class CentroCampista : PlayerID, IResettable
 
         Vector3 dir;
 
-        if (runTowardsBall)
+        if (chasingBall)
             dir = Bola.instance.transform.position - transform.position;
         else
             dir = npcTarget - transform.position;
@@ -364,19 +364,7 @@ public class CentroCampista : PlayerID, IResettable
         npcTarget = new Vector3(x, transform.position.y, z);
     }
 
-    private void runToBall()
-    {
-        Vector3 dir = Bola.instance.transform.position - transform.position;
-        dir.y = 0f;
 
-        if (dir.sqrMagnitude < 0.001f) return;
-
-        Vector3 velocity = dir.normalized * npcSpeed;
-        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
-
-        Quaternion rot = Quaternion.LookRotation(dir);
-        rb.MoveRotation(Quaternion.Slerp(rb.rotation, rot, 10f * Time.deltaTime));
-    }
 
     private void OnEnable()
     {

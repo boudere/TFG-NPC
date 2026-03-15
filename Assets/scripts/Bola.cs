@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Bola : MonoBehaviour
 {
     public static Bola instance;
+    public List<PlayerID> jugadores = new List<PlayerID>();
+    public List<PlayerID> jugadoresOrdenados = new List<PlayerID>();
+
 
     [Header("Refs")]
     [SerializeField] private Rigidbody rb;
@@ -20,11 +25,10 @@ public class Bola : MonoBehaviour
     private Collider[] ownerColliders;
 
     private float blockPickupUntil = 0f;
+    private CharacterManager characterManager;
 
-    public bool PuedeSerRecogida()
-    {
-        return Time.time >= blockPickupUntil;
-    }
+    [SerializeField] private float refreshInterval = 0.15f;
+    private float nextRefreshTime;
 
     private void Awake()
     {
@@ -39,6 +43,118 @@ public class Bola : MonoBehaviour
         if (rb == null)
             rb = GetComponent<Rigidbody>();
     }
+
+    private void Start()
+    {
+        characterManager = CharacterManager.instance;
+        InicializarJugadores();
+    }
+
+    private void Update()
+    {
+        if (Time.time < nextRefreshTime)
+            return;
+
+        nextRefreshTime = Time.time + refreshInterval;
+
+        actualizarPerseguidores();
+    }
+
+    private void InicializarJugadores()
+    {
+        jugadores.Clear();
+
+        GameObject[] allPlayers = GetAllFieldPlayers();
+
+        foreach (GameObject go in allPlayers)
+        {
+            if (go == null) continue;
+
+            PlayerID p = go.GetComponent<PlayerID>();
+            if (p == null) continue;
+
+            jugadores.Add(p);
+        }
+    }
+
+    void actualizarPerseguidores()
+    {
+      
+        OrdenarJugadoresPorDistancia();
+        
+
+        if (!EnPosesion)
+        {
+            bool e0 = false;
+            bool e1 = false;
+
+            foreach (PlayerID p in jugadoresOrdenados)
+            {
+                if (p.id == characterManager.index) continue;
+                if (e0 && e1) break;
+                if (!p.getLibre()) continue;
+
+                if (p.id % 2 == 0 && !e0)
+                {
+                  
+                    p.setChasingBall(true);
+                    e0 = true;
+                }
+                else if (p.id % 2 == 1 && !e1)
+                {
+                    p.setChasingBall(true);
+                    e1 = true;
+                }
+            }
+        }
+        else
+        {
+            foreach (PlayerID p in jugadores)
+                p.setChasingBall(false);
+        }
+    }
+
+    void OrdenarJugadoresPorDistancia()
+    {
+        jugadoresOrdenados.Clear();
+        jugadoresOrdenados.AddRange(jugadores);
+
+        jugadoresOrdenados.Sort((a, b) =>
+        {
+            float da = (a.transform.position - transform.position).sqrMagnitude;
+            float db = (b.transform.position - transform.position).sqrMagnitude;
+            return da.CompareTo(db);
+        });
+    }
+
+    public void RegistrarJugador(PlayerID jugador)
+    {
+        if (jugador == null) return;
+
+        if (!jugador.CompareTag("Defensa") &&
+            !jugador.CompareTag("CentroCampista") &&
+            !jugador.CompareTag("Delantero"))
+            return;
+
+        if (!jugadores.Contains(jugador))
+            jugadores.Add(jugador);
+    }
+
+    public void DesregistrarJugador(PlayerID jugador)
+    {
+        jugadores.Remove(jugador);
+    }
+
+
+    public bool PuedeSerRecogida()
+    {
+        return Time.time >= blockPickupUntil;
+    }
+
+   
+
+
+    
 
 
     public void AsignarPosesion(PlayerID newOwner)
@@ -122,5 +238,22 @@ public class Bola : MonoBehaviour
      
         blockPickupUntil = Time.time + 0.25f;
         rb.WakeUp();
+    }
+
+
+    private GameObject[] GetAllFieldPlayers()
+    {
+        List<GameObject> allPlayers = new List<GameObject>();
+
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Defensa"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("CentroCampista"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Delantero"));
+
+        return allPlayers.ToArray();
+    }
+
+    public List<PlayerID> getJugadoresOrdenados()
+    {
+        return jugadoresOrdenados;
     }
 }

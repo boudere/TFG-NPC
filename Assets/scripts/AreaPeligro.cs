@@ -21,17 +21,15 @@ public static AreaPeligro instance;
 private bool bolaArea = false;
 
 List<Delantero> delanterosSinMarcar = new List<Delantero>();
+
+
 List<CentroCampista> centros = new List<CentroCampista>();
 List<Delantero> delanteros = new List<Delantero>();
 List<Defensa> defensas = new List<Defensa>();
 
 public int TEAM;
 
-    //private void Awake()
-    //{
-    //    instance = this;
 
-    //}
 
     private void Update()
     {
@@ -42,6 +40,7 @@ public int TEAM;
                 LlamarDefensa(delanterosSinMarcar[i]);
                 delanterosSinMarcar.RemoveAt(i);
             }
+
         }
     }
 

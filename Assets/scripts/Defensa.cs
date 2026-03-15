@@ -115,7 +115,15 @@ public class Defensa : PlayerID, IResettable
             return;
         }
 
-        move();
+        if (chasingBall) {
+          
+            runToBall();
+        }
+        else
+        {
+            move();
+        }
+           
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
@@ -375,6 +383,7 @@ public class Defensa : PlayerID, IResettable
         StartCoroutine(EsperarParaPerseguir());
 
         marcajeActual = new Marcaje(d, this);
+        this.setLibre(false);
         activarDefensa(d.transform);
 
 
@@ -404,5 +413,8 @@ public class Defensa : PlayerID, IResettable
 
         marcajeActual = null;
         DejarDeDefender();
+        this.setLibre(true);
     }
+
+
 }
