@@ -7,6 +7,7 @@ public class Bola : MonoBehaviour
 {
     public static Bola instance;
     public List<PlayerID> jugadores = new List<PlayerID>();
+    public List<GameObject> ju = new List<GameObject>();
     public List<PlayerID> jugadoresOrdenados = new List<PlayerID>();
 
 
@@ -27,7 +28,7 @@ public class Bola : MonoBehaviour
     private float blockPickupUntil = 0f;
     private CharacterManager characterManager;
 
-    [SerializeField] private float refreshInterval = 0.15f;
+    [SerializeField] private float refreshInterval = 1;
     private float nextRefreshTime;
 
     private void Awake()
@@ -66,51 +67,64 @@ public class Bola : MonoBehaviour
 
         GameObject[] allPlayers = GetAllFieldPlayers();
 
+        foreach (GameObject player in allPlayers)
+        {
+            PlayerID pl = player.GetComponent<PlayerID>();
+        }
+
         foreach (GameObject go in allPlayers)
         {
             if (go == null) continue;
 
             PlayerID p = go.GetComponent<PlayerID>();
+
             if (p == null) continue;
 
             jugadores.Add(p);
+           
+
         }
     }
 
     void actualizarPerseguidores()
     {
-      
-        OrdenarJugadoresPorDistancia();
-        
 
-        if (!EnPosesion)
+        foreach (PlayerID p in jugadores)
         {
-            bool e0 = false;
-            bool e1 = false;
+            detectTag(p.gameObject, false);
 
-            foreach (PlayerID p in jugadoresOrdenados)
-            {
-                if (p.id == characterManager.index) continue;
-                if (e0 && e1) break;
-                if (!p.getLibre()) continue;
-
-                if (p.id % 2 == 0 && !e0)
-                {
-                  
-                    p.setChasingBall(true);
-                    e0 = true;
-                }
-                else if (p.id % 2 == 1 && !e1)
-                {
-                    p.setChasingBall(true);
-                    e1 = true;
-                }
-            }
         }
-        else
+
+      
+
+
+
+        if (EnPosesion)
+            return;
+
+        OrdenarJugadoresPorDistancia();
+
+        bool e0 = false;
+        bool e1 = false;
+
+        foreach (PlayerID p in jugadoresOrdenados)
         {
-            foreach (PlayerID p in jugadores)
-                p.setChasingBall(false);
+            if (p.id == characterManager.index) continue;
+            if (e0 && e1) break;
+            if (!p.getLibre()) continue;
+
+            if (p.id % 2 == 0 && !e0)
+            {
+               
+                detectTag(p.gameObject, true);
+
+                e0 = true;
+            }
+            else if (p.id % 2 == 1 && !e1)
+            {
+                detectTag(p.gameObject, true);
+                e1 = true;
+            }
         }
     }
 
@@ -151,11 +165,29 @@ public class Bola : MonoBehaviour
         return Time.time >= blockPickupUntil;
     }
 
-   
 
 
-    
 
+    public void detectTag(GameObject go, bool value)
+    {
+        if (go.CompareTag("CentroCampista"))
+        {
+            CentroCampista p = go.GetComponent<CentroCampista>();
+            p.setChasingBallFree(value, p);
+        }
+        else if (go.CompareTag("Defensa"))
+        {
+            Defensa p = go.GetComponent<Defensa>();
+            p.setChasingBallFree(value, p);
+        }
+        else if (go.CompareTag("Delantero"))
+        {
+            Delantero p = go.GetComponent<Delantero>();
+            p.setChasingBallFree(value, p);
+        }
+
+       
+    }
 
     public void AsignarPosesion(PlayerID newOwner)
     {
@@ -209,12 +241,15 @@ public class Bola : MonoBehaviour
     private void RestaurarColisionesConOwner()
     {
         if (ownerColliders == null) return;
+        foreach (PlayerID p in jugadores)
+        {
+            p.setChasingBallFree(false, p);
+        }
 
         foreach (var c in ownerColliders)
         {
             if (c == null) continue;
             Physics.IgnoreCollision(physicalCollider, c, false);
-            //Physics.IgnoreCollision(stealTriggerCollider, c, false);
         }
 
         ownerColliders = null;

@@ -27,13 +27,6 @@ public class CharacterGV : PlayerID
     public bool defaultMove = true;
 
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        //instance = this;
-
-    }
-
     private void Start()
     {
         characterManager = CharacterManager.instance;

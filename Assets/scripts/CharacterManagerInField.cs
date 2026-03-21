@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,6 +15,11 @@ public class CharacterManagerInField : MonoBehaviour
         
         characterManager = CharacterManager.instance;
         GameObject[] p = GetAllFieldPlayers();
+
+        foreach (GameObject player in p) {
+          PlayerID pl = player.GetComponent<PlayerID>();
+        }
+
         players = new GameObject[p.Length];
 
         for (int i = 0; i < p.Length; i++)

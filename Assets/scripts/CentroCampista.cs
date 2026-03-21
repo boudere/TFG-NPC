@@ -44,18 +44,21 @@ public class CentroCampista : PlayerID, IResettable
     private int contrariosInArea = 0;
     private int areaConBola;
     private int areaPlayer;
+   private bool chasingBall = false;
+   
 
     //IR A POR LA BOLA
     //private bool runTowardsBall = false;
-   
+
     private float passBallCase1 = 0.2f, passBallCase2 = 0.40f, passBallCase3 = 0.70f; // 1: Disparo random, 2: Disparo a cualquiera, 3: Disparo a otro centro, 4:Disparo a delantero
 
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         spawnPos = transform.position;
         spawnRot = transform.rotation;
-        rb = GetComponent<Rigidbody>();
     }
 
     void Start()
@@ -163,11 +166,41 @@ public class CentroCampista : PlayerID, IResettable
         //        move();
         //    }
         //}
+
+
+        bool perseguir = getChasingBallFree(this);
+       
+
+        if (perseguir)
+        {
+            runToBall();
+
+        } else
+        {
+            move();
+        }
+        
+
     }
 
     void FixedUpdate()
     {
         rotacion();
+    }
+
+
+    protected void runToBall()
+    {
+        Vector3 dir = Bola.instance.transform.position - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+
+        Quaternion rot = Quaternion.LookRotation(dir);
+        rb.MoveRotation(Quaternion.Slerp(rb.rotation, rot, 10f * Time.deltaTime));
     }
 
     void rotacion()

@@ -30,7 +30,7 @@ public class Delantero : PlayerID, IResettable
 
     public bool defaultMove = true;
 
-    private float moveInArea = 0.5f;
+    private float moveInArea = 0.95f;
     private AreaPeligro1 ap1;
     private AreaPeligro2 ap2;
     private AreaPeligro ap;
@@ -40,14 +40,14 @@ public class Delantero : PlayerID, IResettable
                                     // Ir hacia porteria y tirar si no se la roban 
 
     private bool disparoPorteria = false;
-    
 
-    private void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
 
         spawnPos = transform.position;
         spawnRot = transform.rotation;
-        rb = GetComponent<Rigidbody>();
     }
 
     void Start()
@@ -83,7 +83,7 @@ public class Delantero : PlayerID, IResettable
         //    disparoPorteria = false;
         //}
 
-        //if (chasingBall)
+        //if (chasingBallFree)
         //    runToBall();
         //else
         //    move();
@@ -183,19 +183,6 @@ public class Delantero : PlayerID, IResettable
                     z = Random.Range(area.minZ, area.maxZ);
                 }
             }
-
-            //if (this.id % 2 == 1)
-            //{
-            //    x = Random.Range(ap1.minX, ap1.maxX);
-            //    z = Random.Range(ap1.minZ, ap1.maxZ);
-
-            //}
-            //else
-            //{
-            //    x = Random.Range(ap2.minX, ap2.maxX);
-            //    z = Random.Range(ap2.minZ, ap2.maxZ);
-            //}
-
         }
         else
         {

@@ -68,7 +68,7 @@ public class Defensa : PlayerID, IResettable
     public bool defaultMove = true;
 
 
-    private float moveInArea = 0.5f;
+    private float moveInArea = 0.95f;
 
     public bool defender = false;
     private float tiempoMarcar = 0f;
@@ -80,14 +80,14 @@ public class Defensa : PlayerID, IResettable
      */
 
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
 
         spawnPos = transform.position;
         spawnRot = transform.rotation;
-        rb = GetComponent<Rigidbody>();
     }
- 
+
     void Start()
     {
         characterManager = CharacterManager.instance;
@@ -99,48 +99,49 @@ public class Defensa : PlayerID, IResettable
 
     void Update()
     {
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+        //if (frozen && playerStop)
+        //{
+        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
+        //}
 
-        if (resetPos)
-        {
-            return;
-        }
+        //if (resetPos)
+        //{
+        //    return;
+        //}
 
-        if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
-        {
-            defenderJug();
-            return;
-        }
+        //if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
+        //{
+        //    defenderJug();
+        //    return;
+        //}
 
-        if (chasingBall) {
-          
-            runToBall();
-        }
-        else
-        {
-            move();
-        }
-           
+        //if (chasingBallFree)
+        //{
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            opcionPase();
-        }
-   
-
-    // Perseguir a delantero si está en área de defensa 
-    /*
-     Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
-
-     */
-
-    // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
+        //    runToBall();
+        //}
+        //else
+        //{
+        //    move();
+        //}
 
 
-}
+        //if (Bola.instance.transform.IsChildOf(transform))
+        //{
+        //    opcionPase();
+        //}
+
+
+        // Perseguir a delantero si está en área de defensa 
+        /*
+         Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
+
+         */
+
+        // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
+
+
+    }
 
     void FixedUpdate()
     {

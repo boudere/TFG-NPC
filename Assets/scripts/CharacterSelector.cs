@@ -106,6 +106,11 @@ public class CharacterSelector : MonoBehaviour
 
         for (int i = 0; i < characterManager.characterList.Count; i++)
         {
+
+        }
+
+        for (int i = 0; i < characterManager.characterList.Count; i++)
+        {
            
             if (characterManager.characterList[i].id == index)
             {
@@ -127,28 +132,28 @@ public class CharacterSelector : MonoBehaviour
 
     public void PlayStart2()
     {
-        resetMaterial();
-        putNewMaterial(characterManager.index);
+    //    resetMaterial();
+    //    putNewMaterial(characterManager.index);
 
 
-        characterManager.index = index;
+    //    characterManager.index = index;
 
-        for (int i = 0; i < characterManager.characterList.Count; i++)
-        {
+    //    for (int i = 0; i < characterManager.characterList.Count; i++)
+    //    {
 
-            if (characterManager.characterList[i].id == index)
-            {
-                characterManager.characterList[i].selected = true;
-                break;
-            }
-        }
+    //        if (characterManager.characterList[i].id == index)
+    //        {
+    //            characterManager.characterList[i].selected = true;
+    //            break;
+    //        }
+    //    }
 
 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 5);
-        SceneManager.LoadScene(
-    SceneManager.GetActiveScene().buildIndex + 6,
-    LoadSceneMode.Additive
-);
+    //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 5);
+    //    SceneManager.LoadScene(
+    //SceneManager.GetActiveScene().buildIndex + 6,
+    //LoadSceneMode.Additive
+ //);
 
 
 
@@ -158,15 +163,15 @@ public class CharacterSelector : MonoBehaviour
 
     private void putNewMaterial(int index)
     {
-        GameObject go = characterManager.characterList[index].personajeJugable;
-        Renderer rend = go.GetComponent<Renderer>();
-        rend.material = newMaterial;
+        //GameObject go = characterManager.characterList[index].personajeJugable;
+        //Renderer rend = go.GetComponent<Renderer>();
+        //rend.material = newMaterial;
     }
 
     private void putDefaultMaterial(int index)
     {
-        GameObject go = characterManager.characterList[index].personajeJugable;
-        Renderer rend = go.GetComponent<Renderer>();
-        rend.material = defaultMaterial;
+        //GameObject go = characterManager.characterList[index].personajeJugable;
+        //Renderer rend = go.GetComponent<Renderer>();
+        //rend.material = defaultMaterial;
     }
 }

@@ -409,7 +409,6 @@ GameObject:
   - component: {fileID: 6059091644772476885}
   - component: {fileID: 3244659920211522823}
   - component: {fileID: 5506147881463254980}
-  - component: {fileID: 6682102666419540453}
   - component: {fileID: 5398021544228664392}
   - component: {fileID: 1827199058330523307}
   m_Layer: 6
@@ -514,25 +513,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6682102666419540453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4302736966775426911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 592a34ef92ca6c148bb57d3704101b36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  id: 0
-  posicion: 
-  haveBall: 0
-  holdPoint: {fileID: 0}
-  self: {fileID: 0}
-  probabilidadAciertoPase: 0
-  player: {fileID: 0}
 --- !u!114 &5398021544228664392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -549,9 +529,9 @@ MonoBehaviour:
   posicion: 
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 0}
+  chasingBallFree: 0
   turnSpeedDeg: 720
   directionLerp: 12
   index: 0
