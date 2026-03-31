@@ -19,7 +19,6 @@ public class Delantero : PlayerID, IResettable
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
-    private float npcSpeed = 75;
     private float changeTargetDistance = 50f;
     private Vector3 npcTarget;
 
@@ -31,8 +30,6 @@ public class Delantero : PlayerID, IResettable
     public bool defaultMove = true;
 
     private float moveInArea = 0.95f;
-    private AreaPeligro1 ap1;
-    private AreaPeligro2 ap2;
     private AreaPeligro ap;
 
     private float tiroCase1 = 0.2f; // Tiro aleatorio
@@ -76,17 +73,18 @@ public class Delantero : PlayerID, IResettable
 
         //if (Bola.instance.transform.IsChildOf(transform))
         //{
-        //    opcionPase();
+        //    //opcionPase();
+        //    tiroPorteria();
         //}
         //else
         //{
         //    disparoPorteria = false;
         //}
 
-        //if (chasingBallFree)
-        //    runToBall();
-        //else
-        //    move();
+        ////if (chasingBallFree)
+        ////    runToBall();
+        ////else
+        // move();
 
     }
 
@@ -97,20 +95,46 @@ public class Delantero : PlayerID, IResettable
 
     void rotacion()
     {
-        if (this.id == characterManager.index) { return; }
-        Vector3 dir = npcTarget - transform.position;
+        if (this.id == characterManager.index) return;
+
+
+        Vector3 dir = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            dir.Normalize();
+            smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
+
+            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+            rb.MoveRotation(
+                Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime)
+            );
+            return;
+        }
+
+        dir = npcTarget - transform.position;
         dir.y = 0f;
 
         if (dir.sqrMagnitude <= 0.001f) return;
 
         dir.Normalize();
-
         smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
 
-        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime));
+        Quaternion idleTargetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+        rb.MoveRotation(
+            Quaternion.RotateTowards(rb.rotation, idleTargetRot, turnSpeedDeg * Time.fixedDeltaTime)
+        );
     }
 
+    protected void runToBall()
+    {
+        Vector3 dir = Bola.instance.transform.position - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+    }
 
     private void move()
     {

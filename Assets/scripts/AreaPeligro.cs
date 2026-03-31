@@ -144,7 +144,7 @@ public int TEAM;
             return;
 
         PlayerID jugador = other.GetComponent<PlayerID>();
-        if (jugador != null && !playersInArea.Contains(jugador))
+        if (jugador != null && playersInArea.Contains(jugador))
         {
             playersInArea.Remove(jugador);
             playersInAreaId.Remove(jugador.id);

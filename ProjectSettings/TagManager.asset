@@ -15,6 +15,9 @@ TagManager:
   - Delantero
   - breakGol
   - AreaPeligro
+  - AreaPorteria
+  - Franja
+  - Side
   layers:
   - Default
   - TransparentFX

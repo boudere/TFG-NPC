@@ -68,4 +68,37 @@ public class PlayerID : MonoBehaviour
         stop = false;
         playerStop = null;
     }
+
+    public int whereIsPlayer()
+    { 
+        GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
+        foreach (GameObject a in areas)
+        {
+            AreaPeligro area = a.GetComponent<AreaPeligro>();
+            if (area.isPlayerInArea(this.id))
+            {
+                return area.TEAM;
+
+            }
+        }
+
+        return -1;
+    }
+
+    public int IsInSmallArea()
+    {
+        TriggerAreaPorteria[] areas = GetComponentsInChildren<TriggerAreaPorteria>();
+
+        foreach (TriggerAreaPorteria area in areas)
+        {
+            if (area.isPlayerInSmallArea(this.id))
+            {
+                return area.team;
+            }
+        }
+
+        return -1;
+    }
+
+
 }

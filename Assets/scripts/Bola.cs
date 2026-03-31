@@ -7,7 +7,6 @@ public class Bola : MonoBehaviour
 {
     public static Bola instance;
     public List<PlayerID> jugadores = new List<PlayerID>();
-    public List<GameObject> ju = new List<GameObject>();
     public List<PlayerID> jugadoresOrdenados = new List<PlayerID>();
 
 
@@ -28,7 +27,7 @@ public class Bola : MonoBehaviour
     private float blockPickupUntil = 0f;
     private CharacterManager characterManager;
 
-    [SerializeField] private float refreshInterval = 1;
+    private float refreshInterval = 1;
     private float nextRefreshTime;
 
     private void Awake()
@@ -66,11 +65,6 @@ public class Bola : MonoBehaviour
         jugadores.Clear();
 
         GameObject[] allPlayers = GetAllFieldPlayers();
-
-        foreach (GameObject player in allPlayers)
-        {
-            PlayerID pl = player.GetComponent<PlayerID>();
-        }
 
         foreach (GameObject go in allPlayers)
         {

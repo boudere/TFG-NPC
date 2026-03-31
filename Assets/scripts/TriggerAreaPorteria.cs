@@ -1,11 +1,12 @@
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class TriggerAreaPorteria : MonoBehaviour
 {
 
     private Porteria porteria;
-    private int team;
+    public int team;
     private PlayerID playerID;
 
     public float lineaGolMin;
@@ -21,7 +22,7 @@ public class TriggerAreaPorteria : MonoBehaviour
 
     private Coroutine rutinaActual;
 
-
+    List<int> playersInAreaId = new List<int>();
 
     void Start()
     {
@@ -43,6 +44,11 @@ public class TriggerAreaPorteria : MonoBehaviour
 
 
             if (jugador == null) return;
+
+            if (jugador != null && !playersInAreaId.Contains(jugador.id))
+            {
+                playersInAreaId.Add(jugador.id);
+            }
 
             int teamJugador = jugador.id % 2;
             Bola bola = jugador.GetComponentInChildren<Bola>();
@@ -68,6 +74,12 @@ public class TriggerAreaPorteria : MonoBehaviour
      void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Ball") && !Bola.instance.transform.IsChildOf(other.transform)) return;
+
+        PlayerID jugador = other.GetComponent<PlayerID>();
+        if (jugador != null && playersInAreaId.Contains(jugador.id))
+        {
+            playersInAreaId.Remove(jugador.id);
+        }
 
         pararDefensa();
     }
@@ -113,6 +125,9 @@ public class TriggerAreaPorteria : MonoBehaviour
     }
 
 
-
+    public bool isPlayerInSmallArea(int id)
+    {
+        return playersInAreaId.Contains(id);
+    }
 
 }

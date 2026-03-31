@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using Random = UnityEngine.Random;
@@ -43,14 +44,46 @@ public class CentroCampista : PlayerID, IResettable
 
     private int contrariosInArea = 0;
     private int areaConBola;
+
+    //public struct FranjaBola{
+    //   public int franja;
+    //   public int team;
+    //}
+
+    //public struct SideBola{
+    //    public int side;
+    //    public int team;
+    //}
+
+    
+
+    //public struct ZonaBola
+    //{
+    //    public int zona;
+    //    public int team;
+    //}
+
+    //ZonaBola franjaBola;
+    //ZonaBola sideBola;
+
     private int areaPlayer;
-   private bool chasingBall = false;
-   
+    private int areaSmall;
+    private bool chasingBall = false;
+    private bool disparoPorteria = false;
+    private ZoneManager zoneManager;
 
     //IR A POR LA BOLA
     //private bool runTowardsBall = false;
 
-    private float passBallCase1 = 0.2f, passBallCase2 = 0.40f, passBallCase3 = 0.70f; // 1: Disparo random, 2: Disparo a cualquiera, 3: Disparo a otro centro, 4:Disparo a delantero
+
+    private float refreshInterval = 0.5f;
+    private float nextRefreshTime;
+
+    float nextDecisionTime;
+    float decisionInterval = 1f;
+
+    float nextTiroBolaTime;
+    float tiroBolaInterval = 1f;
 
 
     protected override void Awake()
@@ -59,6 +92,7 @@ public class CentroCampista : PlayerID, IResettable
 
         spawnPos = transform.position;
         spawnRot = transform.rotation;
+        zoneManager = ZoneManager.instance;
     }
 
     void Start()
@@ -68,126 +102,142 @@ public class CentroCampista : PlayerID, IResettable
         ap = AreaPeligro.instance;
         med = MedioCampo.instance;
         arbitro = Arbitro.instance;
+        zoneManager = ZoneManager.instance;
         PickNewTarget(); 
     }
 
 
     void Update()
     {
-        //whereIsBall();
-        //areaPlayer = whereIsPlayer();
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
-
-        //if (resetPos)
-        //{
-        //    return;
-        //}
-
-
-        //cerebro();
-
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    chasingBall = false;
-
-        //    if (Random.value < 0.05)
-        //    {
-
-        //        if (areaPlayer == -1 || areaPlayer == this.id % 2)
-        //        {
-        //            if (Random.value < 0.005)
-        //            {
-        //                opcionPase();
-        //            }
-        //        }
-        //        else
-        //        {
-
-        //            opcionPase();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        goToOtherArea();
-        //    }
-
-        //    move();
-
-        //}
-        //else
-        //{
-
-        //    if (areaConBola == this.id % 2 && arbitro.idTeamBola() != this.id % 2)
-        //    {
-        //        if (!chasingBall && Random.value < 0.0005f)
-        //        {
-        //            chasingBall = true;
-        //        }
-
-        //        if (chasingBall)
-        //            runToBall();
-        //        else
-        //            move();
-        //    }
-        //    else if (areaConBola != -1 && areaConBola != this.id % 2)
-        //    {
-        //        chasingBall = false;
-        //        goToOtherArea();
-        //        move();
-        //    }
-        //    else if (areaConBola == -1)
-        //    {
-        //        if (!chasingBall && Random.value < 0.0005f)
-        //        {
-        //            chasingBall = true;
-        //        }
-
-        //        if (chasingBall)
-        //        {
-        //            if (Random.value < 0.0001f)
-        //            {
-        //                chasingBall = false;
-        //            }
-        //            else
-        //            {
-        //                runToBall();
-        //            }
-        //        }
-        //        else
-        //        {
-        //            move();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        move();
-        //    }
-        //}
-
-
-        bool perseguir = getChasingBallFree(this);
-       
-
-        if (perseguir)
+        whereIsBall();
+        areaPlayer = whereIsPlayer();
+        areaSmall = IsInSmallArea();
+        //Hacer otra función para el area pequeña
+        if (frozen && playerStop)
         {
-            runToBall();
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        } else
+        if (resetPos)
         {
+            return;
+        }
+
+        cerebro();
+
+
+
+
+
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            chasingBall = false;
+
+            // Solo decide cada 1 segundo
+            if (AccionConBola())
+            {
+                float decision = Random.value;
+                bool intentarPase = Random.value < 0.3f;
+                bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == this.id % 2;
+                bool enAreaChica = areaSmall != -1;
+
+                if (enAreaChica)
+                {
+                    //Disparar a porteria en x segundos
+                    if (PuedoTirar())
+                    {
+                        tiroPorteria();
+                    }
+                }
+
+                if (intentarPase)
+                {
+                    bool hacerPase = !estaEnZonaPermitida || Random.value < 0.005f;
+
+                   if (decision < 0.1f)
+                    {
+                        opcionPaseLoco();
+                    } else if (decision > 0.1f && decision < 0.4f)
+                    {
+                        //Pase con criterio
+                        PaseConCriterio();
+
+                    } else if (decision > 0.4f && decision < 0.7f)
+                    {
+                        //Disparar a porteria 
+                        disparoPorteria = true;
+                    } 
+                }
+
+                if (disparoPorteria && Random.value < 0.1f)
+                {
+                    tiroPorteria();
+                    disparoPorteria = false;
+                }
+
+            }
+
+            goToOtherArea();
             move();
         }
-        
+        else
+        {
+            int miEquipo = this.id % 2;
+            bool bolaEnMiArea = areaConBola == miEquipo;
+            bool bolaEnOtraArea = areaConBola != -1 && areaConBola != miEquipo;
+            bool bolaSinArea = areaConBola == -1;
 
+            if (bolaEnOtraArea)
+            {
+                goNearBall();
+                move();
+            }
+            else if ((bolaEnMiArea && arbitro.idTeamBola() != miEquipo) || bolaSinArea)
+            {
+                
+                if (ChangeChasingBallTrue())
+                {
+                    if (Random.value < 0.25f) { chasingBall = true; }
+                }
+                
+
+                if (chasingBall)
+                {
+                    runToBall();
+                }
+                else
+                {
+                    goNearBall();
+                    move();
+                }
+            }
+            else
+            {
+                move();
+            }
+
+
+            bool perseguir = getChasingBallFree(this);
+
+
+            if (perseguir)
+            {
+                runToBall();
+
+            }
+            else
+            {
+
+                move();
+            }
+
+        }
     }
 
     void FixedUpdate()
     {
         rotacion();
     }
-
 
     protected void runToBall()
     {
@@ -198,33 +248,38 @@ public class CentroCampista : PlayerID, IResettable
 
         Vector3 velocity = dir.normalized * npcSpeed;
         rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
-
-        Quaternion rot = Quaternion.LookRotation(dir);
-        rb.MoveRotation(Quaternion.Slerp(rb.rotation, rot, 10f * Time.deltaTime));
     }
 
     void rotacion()
     {
         if (this.id == characterManager.index) return;
-        if (this.id % 2 == 1) return;
+      
 
-        Vector3 dir;
+        Vector3 dir = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            dir.Normalize();
+            smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
 
-        if (chasingBall)
-            dir = Bola.instance.transform.position - transform.position;
-        else
-            dir = npcTarget - transform.position;
+            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+            rb.MoveRotation(
+                Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime)
+            );
+            return;
+        }
 
+        dir = npcTarget - transform.position;
         dir.y = 0f;
 
         if (dir.sqrMagnitude <= 0.001f) return;
 
         dir.Normalize();
-
         smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
 
-        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime));
+        Quaternion idleTargetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+        rb.MoveRotation(
+            Quaternion.RotateTowards(rb.rotation, idleTargetRot, turnSpeedDeg * Time.fixedDeltaTime)
+        );
     }
 
     public void whereIsBall()  // SABER DONDE ESTA LA BOLA
@@ -242,27 +297,13 @@ public class CentroCampista : PlayerID, IResettable
         }
     }
 
-    public int whereIsPlayer() {  // SABER DONDE ESTA EL PLAYER
-        GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
-        foreach (GameObject a in areas)
-        {
-            AreaPeligro area = a.GetComponent<AreaPeligro>();
-            if (area.isPlayerInArea(this.id))
-            {
-                return area.TEAM;
-              
-            }
-        }
-
-        return -1;
-    }
+   
 
     private void cerebro()
     {
         int team = this.id % 2;
-        medioCampo = med.getPlayersInMedioCampo();
-      
-
+        medioCampo = med.getPlayersInMedioCampo(); 
+       
         GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
         foreach (GameObject a in areas)
         {
@@ -283,9 +324,41 @@ public class CentroCampista : PlayerID, IResettable
                 
                 break;
             }
-
-
         }
+    }
+
+
+
+    void PaseConCriterio()
+    {
+
+    }
+
+    bool ChangeChasingBallTrue()
+    {
+        if (Time.time < nextRefreshTime)
+            return false;
+
+        nextRefreshTime = Time.time + refreshInterval;
+        return true;
+    }
+
+    bool AccionConBola()
+    {
+        if (Time.time < nextDecisionTime)
+            return false;
+
+        nextDecisionTime = Time.time + decisionInterval;
+        return true;
+    }
+
+    bool PuedoTirar()
+    {
+        if (Time.time < nextTiroBolaTime)
+            return false;
+
+        nextDecisionTime = Time.time + tiroBolaInterval;
+        return true;
     }
 
     private void move()
@@ -349,21 +422,48 @@ public class CentroCampista : PlayerID, IResettable
             npcTarget = new Vector3(x, transform.position.y, z);
     }
 
-    private void opcionPase()
+
+    private void tiroPorteria()
+    {
+        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
+        Vector3 dir = new Vector3(0, 0);
+
+        foreach (GameObject p in porterias)
+        {
+            Porteria porteria = p.GetComponent<Porteria>();
+            Transform breakGol = p.transform.Find("BreakGol");
+            if (this.id % 2 != porteria.team % 2)
+            {
+                npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
+
+                dir = npcTarget - transform.position;
+                break;
+            }
+
+        }
+
+        dir.y = 0f;
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+
+        Shoot.instance.disparoLibre();
+
+    }
+    private void opcionPaseLoco()
     {
 
         if (this.id == characterManager.index) { return; }
   
         float aux = Random.value;
-        if (aux < passBallCase1)
+        if (aux < 0.1f)
         {
             Shoot.instance.disparoLibre();
         }
-        else if (passBallCase1 < aux && aux < passBallCase2)
+        else if (0.1f < aux && aux < 0.4f)
         {
             Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
         }
-        else if (passBallCase2 < aux && aux < passBallCase3) // Que estén en el area
+        else if (0.4f < aux && aux < 0.7f) // Que estén en el area
         {
             Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
         }
@@ -399,7 +499,22 @@ public class CentroCampista : PlayerID, IResettable
         npcTarget = new Vector3(x, transform.position.y, z);
     }
 
+    private void goNearBall()
+    {
+        if (Vector3.Distance(transform.position, npcTarget) > changeTargetDistance)
+            return;
 
+        List<ZoneManager.ZonaBola> areas = ZoneManager.instance.getAreasAdyacentes();
+        if (areas == null || areas.Count == 0)
+            return;
+
+        Vector3 randomPoint = ZoneManager.instance.GetRandomPointInSelectedAreas(areas, transform.position.y);
+
+        if (randomPoint != Vector3.zero)
+        {
+            npcTarget = randomPoint;
+        }
+    }
 
     private void OnEnable()
     {

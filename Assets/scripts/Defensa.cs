@@ -13,8 +13,6 @@ public class Defensa : PlayerID, IResettable
     private bool resetPos = false;
     public bool pase = false;
     private FieldLimits field;
-    private AreaPeligro1 ap1;
-    private AreaPeligro2 ap2;
     private AreaPeligro ap;
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
@@ -170,22 +168,47 @@ public class Defensa : PlayerID, IResettable
         puedePerseguir = true;
     }
 
+    protected void runToBall()
+    {
+        Vector3 dir = Bola.instance.transform.position - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+    }
+
     void rotacion()
     {
         if (this.id == characterManager.index) return;
-        if (defender) return;
 
-        Vector3 dir = npcTarget - transform.position;
+
+        Vector3 dir = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            dir.Normalize();
+            smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
+
+            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+            rb.MoveRotation(
+                Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime)
+            );
+            return;
+        }
+
+        dir = npcTarget - transform.position;
         dir.y = 0f;
 
         if (dir.sqrMagnitude <= 0.001f) return;
 
         dir.Normalize();
-
         smoothDir = Vector3.Slerp(smoothDir, dir, directionLerp * Time.fixedDeltaTime);
 
-        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.fixedDeltaTime));
+        Quaternion idleTargetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
+        rb.MoveRotation(
+            Quaternion.RotateTowards(rb.rotation, idleTargetRot, turnSpeedDeg * Time.fixedDeltaTime)
+        );
     }
 
 
