@@ -60,31 +60,31 @@ public class Delantero : PlayerID, IResettable
      */
     void Update()
     {
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+        if (frozen && playerStop)
+        {
+            StartCoroutine(StopAndRetargetRoutine(playerStop));
+        }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
+        if (resetPos)
+        {
+            return;
+        }
 
 
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    //opcionPase();
-        //    tiroPorteria();
-        //}
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+           opcionPase();
+            //tiroPorteria();
+        }
+        else
+        {
+            disparoPorteria = false;
+        }
+
+        //if (chasingBallFree)
+        //    runToBall();
         //else
-        //{
-        //    disparoPorteria = false;
-        //}
-
-        ////if (chasingBallFree)
-        ////    runToBall();
-        ////else
-        // move();
+        move();
 
     }
 
@@ -184,6 +184,7 @@ public class Delantero : PlayerID, IResettable
             }
             else
             {
+                if (characterManager.index == this.id) return;
                 tiroPorteria();
             }
         }
@@ -248,38 +249,39 @@ public class Delantero : PlayerID, IResettable
         disparoPorteria = false;
     }
 
-    private void tiroPorteria()
-    {
-        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
-        Vector3 dir = new Vector3(0,0);
+    //private void tiroPorteria()
+    //{
+    //    if (characterManager.index == this.id) return;
+    //    GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
+    //    Vector3 dir = new Vector3(0,0);
 
-        foreach (GameObject p in porterias)
-        {
-            Porteria porteria = p.GetComponent<Porteria>();
-            Transform breakGol = p.transform.Find("BreakGol");
-            if (this.id % 2 != porteria.team % 2)
-            {
-                npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
+    //    foreach (GameObject p in porterias)
+    //    {
+    //        Porteria porteria = p.GetComponent<Porteria>();
+    //        Transform breakGol = p.transform.Find("BreakGol");
+    //        if (this.id % 2 != porteria.team % 2)
+    //        {
+    //            npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
 
-                dir = npcTarget - transform.position;
-                break;
-            }
+    //            dir = npcTarget - transform.position;
+    //            break;
+    //        }
          
-        }
+    //    }
 
-        dir.y = 0f;
-        Vector3 velocity = dir.normalized * npcSpeed;
-        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+    //    dir.y = 0f;
+    //    Vector3 velocity = dir.normalized * npcSpeed;
+    //    rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
 
-        if (disparoPorteria)
-        {
-            if (Random.value < 0.005f) 
-            {
-                Shoot.instance.disparoLibre();
-            }
-        }
+    //    if (disparoPorteria)
+    //    {
+    //        if (Random.value < 0.005f) 
+    //        {
+    //            Shoot.instance.disparoLibre();
+    //        }
+    //    }
 
-    }
+    //}
 
 
     private IEnumerator StopAndRetargetRoutine(GameObject playerStop)

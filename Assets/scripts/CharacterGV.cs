@@ -10,7 +10,6 @@ public class CharacterGV : PlayerID
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
     private float changeTargetDistance = 50f;
-    private Vector3 npcTarget;
 
     public int index;
     private CharacterManager characterManager;

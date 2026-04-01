@@ -21,7 +21,7 @@ public class CentroCampista : PlayerID, IResettable
     private float speed = 150;
   
     private float changeTargetDistance = 50f;
-    private Vector3 npcTarget;
+    //private Vector3 npcTarget;
 
     private CharacterManager characterManager;
 
@@ -146,33 +146,39 @@ public class CentroCampista : PlayerID, IResettable
                     //Disparar a porteria en x segundos
                     if (PuedoTirar())
                     {
+                        if (characterManager.index == this.id) return;
                         tiroPorteria();
                     }
                 }
 
                 if (intentarPase)
                 {
+                    Debug.Log("Intentando pase");
                     bool hacerPase = !estaEnZonaPermitida || Random.value < 0.005f;
 
-                   if (decision < 0.1f)
-                    {
-                        opcionPaseLoco();
-                    } else if (decision > 0.1f && decision < 0.4f)
-                    {
-                        //Pase con criterio
-                        PaseConCriterio();
+                    //if (decision < 0.1f)
+                    // {
+                    //     opcionPaseLoco();
+                    // } else if (decision > 0.1f && decision < 0.5f)
+                    // {
+                    //     //Pase con criterio
+                    //     PaseConCriterio();
 
-                    } else if (decision > 0.4f && decision < 0.7f)
-                    {
-                        //Disparar a porteria 
-                        disparoPorteria = true;
-                    } 
+                    // } else if (decision > 0.5f && decision < 0.7f)
+                    // {
+                    //     //Disparar a porteria 
+                    //     disparoPorteria = true;
+                    // } 
+
+                    PaseConCriterio();
                 }
 
                 if (disparoPorteria && Random.value < 0.1f)
                 {
-                    tiroPorteria();
                     disparoPorteria = false;
+                    if (characterManager.index == this.id) return;
+                    tiroPorteria();
+                   
                 }
 
             }
@@ -194,12 +200,12 @@ public class CentroCampista : PlayerID, IResettable
             }
             else if ((bolaEnMiArea && arbitro.idTeamBola() != miEquipo) || bolaSinArea)
             {
-                
+
                 if (ChangeChasingBallTrue())
                 {
                     if (Random.value < 0.25f) { chasingBall = true; }
                 }
-                
+
 
                 if (chasingBall)
                 {
@@ -332,6 +338,17 @@ public class CentroCampista : PlayerID, IResettable
     void PaseConCriterio()
     {
 
+        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
+        foreach (GameObject p in porterias) { 
+        Porteria porteria = p.GetComponent<Porteria>();
+            Transform breakGol = p.transform.Find("BreakGol");
+            if (this.id % 2 != porteria.team % 2)
+            {
+                Pase.instance.PassBallNear(transform.position, breakGol.transform.position, this.id % 2, this);
+                break;
+            }
+        }
+      
     }
 
     bool ChangeChasingBallTrue()
@@ -423,32 +440,32 @@ public class CentroCampista : PlayerID, IResettable
     }
 
 
-    private void tiroPorteria()
-    {
-        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
-        Vector3 dir = new Vector3(0, 0);
+    //private void tiroPorteria()
+    //{
+    //    GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
+    //    Vector3 dir = new Vector3(0, 0);
 
-        foreach (GameObject p in porterias)
-        {
-            Porteria porteria = p.GetComponent<Porteria>();
-            Transform breakGol = p.transform.Find("BreakGol");
-            if (this.id % 2 != porteria.team % 2)
-            {
-                npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
+    //    foreach (GameObject p in porterias)
+    //    {
+    //        Porteria porteria = p.GetComponent<Porteria>();
+    //        Transform breakGol = p.transform.Find("BreakGol");
+    //        if (this.id % 2 != porteria.team % 2)
+    //        {
+    //            npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
 
-                dir = npcTarget - transform.position;
-                break;
-            }
+    //            dir = npcTarget - transform.position;
+    //            break;
+    //        }
 
-        }
+    //    }
 
-        dir.y = 0f;
-        Vector3 velocity = dir.normalized * npcSpeed;
-        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+    //    dir.y = 0f;
+    //    Vector3 velocity = dir.normalized * npcSpeed;
+    //    rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
 
-        Shoot.instance.disparoLibre();
+    //    Shoot.instance.disparoLibre();
 
-    }
+    //}
     private void opcionPaseLoco()
     {
 

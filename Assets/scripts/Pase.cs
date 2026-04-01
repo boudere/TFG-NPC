@@ -100,7 +100,7 @@ public class Pase : MonoBehaviour
         //Index es el que la pasa
         // ID al que se la paso 
         GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
-        float minDistance = 1000000;
+        float minDistance = Mathf.Infinity;
         float currentDistance;
 
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
@@ -190,10 +190,74 @@ public class Pase : MonoBehaviour
      
     }
 
-    void passBallNear()
+    public void PassBallNear(Vector3 positionPlayer, Vector3 porteriaTeam, int teamID, PlayerID playerID)
     {
 
+        GameObject bestPlayer = null;
+        Vector3 dir = new Vector3(0, 0);
+
+        float currentDistToGoal = Vector3.Distance(positionPlayer, porteriaTeam);
+        float bestScore = Mathf.Infinity;
+
+        for (int j = 0; j < p.Length; j++)
+        {
+            GameObject candidate = p[j];
+
+            if (candidate == null) continue;
+
+            PlayerID candidatePlayerID = candidate.GetComponent<PlayerID>();
+            if (candidatePlayerID == null) continue;
+
+           // if (candidatePlayerID.id == characterManager.index) continue;
+            if (candidatePlayerID.id % 2 != teamID) continue;
+
+            float candidateDistToGoal = Vector3.Distance(candidate.transform.position, porteriaTeam);
+            float candidateDistToCurrent = Vector3.Distance(candidate.transform.position, positionPlayer);
+
+            if (candidateDistToGoal >= currentDistToGoal) continue;
+            float score = candidateDistToGoal + candidateDistToCurrent;
+
+            if (score < bestScore)
+            {
+                bestScore = score;
+                bestPlayer = candidate;
+            }
+        }
+
+        Debug.Log("Best player for pass: " + (bestPlayer != null ? bestPlayer.name : "None"));
+
+        Rigidbody rbPlayer = playerID.GetComponent<Rigidbody>();
+
+        if (bestPlayer == null)
+        {
+            if (characterManager.index == playerID.id) return;
+            playerID.tiroPorteria();
+            return;
+        }
+
+        OnCharacterGVSelected?.Invoke(bestPlayer);
+
+        Bola.instance.Soltar();
+
+        Rigidbody rbBall = Bola.instance.GetComponent<Rigidbody>();
+
+        Vector3 direction = (bestPlayer.transform.position - Bola.instance.transform.position);
+        direction.y = 0f;
+
+        if (direction != Vector3.zero)
+        {
+            playerID.transform.rotation = Quaternion.LookRotation(direction);
+        }
+
+        direction = direction.normalized;
+
+        float passSpeed = 200f;
+        rbBall.linearVelocity = direction * passSpeed;
+        rbBall.angularVelocity = Vector3.zero;
+        rbBall.angularVelocity = Vector3.zero;
     }
+
+
 
     void OrdenarJugadoresPorDistancia()
     {

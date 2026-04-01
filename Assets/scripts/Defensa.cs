@@ -19,9 +19,9 @@ public class Defensa : PlayerID, IResettable
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
-    private float npcSpeed = 75;
+   // private float npcSpeed = 75;
     private float changeTargetDistance = 50f;
-    private Vector3 npcTarget;
+    //private Vector3 npcTarget;
 
 
     private CharacterManager characterManager;

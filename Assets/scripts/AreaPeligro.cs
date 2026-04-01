@@ -50,14 +50,14 @@ public int TEAM;
 
         if (other.CompareTag("Ball"))
         {
-            Debug.Log("AAA");
+            //Debug.Log("AAA");
             bolaArea = true;
             return;
         }
 
         if (Bola.instance.transform.IsChildOf(other.transform))
         {
-            Debug.Log("BBB");
+            //Debug.Log("BBB");
             bolaArea = true;
         }
 
@@ -109,7 +109,7 @@ public int TEAM;
     {
         if (other.CompareTag("Ball"))
         {
-            Debug.Log("CCC");
+            //Debug.Log("CCC");
             bolaArea = false;
 
   
@@ -134,7 +134,7 @@ public int TEAM;
 
         if (Bola.instance.transform.IsChildOf(other.transform))
         {
-            Debug.Log("DDD");
+            //Debug.Log("DDD");
             bolaArea = false;
           
         }

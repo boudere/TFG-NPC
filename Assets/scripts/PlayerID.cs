@@ -17,6 +17,7 @@ public class PlayerID : MonoBehaviour
     protected GameObject playerStop = null;
     protected bool libre = true;
     protected float npcSpeed = 75f;
+    protected Vector3 npcTarget;
 
     protected bool chasingBallFree = false;
 
@@ -98,6 +99,41 @@ public class PlayerID : MonoBehaviour
         }
 
         return -1;
+    }
+
+    public void tiroPorteria()
+    {
+        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
+        Vector3 dir = new Vector3(0, 0);
+
+        foreach (GameObject p in porterias)
+        {
+            Porteria porteria = p.GetComponent<Porteria>();
+            Transform breakGol = p.transform.Find("BreakGol");
+
+            if (this.id % 2 != porteria.team % 2)
+            {
+                npcTarget = new Vector3(
+                    breakGol.position.x,
+                    transform.position.y,
+                    breakGol.position.z
+                );
+
+                dir = npcTarget - transform.position;
+                break;
+            }
+        }
+
+        dir.y = 0f;
+        if (dir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
+
+        Vector3 velocity = dir.normalized * npcSpeed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+
+        Shoot.instance.disparoLibre();
     }
 
 
