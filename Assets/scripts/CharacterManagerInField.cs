@@ -55,7 +55,8 @@ public class CharacterManagerInField : MonoBehaviour
 
     public void cameraConfiguration(int i)
     {
-        camY.transform.position = new Vector3(players[i].transform.position.x, 450, players[i].transform.position.z);
+        //Cambiar a 300 
+        camY.transform.position = new Vector3(players[i].transform.position.x, 600, players[i].transform.position.z);
     }
     
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using Random = UnityEngine.Random;
@@ -20,7 +21,7 @@ public class Defensa : PlayerID, IResettable
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
    // private float npcSpeed = 75;
-    private float changeTargetDistance = 50f;
+   // private float changeTargetDistance = 50f;
     //private Vector3 npcTarget;
 
 
@@ -95,51 +96,51 @@ public class Defensa : PlayerID, IResettable
     }
 
 
-    void Update()
-    {
-        //if (frozen && playerStop)
-        //{
-        //    StartCoroutine(StopAndRetargetRoutine(playerStop));
-        //}
+    //void Update()
+    //{
+    //    if (frozen && playerStop)
+    //    {
+    //        StartCoroutine(StopAndRetargetRoutine(playerStop));
+    //    }
 
-        //if (resetPos)
-        //{
-        //    return;
-        //}
+    //    if (resetPos)
+    //    {
+    //        return;
+    //    }
 
-        //if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
-        //{
-        //    defenderJug();
-        //    return;
-        //}
+    //    if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
+    //    {
+    //        defenderJug();
+    //        return;
+    //    }
 
-        //if (chasingBallFree)
-        //{
+    //    if (chasingBallFree)
+    //    {
 
-        //    runToBall();
-        //}
-        //else
-        //{
-        //    move();
-        //}
-
-
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-        //    opcionPase();
-        //}
+    //        runToBall();
+    //    }
+    //    else
+    //    {
+    //        move();
+    //    }
 
 
-        // Perseguir a delantero si está en área de defensa 
-        /*
-         Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
-
-         */
-
-        // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
+    //    if (Bola.instance.transform.IsChildOf(transform))
+    //    {
+    //        opcionPase();
+    //    }
 
 
-    }
+    //    // Perseguir a delantero si está en área de defensa 
+    //    /*
+    //     Lo voy a gestionar desde los triggers de los areas, si entra en area peligro habrá una probabilidad menor de que le "siga" que si entra en area de gol
+
+    //     */
+
+    //    // Contar jugadores por campo y si hay más en el otro ir  hacia allá  (De momento no lo hago)
+
+
+    //}
 
     void FixedUpdate()
     {
@@ -439,6 +440,22 @@ public class Defensa : PlayerID, IResettable
         marcajeActual = null;
         DejarDeDefender();
         this.setLibre(true);
+    }
+
+    void goToOtherAreaDefender()
+    {
+        int areaSet = (this.id % 2 == 0) ? 0 : 1;
+        ZoneManager.instance.getAreasByTeam(areaSet);
+        List<ZoneManager.ZonaBola> areas = ZoneManager.instance.getAreasByTeam(areaSet);
+        if (areas == null || areas.Count == 0)
+            return;
+
+        Vector3 randomPoint = ZoneManager.instance.GetRandomPointInSelectedAreas(areas, transform.position.y);
+
+        if (randomPoint != Vector3.zero)
+        {
+            npcTarget = randomPoint;
+        }
     }
 
 

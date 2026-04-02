@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.LowLevel;
@@ -19,8 +20,6 @@ public class Delantero : PlayerID, IResettable
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
-    private float changeTargetDistance = 50f;
-    private Vector3 npcTarget;
 
     private CharacterManager characterManager;
 
@@ -37,7 +36,7 @@ public class Delantero : PlayerID, IResettable
                                     // Ir hacia porteria y tirar si no se la roban 
 
     private bool disparoPorteria = false;
-
+    private bool yendoAAreaRival = false;
 
     protected override void Awake()
     {
@@ -58,34 +57,67 @@ public class Delantero : PlayerID, IResettable
     /*
      Si tienen la bola que se acerque a la portería y apunte, también que la pase a un medio campo, o que se pueda a equivocar 
      */
+
     void Update()
     {
-        if (frozen && playerStop)
-        {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
-        }
+        whereIsBall();
 
-        if (resetPos)
+        if (resetPos) return;
+        if (frozen && playerStop) StartCoroutine(StopAndRetargetRoutine(playerStop));
+
+        if (chasingBallFree)
         {
+            runToBall();
             return;
         }
 
+        // Solo actúa si la bola está en el área del mismo equipo que este delantero
+        if (areaConBola == this.id % 2)
+        {
+            disparoPorteria = false;
+            if (!yendoAAreaRival && !stop)
+            {
+                goToOtherAreaForward();
+                yendoAAreaRival = true;
+            }
+
+            if (!stop)
+            {
+                move();
+            }
+
+            if (Vector3.Distance(transform.position, npcTarget) < 5f)
+            {
+                Parar();
+            }
+        }
+        else if (areaConBola != this.id % 2)
+        {
+            disparoPorteria = false;
+            if (IsInSmallArea() != this.id % 2)
+            {
+                disparoPorteria = true;
+            }
+            move();
+        } else
+        {
+            disparoPorteria = false;
+            move();
+        }
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
-           opcionPase();
-            //tiroPorteria();
+            if (PuedoTirar())
+            {
+                opcionPase();
+            }
+
+            move();
         }
         else
         {
             disparoPorteria = false;
         }
-
-        //if (chasingBallFree)
-        //    runToBall();
-        //else
-        move();
-
     }
 
     void FixedUpdate()
@@ -157,9 +189,10 @@ public class Delantero : PlayerID, IResettable
 
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
         {
+            //REVISARRR
             PickNewTarget();
         }
-       
+
     }
 
     private void opcionPase()
@@ -168,25 +201,30 @@ public class Delantero : PlayerID, IResettable
 
         if (disparoPorteria)
         {
+            tiroPorteria();
             return;
         }
 
         if (Random.value < npcPass)
         {
             float aux = Random.value;
-            if (aux < tiroCase1)
+            if (aux < 0.1f)
             {
                 Shoot.instance.disparoLibre();
             }
-            else if (tiroCase1 < aux && aux < tiroCase2)
+            else if (0.1f < aux && aux < 0.4f)
             {
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-            }
-            else
+            } else if (0.4f < aux && aux < 0.6f)
             {
-                if (characterManager.index == this.id) return;
+                PaseConCriterio();
+            } else if (0.6f < aux && aux < 0.9f)
+            {
                 tiroPorteria();
             }
+             
+
+            //else if ( < aux && aux < )
         }
     }
 
@@ -318,5 +356,21 @@ public class Delantero : PlayerID, IResettable
     public void setPase(bool pase)
     {
         this.pase = pase;
+    }
+
+    void goToOtherAreaForward()
+    {
+        int areaSet = (this.id % 2 == 0) ? 1 : 0;
+        ZoneManager.instance.getAreasByTeam(areaSet);
+        List<ZoneManager.ZonaBola> areas = ZoneManager.instance.getAreasByTeam(areaSet);
+        if (areas == null || areas.Count == 0)
+            return;
+
+        Vector3 randomPoint = ZoneManager.instance.GetRandomPointInSelectedAreas(areas, transform.position.y);
+
+        if (randomPoint != Vector3.zero)
+        {
+            npcTarget = randomPoint;
+        }
     }
 }

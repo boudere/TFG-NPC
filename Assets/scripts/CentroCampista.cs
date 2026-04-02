@@ -7,8 +7,6 @@ using Random = UnityEngine.Random;
 
 public class CentroCampista : PlayerID, IResettable
 {
-
-
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool resetPos = false;
@@ -20,7 +18,7 @@ public class CentroCampista : PlayerID, IResettable
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
   
-    private float changeTargetDistance = 50f;
+    
     //private Vector3 npcTarget;
 
     private CharacterManager characterManager;
@@ -43,7 +41,7 @@ public class CentroCampista : PlayerID, IResettable
     private int medioCampo;
 
     private int contrariosInArea = 0;
-    private int areaConBola;
+   
 
     //public struct FranjaBola{
     //   public int franja;
@@ -81,9 +79,6 @@ public class CentroCampista : PlayerID, IResettable
 
     float nextDecisionTime;
     float decisionInterval = 1f;
-
-    float nextTiroBolaTime;
-    float tiroBolaInterval = 1f;
 
 
     protected override void Awake()
@@ -147,28 +142,29 @@ public class CentroCampista : PlayerID, IResettable
                     if (PuedoTirar())
                     {
                         if (characterManager.index == this.id) return;
-                        tiroPorteria();
+                       PaseConCriterio();
                     }
                 }
 
                 if (intentarPase)
                 {
-                    Debug.Log("Intentando pase");
                     bool hacerPase = !estaEnZonaPermitida || Random.value < 0.005f;
 
-                    //if (decision < 0.1f)
-                    // {
-                    //     opcionPaseLoco();
-                    // } else if (decision > 0.1f && decision < 0.5f)
-                    // {
-                    //     //Pase con criterio
-                    //     PaseConCriterio();
+                    if (decision < 0.1f)
+                    {
+                        opcionPaseLoco();
+                    }
+                    else if (decision > 0.1f && decision < 0.5f)
+                    {
+                        //Pase con criterio
+                        PaseConCriterio();
 
-                    // } else if (decision > 0.5f && decision < 0.7f)
-                    // {
-                    //     //Disparar a porteria 
-                    //     disparoPorteria = true;
-                    // } 
+                    }
+                    else if (decision > 0.5f && decision < 0.6f)
+                    {
+                        //Disparar a porteria 
+                        disparoPorteria = true;
+                    }
 
                     PaseConCriterio();
                 }
@@ -186,7 +182,7 @@ public class CentroCampista : PlayerID, IResettable
             goToOtherArea();
             move();
         }
-        else
+        else // SI NO SE TIENE LA BOLA ¿IR A POR ELLA ACTIVAMENTE?
         {
             int miEquipo = this.id % 2;
             bool bolaEnMiArea = areaConBola == miEquipo;
@@ -233,7 +229,7 @@ public class CentroCampista : PlayerID, IResettable
             }
             else
             {
-
+                goNearBall();
                 move();
             }
 
@@ -288,21 +284,6 @@ public class CentroCampista : PlayerID, IResettable
         );
     }
 
-    public void whereIsBall()  // SABER DONDE ESTA LA BOLA
-    {
-        areaConBola = -1;
-        GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
-        foreach (GameObject a in areas)
-        {
-            AreaPeligro area = a.GetComponent<AreaPeligro>();
-            if (area.isBallInArea())
-            {
-                areaConBola = area.TEAM;
-                break;
-            }
-        }
-    }
-
    
 
     private void cerebro()
@@ -335,21 +316,7 @@ public class CentroCampista : PlayerID, IResettable
 
 
 
-    void PaseConCriterio()
-    {
 
-        GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
-        foreach (GameObject p in porterias) { 
-        Porteria porteria = p.GetComponent<Porteria>();
-            Transform breakGol = p.transform.Find("BreakGol");
-            if (this.id % 2 != porteria.team % 2)
-            {
-                Pase.instance.PassBallNear(transform.position, breakGol.transform.position, this.id % 2, this);
-                break;
-            }
-        }
-      
-    }
 
     bool ChangeChasingBallTrue()
     {
@@ -369,14 +336,7 @@ public class CentroCampista : PlayerID, IResettable
         return true;
     }
 
-    bool PuedoTirar()
-    {
-        if (Time.time < nextTiroBolaTime)
-            return false;
-
-        nextDecisionTime = Time.time + tiroBolaInterval;
-        return true;
-    }
+   
 
     private void move()
     {
@@ -490,31 +450,7 @@ public class CentroCampista : PlayerID, IResettable
         }
     }
 
-    private void goToOtherArea()
-    {
-
-        if (Vector3.Distance(transform.position, npcTarget) > changeTargetDistance)
-            return;
-
-        GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
-
-        float x = transform.position.x;
-        float z = transform.position.z;
-
-        foreach (GameObject a in areas)
-        {
-            AreaPeligro area = a.GetComponent<AreaPeligro>();
-
-            if (area != null && area.TEAM != this.id % 2) // área contraria
-            {
-                x = Random.Range(area.minX, area.maxX);
-                z = Random.Range(area.minZ, area.maxZ);
-                break;
-            }
-        }
-
-        npcTarget = new Vector3(x, transform.position.y, z);
-    }
+  
 
     private void goNearBall()
     {

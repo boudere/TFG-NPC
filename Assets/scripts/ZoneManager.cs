@@ -147,5 +147,25 @@ public class ZoneManager : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
+    public List<ZonaBola> getAreasByTeam(int teamId)
+    {
+        List<ZonaBola> resultado = new List<ZonaBola>();
+
+        foreach (GameObject franja in franjas)
+        {
+            FranjaTrigger f = franja.GetComponent<FranjaTrigger>();
+            if (f == null) continue;
+
+            if (f.team == teamId)
+            {
+                ZonaBola zona = new ZonaBola();
+                zona.zona = f.franjaIndex;
+                zona.team = f.team;
+                resultado.Add(zona);
+            }
+        }
+
+        return resultado;
+    }
 
 }
