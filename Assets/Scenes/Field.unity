@@ -2042,6 +2042,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd0e27b2ebc3d04686210a4639de5b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  franjas: []
 --- !u!1 &394434960
 GameObject:
   m_ObjectHideFlags: 0
@@ -6123,7 +6124,7 @@ GameObject:
   - component: {fileID: 910573810}
   m_Layer: 0
   m_Name: TriggerAreaPorteria
-  m_TagString: Untagged
+  m_TagString: AreaPorteria
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6155,7 +6156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29392ffb0d03f1441b2522be063aea92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
+  team: 1
   lineaGolMin: 0
   lineaGolMax: 0
   hx: 0
@@ -15340,6 +15341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd0e27b2ebc3d04686210a4639de5b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  franjas: []
 --- !u!1 &2052564283
 GameObject:
   m_ObjectHideFlags: 0

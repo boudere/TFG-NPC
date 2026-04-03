@@ -224,8 +224,6 @@ public class Pase : MonoBehaviour
             }
         }
 
-        Debug.Log("Best player for pass: " + (bestPlayer != null ? bestPlayer.name : "None"));
-
         Rigidbody rbPlayer = playerID.GetComponent<Rigidbody>();
 
         if (bestPlayer == null)

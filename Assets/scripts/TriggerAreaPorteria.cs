@@ -130,4 +130,25 @@ public class TriggerAreaPorteria : MonoBehaviour
         return playersInAreaId.Contains(id);
     }
 
+    public Vector3 GetRandomPointInArea()
+    {
+        Collider col = GetComponent<Collider>();
+
+        if (col == null)
+        {
+            Debug.LogWarning("No hay collider en el área");
+            return transform.position;
+        }
+
+        Bounds bounds = col.bounds;
+
+        Vector3 randomPoint = new Vector3(
+            Random.Range(bounds.min.x, bounds.max.x),
+            bounds.center.y, // normalmente el suelo
+            Random.Range(bounds.min.z, bounds.max.z)
+        );
+
+        return randomPoint;
+    }
+
 }

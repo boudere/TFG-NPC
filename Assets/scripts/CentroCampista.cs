@@ -215,6 +215,7 @@ public class CentroCampista : PlayerID, IResettable
             }
             else
             {
+                goNearBall();
                 move();
             }
 
