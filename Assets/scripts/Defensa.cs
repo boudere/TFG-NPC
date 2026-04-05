@@ -97,13 +97,19 @@ public class Defensa : PlayerID, IResettable
 
         if (frozen && playerStop)
         {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
+            StartCoroutine(StopRoutine(playerStop));
         }
 
         if (resetPos)
         {
             return;
         }
+
+        if (stop)
+{
+    rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+    return;
+}
 
         if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
         {
@@ -317,7 +323,7 @@ public class Defensa : PlayerID, IResettable
         Pase.OnCharacterGVSelected -= OnSelected;
     }
 
-    void OnSelected(GameObject player)
+    void OnSelected(PlayerID player)
     {
         frozen = true;
         playerStop = player;
@@ -471,6 +477,23 @@ public class Defensa : PlayerID, IResettable
                 npcTarget = randomPoint;
             }
         }
+    }
+
+    public IEnumerator PararJugador(PlayerID target)
+    {
+        stop = true;
+        playerStop = target;
+
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        if (rbPlayer != null)
+        {
+            rbPlayer.linearVelocity = Vector3.zero;
+            rbPlayer.angularVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(2f);
+        stop = false;
+        playerStop = null;
     }
 
 }

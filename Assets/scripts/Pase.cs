@@ -10,7 +10,7 @@ public class Pase : MonoBehaviour
     private GameObject[] p;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
-    public static event Action <GameObject> OnCharacterGVSelected;
+    public static event Action <PlayerID> OnCharacterGVSelected;
     public static Pase instance;
     private string tagPlayer;
     public List<PlayerID> jugadores = new List<PlayerID>();
@@ -170,9 +170,10 @@ public class Pase : MonoBehaviour
                 }
             }
 
-        if (p[j].GetComponent<PlayerID>().id != characterManager.index)
+            PlayerID playerID = player.GetComponent<PlayerID>();
+        if (playerID.id != characterManager.index)
         {
-            OnCharacterGVSelected?.Invoke(player);
+            OnCharacterGVSelected?.Invoke(playerID);
         }
 
         Bola.instance.Soltar();
@@ -233,7 +234,9 @@ public class Pase : MonoBehaviour
             return;
         }
 
-        OnCharacterGVSelected?.Invoke(bestPlayer);
+        PlayerID bestPlayerID = bestPlayer.GetComponent<PlayerID>();
+
+        OnCharacterGVSelected?.Invoke(bestPlayerID);
 
         Bola.instance.Soltar();
 

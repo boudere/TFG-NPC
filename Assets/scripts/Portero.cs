@@ -13,20 +13,13 @@ public class Portero : PlayerID, IResettable
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
-    private float npcSpeed = 75;
 
-    private float changeTargetDistance = 50f;
-
-    private Vector3 npcTarget;
-
-    private Rigidbody rb;
     public int index;
     private CharacterManager characterManager;
     private FieldLimits field;
     public static CharacterGV instance;
 
-    private bool frozen = false;
-    private GameObject playerStop = null;
+   
     public bool defendiendo = false;
     [SerializeField] private float velocidadDefensa = 50f;
     private int direccionDefensa = 1;
@@ -39,7 +32,7 @@ public class Portero : PlayerID, IResettable
     //Probabilidades saque
     float probabilidadSaque = 0.05f;
     float exito = 0.3f;
-    private void Awake()
+    protected override void Awake()
     {
 
         spawnPos = transform.position;
@@ -174,13 +167,13 @@ public class Portero : PlayerID, IResettable
         Pase.OnCharacterGVSelected -= OnSelected;
     }
 
-    void OnSelected(GameObject player)
+    void OnSelected(PlayerID player)
     {
         frozen = true;
         playerStop = player;
     }
 
-    private IEnumerator StopAndRetargetRoutine(GameObject playerStop)
+    private IEnumerator StopAndRetargetRoutine(PlayerID playerStop)
     {
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
         rbPlayer.linearVelocity = Vector3.zero;

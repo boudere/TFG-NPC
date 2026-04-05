@@ -110,7 +110,7 @@ public class CentroCampista : PlayerID, IResettable
         //Hacer otra función para el area pequeña
         if (frozen && playerStop)
         {
-            StartCoroutine(StopAndRetargetRoutine(playerStop));
+            StartCoroutine(StopRoutine(playerStop));
         }
 
         if (resetPos)
@@ -120,7 +120,11 @@ public class CentroCampista : PlayerID, IResettable
 
         cerebro();
 
-
+        if (stop)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
 
 
 
@@ -166,7 +170,7 @@ public class CentroCampista : PlayerID, IResettable
                         disparoPorteria = true;
                     }
 
-                    PaseConCriterio();
+                    //PaseConCriterio();
                 }
 
                 if (disparoPorteria && Random.value < 0.1f)
@@ -241,6 +245,8 @@ public class CentroCampista : PlayerID, IResettable
     {
         rotacion();
     }
+
+
 
     protected void runToBall()
     {
@@ -480,7 +486,7 @@ public class CentroCampista : PlayerID, IResettable
         Pase.OnCharacterGVSelected -= OnSelected;
     }
 
-    void OnSelected(GameObject player)
+    void OnSelected(PlayerID player)
     {
         frozen = true;
         playerStop = player;
@@ -520,5 +526,22 @@ public class CentroCampista : PlayerID, IResettable
     public void setPase(bool pase)
     {
         this.pase = pase;
+    }
+
+    public IEnumerator PararJugador(PlayerID target)
+    {
+        stop = true;
+        playerStop = target;
+
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        if (rbPlayer != null)
+        {
+            rbPlayer.linearVelocity = Vector3.zero;
+            rbPlayer.angularVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(2f);
+        stop = false;
+        playerStop = null;
     }
 }

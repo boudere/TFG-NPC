@@ -19,7 +19,6 @@ public class Delantero : PlayerID, IResettable
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-    private float speed = 150;
 
     private CharacterManager characterManager;
 
@@ -30,9 +29,6 @@ public class Delantero : PlayerID, IResettable
 
     private float moveInArea = 0.95f;
     private AreaPeligro ap;
-
-    private float tiroCase1 = 0.2f; // Tiro aleatorio
-    private float tiroCase2 = 0.5f; //Pase a un npc
                                     // Ir hacia porteria y tirar si no se la roban 
 
     private bool disparoPorteria = false;
@@ -63,11 +59,17 @@ public class Delantero : PlayerID, IResettable
         whereIsBall();
 
         if (resetPos) return;
-        if (frozen && playerStop) StartCoroutine(StopAndRetargetRoutine(playerStop));
+        if (frozen && playerStop) StartCoroutine(StopRoutine(playerStop));
 
         if (chasingBallFree)
         {
             runToBall();
+            return;
+        }
+
+        if (stop)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
 
@@ -271,7 +273,7 @@ public class Delantero : PlayerID, IResettable
         Pase.OnCharacterGVSelected -= OnSelected;
     }
 
-    void OnSelected(GameObject player)
+    void OnSelected(PlayerID player)
     {
         frozen = true;
         playerStop = player;
@@ -372,5 +374,22 @@ public class Delantero : PlayerID, IResettable
         {
             npcTarget = randomPoint;
         }
+    }
+
+    public IEnumerator PararJugador(PlayerID target)
+    {
+        stop = true;
+        playerStop = target;
+
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        if (rbPlayer != null)
+        {
+            rbPlayer.linearVelocity = Vector3.zero;
+            rbPlayer.angularVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(2f);
+        stop = false;
+        playerStop = null;
     }
 }

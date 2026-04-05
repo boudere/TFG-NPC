@@ -33,7 +33,10 @@ public class TriggerHavePlayer : MonoBehaviour
 
             if (defensa != null)
             {
-                StartCoroutine(owner.PararJugador(owner.gameObject));
+                //detectTag(owner.gameObject);
+                //StartCoroutine(owner.PararJugador(owner.gameObject));
+               // owner.PararJugador(owner.gameObject);
+               detectTag(owner.gameObject);
             }
 
         }
@@ -51,7 +54,32 @@ public class TriggerHavePlayer : MonoBehaviour
         Arbitro.instance.BallEntraEnArea(owner);
     }
 
-   
+    public void detectTag(GameObject go)
+    {
+        if (go.CompareTag("CentroCampista"))
+        {
+            CentroCampista p = go.GetComponent<CentroCampista>();
+            StartCoroutine(p.PararJugador(p));
+        }
+        else if (go.CompareTag("Defensa"))
+        {
+            Defensa p = go.GetComponent<Defensa>();
+            StartCoroutine(p.PararJugador(p));
+        }
+        else if (go.CompareTag("Delantero"))
+        {
+            Delantero p = go.GetComponent<Delantero>();
+            StartCoroutine(p.PararJugador(p));
+        } else if (go.CompareTag("CharacterGV"))
+        {
+            CharacterGV p = go.GetComponent<CharacterGV>();
+            StartCoroutine(p.PararJugador(p));
+        }
+
+
+    }
+
+
 
     private void OnTriggerExit(Collider other)
     {
@@ -68,7 +96,4 @@ public class TriggerHavePlayer : MonoBehaviour
             owner = null;
         }
     }
-
-    
-
 }

@@ -14,7 +14,7 @@ public class PlayerID : MonoBehaviour
     protected Rigidbody rb;
     protected bool stop = false;
     protected bool frozen = false;
-    protected GameObject playerStop = null;
+    protected PlayerID playerStop = null;
     protected bool libre = true;
     protected float npcSpeed = 75f;
     protected Vector3 npcTarget;
@@ -61,23 +61,22 @@ public class PlayerID : MonoBehaviour
         chasingBallFree = value;
     }
 
-    public IEnumerator PararJugador(GameObject target)
-    {
-        stop = true;
-        playerStop = target;
+    //public IEnumerator PararJugador(GameObject target)
+    //{
+    //    stop = true;
+    //    playerStop = target;
 
-        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
-        if (rbPlayer != null)
-        {
-            rbPlayer.linearVelocity = Vector3.zero;
-            rbPlayer.angularVelocity = Vector3.zero;
-        }
+    //    Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+    //    if (rbPlayer != null)
+    //    {
+    //        rbPlayer.linearVelocity = Vector3.zero;
+    //        rbPlayer.angularVelocity = Vector3.zero;
+    //    }
 
-        yield return new WaitForSeconds(2f);
-
-        stop = false;
-        playerStop = null;
-    }
+    //    yield return new WaitForSeconds(2f);
+    //    stop = false;
+    //    playerStop = null;
+    //}
 
     public void whereIsBall()  // SABER DONDE ESTA LA BOLA
     {
@@ -235,6 +234,15 @@ public class PlayerID : MonoBehaviour
             }
         }
 
+    }
+
+    protected IEnumerator StopRoutine(PlayerID playerStop)
+    {
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        rbPlayer.linearVelocity = Vector3.zero;
+        rbPlayer.angularVelocity = Vector3.zero;
+        yield return new WaitForSeconds(2f);
+        frozen = false;
     }
 
 }

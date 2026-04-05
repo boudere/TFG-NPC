@@ -15,12 +15,8 @@ public class CharacterGV : PlayerID
    
     public static CharacterGV instance;
 
-   
 
-   
-    private bool resetPos = false;
 
-    
 
     public bool defaultMove = true;
 
@@ -42,43 +38,6 @@ public class CharacterGV : PlayerID
         movePlayer();
         
     }
-
-    private IEnumerator StopRoutine(GameObject playerStop)
-    {
-        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
-        rbPlayer.linearVelocity = Vector3.zero;
-        rbPlayer.angularVelocity = Vector3.zero;
-        yield return new WaitForSeconds(2f);
-        frozen = false;
-    }
-
-    //void movePlayer()
-    //{
-    //    if (index != characterManager.index)
-    //        return;
-
-    //    float h = Input.GetAxisRaw("Horizontal");
-    //    float v = Input.GetAxisRaw("Vertical");
-
-    //    Vector3 inputDir = new Vector3(h, 0f, v);
-
-    //    // Movimiento (en la dirección que toca)
-    //    Vector3 moveDir = inputDir.normalized;
-    //    Vector3 movement = moveDir * speed;
-    //    rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
-
-
-    //    if (inputDir.sqrMagnitude > 0.001f)
-    //    {
-
-    //        smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
-
-
-    //        Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-    //        rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
-    //    }
-    //}
-
     void movePlayer()
     {
         if (stop)
@@ -108,42 +67,22 @@ public class CharacterGV : PlayerID
         }
     }
 
-    void othersBehaviour()
+    public IEnumerator PararJugador(PlayerID target)
     {
-   
-     
+        stop = true;
+        playerStop = target;
 
-        //Si tiene bola y se cumple x probabilidad que se pase 
+        Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+        if (rbPlayer != null)
+        {
+            rbPlayer.linearVelocity = Vector3.zero;
+            rbPlayer.angularVelocity = Vector3.zero;
+        }
 
-        
-        //if (Bola.instance.transform.IsChildOf(transform))
-        //{
-
-        //    float aux = Random.value;
-        //    if (aux < npcPass)
-        //    {
-        //        //Tendría que llamar al
-        //        //Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-
-        //        if (this.posicion == "Delantero")
-        //        {
-        //            Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-        //        } else if (this.posicion == "CentroCampista")
-        //        {
-        //            Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-        //        } else if (this.posicion == "Defensa")
-        //        {
-        //            Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-        //            //Buscar a ese jugador su instancia y castearlo, algo similar al reset habría que hacer una función que busque su instancia 
-
-        //        }
-        //    }
-
-        //}
-     
+        yield return new WaitForSeconds(2f);
+        stop = false;
+        playerStop = null;
     }
-
-
 
 }
 
