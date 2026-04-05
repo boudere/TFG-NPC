@@ -26,11 +26,4 @@ public class CharacterManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    private void Start()
-    {
-        
-    }
-
-
 }

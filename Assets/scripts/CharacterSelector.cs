@@ -38,6 +38,11 @@ public class CharacterSelector : MonoBehaviour
         if (index > characterManager.characterList.Count - 1) { index = 0; }
     }
 
+    void Update()
+    {
+        
+    }
+
     private void resetMaterial()
     {
         for (int i = 0; i < characterManager.characterList.Count; i++) {
@@ -126,9 +131,13 @@ public class CharacterSelector : MonoBehaviour
     LoadSceneMode.Additive
 );
 
+
+
    
 
     }
+
+   
 
     public void PlayStart2()
     {
@@ -174,4 +183,6 @@ public class CharacterSelector : MonoBehaviour
         //Renderer rend = go.GetComponent<Renderer>();
         //rend.material = defaultMaterial;
     }
+
+
 }

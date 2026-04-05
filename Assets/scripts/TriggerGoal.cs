@@ -8,6 +8,7 @@ public class TriggerGoal : MonoBehaviour
     private int goalCounter = 0;
     public Goal goal;
     public ShowScore showScore;
+    public Score score;
     private Porteria porteria;
     private int team;
     
@@ -17,6 +18,8 @@ public class TriggerGoal : MonoBehaviour
     void Awake()
     {
         goal = Goal.instance;
+        showScore = ShowScore.instance;
+        score = Score.instance;
         porteria = GetComponentInParent<Porteria>();
     }
 
@@ -92,6 +95,7 @@ public class TriggerGoal : MonoBehaviour
             if (team % 2 == 0)
             {
                 showScore.setScoret0(porteria.goalCounterTeam);
+
             } else if (team % 2 == 1)
             {
                 showScore.setScoret1(porteria.goalCounterTeam);

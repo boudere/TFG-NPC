@@ -3,14 +3,21 @@ using UnityEngine.UI;
 
 public class ShowScore : MonoBehaviour
 {
-
     [SerializeField] private GameObject modal;
     public static ShowScore instance;
-    [SerializeField] private Image scoreTeam0Image;
-    [SerializeField] private Image scoreTeam1Image; 
+
+    [Header("Marcador izquierdo")]
+    [SerializeField] private Image scoreTeam0Image;   // decenas
+    [SerializeField] private Image scoreTeam00Image;  // unidades
+
+    [Header("Marcador derecho")]
+    [SerializeField] private Image scoreTeam1Image;   // decenas
+    [SerializeField] private Image scoreTeam11Image;  // unidades
+
     [SerializeField] private Sprite[] digits = new Sprite[10];
-    int team0 = 0;
-    int team1 = 0;
+
+    private int leftScore = 0;
+    private int rightScore = 0;
 
     private void Awake()
     {
@@ -23,47 +30,64 @@ public class ShowScore : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
     }
 
-    void Start()
+    private void Start()
     {
         if (modal != null)
-        {
-            modal.SetActive(false);
-            scoreTeam0Image.sprite = digits[team0];
-            scoreTeam1Image.sprite = digits[team1];
-        }
+            modal.SetActive(true);
+
+        UpdateLeftScore();
+        UpdateRightScore();
     }
 
     public void openModalMarcador()
     {
         if (modal != null)
-        {
-            modal.SetActive(true);
-        }
+            modal.SetActive(false);
     }
 
     public void closeModalMarcador()
     {
         if (modal != null)
-        {
-            modal.SetActive(false);
-        }
+            modal.SetActive(true);
     }
 
- 
-
-    public void setScoret0(int team0)
+    // team0 se muestra cruzado en el marcador derecho
+    public void setScoret0(int value)
     {
-        int t0 = Mathf.Clamp(team0, 0, 9);
-        if (scoreTeam0Image != null) scoreTeam1Image.sprite = digits[team0];
+        rightScore = Mathf.Clamp(value, 0, 99);
+        UpdateRightScore();
     }
 
-    public void setScoret1(int team1)
+    // team1 se muestra cruzado en el marcador izquierdo
+    public void setScoret1(int value)
     {
-        int t1 = Mathf.Clamp(team1, 0, 9);
-        if (scoreTeam1Image != null) scoreTeam0Image.sprite = digits[team1];
+        leftScore = Mathf.Clamp(value, 0, 99);
+        UpdateLeftScore();
     }
 
+    private void UpdateLeftScore()
+    {
+        int decenas = leftScore / 10;
+        int unidades = leftScore % 10;
+
+        if (scoreTeam0Image != null)
+            scoreTeam0Image.sprite = digits[decenas];
+
+        if (scoreTeam00Image != null)
+            scoreTeam00Image.sprite = digits[unidades];
+    }
+
+    private void UpdateRightScore()
+    {
+        int decenas = rightScore / 10;
+        int unidades = rightScore % 10;
+
+        if (scoreTeam1Image != null)
+            scoreTeam1Image.sprite = digits[decenas];
+
+        if (scoreTeam11Image != null)
+            scoreTeam11Image.sprite = digits[unidades];
+    }
 }
