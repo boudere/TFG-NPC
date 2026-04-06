@@ -70,7 +70,7 @@ public class TriggerHavePlayer : MonoBehaviour
         {
             Delantero p = go.GetComponent<Delantero>();
             StartCoroutine(p.PararJugador(p));
-        } else if (go.CompareTag("CharacterGV"))
+        } else if (!go.CompareTag("Portero"))
         {
             CharacterGV p = go.GetComponent<CharacterGV>();
             StartCoroutine(p.PararJugador(p));

@@ -33,7 +33,10 @@ public class Delantero : PlayerID, IResettable
 
     private bool disparoPorteria = false;
     private bool yendoAAreaRival = false;
+    private int areaSmall;
 
+    float tiroTime;
+    float tiroInterval = 0.5f;
     protected override void Awake()
     {
         base.Awake();
@@ -57,6 +60,13 @@ public class Delantero : PlayerID, IResettable
     void Update()
     {
         whereIsBall();
+        areaSmall = IsInSmallArea();
+
+        int miEquipo = this.id % 2;
+        bool enAreaChica = areaSmall != -1;
+        bool bolaEnMiArea = areaConBola == miEquipo;
+        bool bolaEnOtraArea = areaConBola != -1 && areaConBola != miEquipo;
+        bool bolaSinArea = areaConBola == -1;
 
         if (resetPos) return;
         if (frozen && playerStop) StartCoroutine(StopRoutine(playerStop));
@@ -109,12 +119,26 @@ public class Delantero : PlayerID, IResettable
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
-            if (PuedoTirar())
+            if (enAreaChica && bolaEnOtraArea)
             {
-                opcionPase();
-            }
+                if (Tirar())
+                {
+                    if (characterManager.index == this.id) return;
+                    if (Random.value < 0.75f)
+                    {
+                        PaseConCriterio();
+                    }
+                }
+            } else
+            {
+                if (PuedoTirar())
+                {
+                    opcionPase();
+                }
 
-            move();
+                move();
+            }
+           
         }
         else
         {
@@ -260,7 +284,14 @@ public class Delantero : PlayerID, IResettable
         
     }
 
+    protected bool Tirar()
+    {
+        if (Time.time < tiroTime)
+            return false;
 
+        tiroTime = Time.time + tiroInterval;
+        return true;
+    }
 
 
     private void OnEnable()

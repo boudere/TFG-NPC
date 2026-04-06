@@ -44,7 +44,7 @@ public class Defensa : PlayerID, IResettable
 
 
     //Probabilidad de efectuar pase 
-    private float npcPass = 0.3f; //PROVISIONAL
+    private float npcPass = 0.5f; //PROVISIONAL
 
     //Probabilidades (luego pueden fallarse o no) 
 

@@ -80,6 +80,8 @@ public class CentroCampista : PlayerID, IResettable
     float nextDecisionTime;
     float decisionInterval = 1f;
 
+    float tiroTime;
+    float tiroInterval = 0.5f;
 
     protected override void Awake()
     {
@@ -125,12 +127,25 @@ public class CentroCampista : PlayerID, IResettable
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
-
-
+        int miEquipo = this.id % 2;
+        bool bolaEnMiArea = areaConBola == miEquipo;
+        bool bolaEnOtraArea = areaConBola != -1 && areaConBola != miEquipo;
+        bool bolaSinArea = areaConBola == -1;
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
             chasingBall = false;
+
+
+            if (bolaEnMiArea || bolaSinArea)
+            {
+                goToOtherArea();
+                move();
+            } else
+            {//Esta en área de ataque
+                //Buscar delantero
+                //¡¡¡¡¡!!!!!
+            }
 
             // Solo decide cada 1 segundo
             if (AccionConBola())
@@ -140,15 +155,18 @@ public class CentroCampista : PlayerID, IResettable
                 bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == this.id % 2;
                 bool enAreaChica = areaSmall != -1;
 
-                if (enAreaChica)
+                if (enAreaChica && bolaEnOtraArea)
                 {
                     //Disparar a porteria en x segundos
-                    if (PuedoTirar())
+                    if (Tirar())
                     {
                         if (characterManager.index == this.id) return;
-                       PaseConCriterio();
+                        if (Random.value < 0.5f)
+                        {
+                            PaseConCriterio();
+                        }
                     }
-                }
+                } 
 
                 if (intentarPase)
                 {
@@ -178,32 +196,28 @@ public class CentroCampista : PlayerID, IResettable
                     disparoPorteria = false;
                     if (characterManager.index == this.id) return;
                     tiroPorteria();
-                   
+
                 }
 
-            }
+            } 
 
             goToOtherArea();
             move();
         }
         else // SI NO SE TIENE LA BOLA ¿IR A POR ELLA ACTIVAMENTE?
         {
-            int miEquipo = this.id % 2;
-            bool bolaEnMiArea = areaConBola == miEquipo;
-            bool bolaEnOtraArea = areaConBola != -1 && areaConBola != miEquipo;
-            bool bolaSinArea = areaConBola == -1;
-
             if (bolaEnOtraArea)
             {
                 goNearBall();
                 move();
             }
-            else if ((bolaEnMiArea && arbitro.idTeamBola() != miEquipo) || bolaSinArea)
-            {
+            //else if ((bolaEnMiArea && arbitro.idTeamBola() != miEquipo) || bolaSinArea)
+                else if (bolaEnMiArea)
+                    {
 
                 if (ChangeChasingBallTrue())
                 {
-                    if (Random.value < 0.25f) { chasingBall = true; }
+                    if (Random.value < 0.5f) { chasingBall = true; }
                 }
 
 
@@ -322,6 +336,14 @@ public class CentroCampista : PlayerID, IResettable
     }
 
 
+    protected bool Tirar()
+    {
+        if (Time.time < tiroTime)
+            return false;
+
+        tiroTime = Time.time + tiroInterval;
+        return true;
+    }
 
 
 
@@ -347,7 +369,6 @@ public class CentroCampista : PlayerID, IResettable
 
     private void move()
     {
-       
 
         if (this.id == characterManager.index) return;
 

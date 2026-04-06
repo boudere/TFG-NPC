@@ -74,7 +74,7 @@ public int TEAM;
 
         if ((other.CompareTag("Delantero") && Bola.instance.transform.IsChildOf(other.transform)) || (other.CompareTag("Delantero") && bolaArea))
         {
-            bolaArea = true;
+            //bolaArea = true;
             Delantero d = other.GetComponent<Delantero>();
             delanteros.Add(d);
 

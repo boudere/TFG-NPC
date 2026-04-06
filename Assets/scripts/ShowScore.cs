@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ShowScore : MonoBehaviour
@@ -73,7 +73,11 @@ public class ShowScore : MonoBehaviour
         int unidades = leftScore % 10;
 
         if (scoreTeam0Image != null)
-            scoreTeam0Image.sprite = digits[decenas];
+        {
+            scoreTeam0Image.enabled = leftScore >= 10;
+            if (leftScore >= 10)
+                scoreTeam0Image.sprite = digits[decenas];
+        }
 
         if (scoreTeam00Image != null)
             scoreTeam00Image.sprite = digits[unidades];
@@ -85,7 +89,11 @@ public class ShowScore : MonoBehaviour
         int unidades = rightScore % 10;
 
         if (scoreTeam1Image != null)
-            scoreTeam1Image.sprite = digits[decenas];
+        {
+            scoreTeam1Image.enabled = rightScore >= 10;
+            if (rightScore >= 10)
+                scoreTeam1Image.sprite = digits[decenas];
+        }
 
         if (scoreTeam11Image != null)
             scoreTeam11Image.sprite = digits[unidades];
