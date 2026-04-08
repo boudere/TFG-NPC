@@ -1,0 +1,97 @@
+﻿
+=== Cargando datasets ===
+  Cargado ../Assets/SoccerData_2026_03_31_19_33_06.csv  (3494 filas, Shoot=0, Pass=0)
+  Cargado ../Assets/SoccerData_2026_03_31_20_20_59.csv  (3732 filas, Shoot=43, Pass=29)
+  TOTAL combinado: 7226 filas
+  ActionShoot=1 en total: 43
+  ActionPass=1  en total: 29
+
+Distribuci¾n de acciones ANTES del balanceo:
+_action
+0.0_0.0      2210
+1.0_0.0      1300
+0.0_-1.0      922
+1.0_-1.0      608
+1.0_1.0       492
+0.0_1.0       469
+-1.0_-1.0     413
+-1.0_1.0      411
+-1.0_0.0      401
+
+Filas tras balanceo: 19890  (antes: 7226)
+
+Split: 15912 train | 3978 test
+
+Scaler guardado en ../Assets\scaler.json
+Iniciando entrenamiento...
+
+Epoch [ 10/150] Loss=0.1152  MSE(mov)=0.0983  BCE(shoot+pass)=0.0085
+Epoch [ 20/150] Loss=0.0851  MSE(mov)=0.0752  BCE(shoot+pass)=0.0049
+Epoch [ 30/150] Loss=0.0743  MSE(mov)=0.0653  BCE(shoot+pass)=0.0045
+Epoch [ 40/150] Loss=0.0667  MSE(mov)=0.0600  BCE(shoot+pass)=0.0033
+Epoch [ 50/150] Loss=0.0622  MSE(mov)=0.0555  BCE(shoot+pass)=0.0033
+Epoch [ 60/150] Loss=0.0572  MSE(mov)=0.0510  BCE(shoot+pass)=0.0031
+Epoch [ 70/150] Loss=0.0524  MSE(mov)=0.0473  BCE(shoot+pass)=0.0026
+Epoch [ 80/150] Loss=0.0501  MSE(mov)=0.0450  BCE(shoot+pass)=0.0025
+Epoch [ 90/150] Loss=0.0477  MSE(mov)=0.0429  BCE(shoot+pass)=0.0024
+Epoch [100/150] Loss=0.0453  MSE(mov)=0.0404  BCE(shoot+pass)=0.0024
+Epoch [110/150] Loss=0.0427  MSE(mov)=0.0386  BCE(shoot+pass)=0.0021
+Epoch [120/150] Loss=0.0419  MSE(mov)=0.0374  BCE(shoot+pass)=0.0022
+Epoch [130/150] Loss=0.0426  MSE(mov)=0.0372  BCE(shoot+pass)=0.0027
+Epoch [140/150] Loss=0.0382  MSE(mov)=0.0348  BCE(shoot+pass)=0.0017
+Epoch [150/150] Loss=0.0361  MSE(mov)=0.0329  BCE(shoot+pass)=0.0016
+
+Entrenamiento finalizado.
+
+============================================================
+         VALIDATION RESULTS  (test 20%)
+============================================================
+
+[InputX ù Movimiento Horizontal]
+              precision    recall  f1-score   support
+
+     Izq(-1)       0.94      0.99      0.96      1318
+    Quiet(0)       0.97      0.86      0.91      1349
+     Der(+1)       0.91      0.97      0.94      1311
+
+    accuracy                           0.94      3978
+   macro avg       0.94      0.94      0.94      3978
+weighted avg       0.94      0.94      0.94      3978
+
+[InputZ ù Movimiento Vertical / Adelante-Atrßs]
+              precision    recall  f1-score   support
+
+   Atrßs(-1)       0.94      0.99      0.97      1377
+    Quiet(0)       0.98      0.78      0.87      1265
+Adelante(+1)       0.87      0.99      0.93      1336
+
+    accuracy                           0.93      3978
+   macro avg       0.93      0.92      0.92      3978
+weighted avg       0.93      0.93      0.92      3978
+
+[Acci¾n Combinada Mov]  Accuracy=86.8%  Precision=87.9%  Recall=86.6%
+
+[ActionShoot ù Chute a porterÝa]
+              precision    recall  f1-score   support
+
+    No chuta       1.00      1.00      1.00      3959
+       Chuta       1.00      0.58      0.73        19
+
+    accuracy                           1.00      3978
+   macro avg       1.00      0.79      0.87      3978
+weighted avg       1.00      1.00      1.00      3978
+
+[ActionPass ù Pase]
+              precision    recall  f1-score   support
+
+     No pasa       1.00      1.00      1.00      3958
+        Pasa       0.95      0.95      0.95        20
+
+    accuracy                           1.00      3978
+   macro avg       0.97      0.97      0.97      3978
+weighted avg       1.00      1.00      1.00      3978
+
+============================================================
+
+ONNX export fall¾ (No module named 'onnxscript'), guardando como .pt...
+Modelo JIT guardado en ../Assets/SoccerModel.pt

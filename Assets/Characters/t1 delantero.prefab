@@ -542,7 +542,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4302736966775426911}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
@@ -599,9 +599,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 5022602860645237092, guid: d0e9b5bacfa26cd4d8cf4d172a72d4d9, type: 3}
   scalerJson: {fileID: 4900000, guid: e843cde833bebc1418ea640ed9dbedb4, type: 3}
+  actionThreshold: 0.5
+  actionCooldown: 0.5
   myPlayer: {fileID: 0}
   myRigidbody: {fileID: 0}
   characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
 --- !u!114 &-4207268408474081122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -620,6 +624,8 @@ MonoBehaviour:
   myPlayer: {fileID: 0}
   myRigidbody: {fileID: 0}
   myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
 --- !u!1 &5688988184054912042
 GameObject:
   m_ObjectHideFlags: 0

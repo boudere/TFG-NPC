@@ -1,46 +1,90 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class Recorder : MonoBehaviour
 {
     [Header("Configuration")]
     public bool recordMode = true;
-    public float snapshotTime = 0.1f; // Take a snapshot every 0.1 seconds
+    public float snapshotTime = 0.1f;
     public string csvOutputName = "SoccerData";
 
     [Header("References")]
-    public PlayerID myPlayer; // The player this recorder is attached to
+    public PlayerID myPlayer;
     public Rigidbody myRigidbody;
     public CharacterGV myCharacterGV;
 
-    private float timeElapsed = 0f;
-    private float totalTime = 0f;
+    [Header("Goals")]
+    [Tooltip("Si se deja vacío el Recorder busca las Porterías automáticamente por componente Porteria")]
+    public Transform rivalGoalTransform;
+    public Transform ownGoalTransform;
 
-    // To store data dynamically before saving
+    private const string IC = ""; // se usa InvariantCulture en toda la serialización
+
+    private float timeElapsed = 0f;
+    private float totalTime   = 0f;
     private List<string> recordedLines = new List<string>();
+
+    private static readonly System.Globalization.CultureInfo Inv =
+        System.Globalization.CultureInfo.InvariantCulture;
 
     private void Start()
     {
-        if (myPlayer == null) myPlayer = GetComponent<PlayerID>();
-        if (myRigidbody == null) myRigidbody = GetComponent<Rigidbody>();
+        if (myPlayer     == null) myPlayer      = GetComponent<PlayerID>();
+        if (myRigidbody  == null) myRigidbody   = GetComponent<Rigidbody>();
         if (myCharacterGV == null) myCharacterGV = GetComponent<CharacterGV>();
 
-        // Agregamos la cabecera del CSV
-        string header = "TotalTime," +
-                        "MyPosX,MyPosZ," +
-                        "BallPosX,BallPosZ," +
-                        "DistToBall," +
-                        "HasBallTeam," + // 0: libre, 1: team1, 2: team2 (sacado del árbitro o Bola)
-                        "DistToRivalGoal," + // Aproximación
-                        "ScoreTeam1,ScoreTeam2," + // Puntuación
-                        "DistBallToMyGoal," +
-                        "DistClosestAlly," +
-                        "DistClosestEnemy," +
-                        // LABELS (Acciones)
-                        "InputX,InputZ," +
-                        "ActionShoot,ActionPass"; // Por si añades botones después
+        // Buscar porterías automáticamente si no se asignaron en el inspector
+        if (rivalGoalTransform == null || ownGoalTransform == null)
+        {
+            Porteria[] porterias = FindObjectsByType<Porteria>(FindObjectsSortMode.None);
+            int myTeam = myPlayer != null ? myPlayer.id % 2 : 0;
+
+            foreach (Porteria p in porterias)
+            {
+                bool isOwnGoal = (p.team % 2 == myTeam);
+                if (isOwnGoal && ownGoalTransform == null)
+                    ownGoalTransform = p.transform;
+                else if (!isOwnGoal && rivalGoalTransform == null)
+                    rivalGoalTransform = p.transform;
+            }
+
+            Debug.Log($"[Recorder] Porterías encontradas automáticamente " +
+                      $"| Propia: {(ownGoalTransform != null ? ownGoalTransform.name : "NO ENCONTRADA")} " +
+                      $"| Rival: {(rivalGoalTransform != null ? rivalGoalTransform.name : "NO ENCONTRADA")}");
+        }
+
+        // ---- CABECERA CSV ------------------------------------------------
+        string header =
+            // --- Estado propio ---
+            "PosX,PosZ," +
+            "OrientacionX,OrientacionZ," +
+            "TienePelota," +
+            // --- Pelota ---
+            "PosPelotaX,PosPelotaZ," +
+            "DistPelota," +
+            "TienePelotaEquipo," +
+            // --- Porterías y marcador ---
+            "DistPorteriaContraria," +
+            "DistPorteriaPropia," +
+            "PuntuacionPropia,PuntuacionContraria," +
+            "DistPelotaPorteriaPropia," +
+            // --- Distancia al más cercano (resumen) ---
+            "DistAliadoCercano," +
+            "DistEnemigoCercano," +
+            // --- 3 aliados más cercanos: posición + dirección ---
+            "Aliado1PosX,Aliado1PosZ,Aliado1DirX,Aliado1DirZ," +
+            "Aliado2PosX,Aliado2PosZ,Aliado2DirX,Aliado2DirZ," +
+            "Aliado3PosX,Aliado3PosZ,Aliado3DirX,Aliado3DirZ," +
+            // --- 3 enemigos más cercanos: posición + dirección ---
+            "Enemigo1PosX,Enemigo1PosZ,Enemigo1DirX,Enemigo1DirZ," +
+            "Enemigo2PosX,Enemigo2PosZ,Enemigo2DirX,Enemigo2DirZ," +
+            "Enemigo3PosX,Enemigo3PosZ,Enemigo3DirX,Enemigo3DirZ," +
+            // --- LABELS ---
+            "InputX,InputZ," +
+            "Disparo,Pase";
 
         recordedLines.Add(header);
     }
@@ -48,10 +92,8 @@ public class Recorder : MonoBehaviour
     private void Update()
     {
         if (!recordMode) return;
-
-        totalTime += Time.deltaTime;
+        totalTime   += Time.deltaTime;
         timeElapsed += Time.deltaTime;
-
         if (timeElapsed >= snapshotTime)
         {
             timeElapsed -= snapshotTime;
@@ -59,104 +101,138 @@ public class Recorder : MonoBehaviour
         }
     }
 
+    // ------------------------------------------------------------------ //
     private void RecordSnapshot()
     {
-        // 1. Posición del jugador
         Vector3 myPos = transform.position;
 
-        // 2. Posición de la pelota
-        Vector3 ballPos = Bola.instance != null ? Bola.instance.transform.position : Vector3.zero;
+        // ---- Pelota -------------------------------------------------------
+        Vector3 ballPos   = Bola.instance != null ? Bola.instance.transform.position : Vector3.zero;
+        float distToBall  = Vector3.Distance(myPos, ballPos);
 
-        // 3. Distancia a la pelota
-        float distToBall = Vector3.Distance(myPos, ballPos);
-
-        // 4. ¿Quién tiene la pelota? (Aproximación por ahora)
-        int hasBallTeam = 0; // 0 = Nadie
-        if (Bola.instance != null && Bola.instance.EnPosesion)
+        // ---- ¿Quién tiene la pelota? --------------------------------------
+        int hasBallTeam  = 0;
+        int myHasBall    = 0;
+        if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null)
         {
-            if (Bola.instance.Owner != null)
+            PlayerID ownerID = Bola.instance.Owner.GetComponent<PlayerID>();
+            if (ownerID != null)
             {
-               PlayerID ownerID = Bola.instance.Owner.GetComponent<PlayerID>();
-               if (ownerID != null) {
-                   hasBallTeam = (ownerID.id % 2 == myPlayer.id % 2) ? 1 : 2; 
-               }
+                bool sameTeam = (ownerID.id % 2 == myPlayer.id % 2);
+                hasBallTeam = sameTeam ? 1 : 2;
+                myHasBall   = (ownerID == myPlayer) ? 1 : 0;
             }
         }
 
-        // 5. Distancia a portería rival (simplificado: asumiendo Z positiva o negativa según el equipo)
-        // Puedes ajustar esto según la posición estática de las porterías en tu campo
-        float distToRivalGoal = 0f; // TODO: Calculate distances to actual goals
+        // ---- Porterías ----------------------------------------------------
+        float distToRivalGoal = rivalGoalTransform != null
+            ? Vector3.Distance(myPos, rivalGoalTransform.position) : 0f;
+        float distToOwnGoal   = ownGoalTransform != null
+            ? Vector3.Distance(myPos, ownGoalTransform.position) : 0f;
 
-        // 6. Puntuaciones
-        int scoreT1 = 0; // TODO: Get from arbitro/manager
+        float distBallToOwnGoal = ownGoalTransform != null
+            ? Vector3.Distance(ballPos, ownGoalTransform.position) : 0f;
+
+        // ---- Puntuaciones -------------------------------------------------
+        int scoreT1 = 0; // TODO: conectar al Arbitro cuando esté disponible
         int scoreT2 = 0;
+        int puntuacionPropia = myPlayer.id % 2 == 0 ? scoreT1 : scoreT2;
+        int puntuacionContraria = myPlayer.id % 2 == 0 ? scoreT2 : scoreT1;
 
-        // 7. Distancia pelota a mi portero
-        float distBallToMyGoal = 0f;
+        // ---- Hacia dónde mira el jugador controlado -----------------------
+        Vector3 facing  = transform.forward;   // ya normalizado
 
-        // 8 y 9. Distancia aliados y enemigos
-        float distClosestAlly = 999f;
-        float distClosestEnemy = 999f;
-
+        // ---- Clasificar todos los jugadores en aliados / rivales ----------
         PlayerID[] allPlayers = FindObjectsByType<PlayerID>(FindObjectsSortMode.None);
-        foreach(PlayerID p in allPlayers)
-        {
-            if (p == myPlayer) continue;
 
+        var allies  = new List<(float dist, PlayerID p)>();
+        var enemies = new List<(float dist, PlayerID p)>();
+
+        foreach (PlayerID p in allPlayers)
+        {
+            // Excluir al propio jugador comparando el GameObject (más robusto que comparar el componente)
+            if (p.gameObject == myPlayer.gameObject) continue;
+            // Excluir porteros u objetos que no sean jugadores de campo si los tienes con PlayerID
             float d = Vector3.Distance(myPos, p.transform.position);
-            
-            // Usamos ID par/impar para equipos
             if (p.id % 2 == myPlayer.id % 2)
-            {
-                if (d < distClosestAlly) distClosestAlly = d;
-            }
+                allies.Add((d, p));
             else
-            {
-                if (d < distClosestEnemy) distClosestEnemy = d;
-            }
+                enemies.Add((d, p));
         }
 
-        // --- LABELS (Acciones tomadas por el humano en CharacterGV) ---
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
+        allies.Sort((a, b) => a.dist.CompareTo(b.dist));
+        enemies.Sort((a, b) => a.dist.CompareTo(b.dist));
 
-        // Faltaría mapear botones de tiro o pase si los usas
-        int actionShoot = Input.GetKey(KeyCode.Space) ? 1 : 0; // Ejemplo
-        int actionPass = Input.GetKey(KeyCode.LeftControl) ? 1 : 0; // Ejemplo
+        float distClosestAlly  = allies.Count  > 0 ? allies[0].dist  : 999f;
+        float distClosestEnemy = enemies.Count > 0 ? enemies[0].dist : 999f;
 
+        // ---- Helper: obtener información de un jugador (o 0,0 si no existe) -
+        (float px, float pz, float dx, float dz) GetPlayerData(List<(float, PlayerID)> list, int index)
+        {
+            if (index >= list.Count) return (0f, 0f, 0f, 0f);
+            PlayerID p  = list[index].Item2;
+            Vector3 pos = p.transform.position;
+            Rigidbody rb = p.GetComponent<Rigidbody>();
+            Vector3 vel  = rb != null ? rb.linearVelocity : Vector3.zero;
+            Vector3 dir  = vel.magnitude > 0.01f ? vel.normalized : Vector3.zero;
+            return (pos.x, pos.z, dir.x, dir.z);
+        }
 
-        // Construir la fila CSV usando InvariantCulture para que los decimales sean SIEMPRE un punto '.'
-        string row = $"{totalTime.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{myPos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{myPos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{ballPos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{ballPos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{distToBall.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{hasBallTeam}," +
-                     $"{distToRivalGoal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{scoreT1},{scoreT2}," +
-                     $"{distBallToMyGoal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{distClosestAlly.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{distClosestEnemy.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{inputX.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{inputZ.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}," +
-                     $"{actionShoot},{actionPass}";
+        // 3 aliados más cercanos
+        var (a1px, a1pz, a1dx, a1dz) = GetPlayerData(allies, 0);
+        var (a2px, a2pz, a2dx, a2dz) = GetPlayerData(allies, 1);
+        var (a3px, a3pz, a3dx, a3dz) = GetPlayerData(allies, 2);
+
+        // 3 enemigos más cercanos
+        var (e1px, e1pz, e1dx, e1dz) = GetPlayerData(enemies, 0);
+        var (e2px, e2pz, e2dx, e2dz) = GetPlayerData(enemies, 1);
+        var (e3px, e3pz, e3dx, e3dz) = GetPlayerData(enemies, 2);
+
+        // ---- Labels -------------------------------------------------------
+        float inputX     = Input.GetAxisRaw("Horizontal");
+        float inputZ     = Input.GetAxisRaw("Vertical");
+        int disparo = Input.GetKey(KeyCode.O) ? 1 : 0;   // O = Disparo a portería
+        int pase    = Input.GetKey(KeyCode.P) ? 1 : 0;   // P = Pase
+
+        // ---- Serializar fila CSV ------------------------------------------
+        string F(float v) => v.ToString("F3", Inv);
+
+        string row =
+            $"{F(myPos.x)},{F(myPos.z)}," +
+            $"{F(facing.x)},{F(facing.z)}," +
+            $"{myHasBall}," +
+            $"{F(ballPos.x)},{F(ballPos.z)}," +
+            $"{F(distToBall)}," +
+            $"{hasBallTeam}," +
+            $"{F(distToRivalGoal)}," +
+            $"{F(distToOwnGoal)}," +
+            $"{puntuacionPropia},{puntuacionContraria}," +
+            $"{F(distBallToOwnGoal)}," +
+            $"{F(distClosestAlly)}," +
+            $"{F(distClosestEnemy)}," +
+            // aliados
+            $"{F(a1px)},{F(a1pz)},{F(a1dx)},{F(a1dz)}," +
+            $"{F(a2px)},{F(a2pz)},{F(a2dx)},{F(a2dz)}," +
+            $"{F(a3px)},{F(a3pz)},{F(a3dx)},{F(a3dz)}," +
+            // enemigos
+            $"{F(e1px)},{F(e1pz)},{F(e1dx)},{F(e1dz)}," +
+            $"{F(e2px)},{F(e2pz)},{F(e2dx)},{F(e2dz)}," +
+            $"{F(e3px)},{F(e3pz)},{F(e3dx)},{F(e3dz)}," +
+            // labels
+            $"{F(inputX)},{F(inputZ)}," +
+            $"{disparo},{pase}";
 
         recordedLines.Add(row);
     }
 
-    // Método para guardar al terminar el nivel/partido
     public void SaveToFile()
     {
         if (!recordMode || recordedLines.Count <= 1) return;
-
-        string date = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
+        string date      = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
         string finalPath = Path.Combine(Application.dataPath, $"{csvOutputName}_{date}.csv");
-
         File.WriteAllLines(finalPath, recordedLines);
-        Debug.Log($"[Recorder] Dataset guardado con éxito en: {finalPath}");
+        Debug.Log($"[Recorder] Dataset guardado en: {finalPath}");
     }
 
-    private void OnApplicationQuit()
-    {
-        // Guardado automático al cerrar el juego como seguridad
-        SaveToFile();
-    }
+    private void OnApplicationQuit() => SaveToFile();
 }
