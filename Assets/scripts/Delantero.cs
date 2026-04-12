@@ -50,7 +50,7 @@ public class Delantero : PlayerID, IResettable
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
         ap = AreaPeligro.instance;
-        PickNewTarget(); 
+        //PickNewTarget(); 
     }
 
     /*
@@ -95,7 +95,7 @@ public class Delantero : PlayerID, IResettable
 
             if (!stop)
             {
-                move();
+                move("otherArea");
             }
 
             if (Vector3.Distance(transform.position, npcTarget) < 5f)
@@ -110,11 +110,12 @@ public class Delantero : PlayerID, IResettable
             {
                 disparoPorteria = true;
             }
-            move();
-        } else
+            move("otherArea");
+        }
+        else
         {
             disparoPorteria = false;
-            move();
+            move("otherArea");
         }
 
         if (Bola.instance.transform.IsChildOf(transform))
@@ -129,16 +130,17 @@ public class Delantero : PlayerID, IResettable
                         PaseConCriterio();
                     }
                 }
-            } else
+            }
+            else
             {
                 if (PuedoTirar())
                 {
                     opcionPase();
                 }
 
-                move();
+                move("otherArea");
             }
-           
+
         }
         else
         {
@@ -194,15 +196,21 @@ public class Delantero : PlayerID, IResettable
         rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
     }
 
-    private void move()
+    private void move(string targetTag)
     {
-
-        if (this.id == characterManager.index) { return; }
+        if (this.id == characterManager.index) return;
 
         if (stop)
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
+        }
+
+        if (targetTag != this.targetTag)
+        {
+            this.targetTag = targetTag;
+            npcTarget = Vector3.zero;
+            PickNewTarget();
         }
 
         Vector3 direction = (npcTarget - transform.position).normalized;
@@ -214,11 +222,7 @@ public class Delantero : PlayerID, IResettable
         );
 
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
-        {
-            //REVISARRR
             PickNewTarget();
-        }
-
     }
 
     private void opcionPase()
@@ -267,7 +271,7 @@ public class Delantero : PlayerID, IResettable
                 AreaPeligro area = a.GetComponent<AreaPeligro>();
 
                 if (area != null && area.TEAM != this.id % 2)
-                { 
+                {
                     x = Random.Range(area.minX, area.maxX);
                     z = Random.Range(area.minZ, area.maxZ);
                 }
@@ -281,7 +285,7 @@ public class Delantero : PlayerID, IResettable
 
         npcTarget = new Vector3(x, transform.position.y, z);
 
-        
+
     }
 
     protected bool Tirar()

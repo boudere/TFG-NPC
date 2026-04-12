@@ -87,7 +87,7 @@ public class Defensa : PlayerID, IResettable
         characterManager = CharacterManager.instance;
         field = FieldLimits.instance;
         ap = AreaPeligro.instance;
-        PickNewTarget();
+      //  PickNewTarget();
     }
 
 
@@ -106,10 +106,10 @@ public class Defensa : PlayerID, IResettable
         }
 
         if (stop)
-{
-    rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-    return;
-}
+        {
+           rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+           return;
+        }
 
         if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
         {
@@ -127,17 +127,20 @@ public class Defensa : PlayerID, IResettable
         {
             goToOtherAreaDefender();
 
-            if (PuedoTirar())
+         
+            if (PuedoTirar() && Random.value < 0.01) // Aumentar probabiliadad según llegue al centro o al area de peligro
             {
                 opcionPase();
             }
+               
 
-            move();
-            return;
+            move("otherArea");
+           
         }
-
-        stayInAreaGoal();
-        move();
+        else {
+            stayInAreaGoal();
+            move("ownArea");
+        }
     }
 
     void FixedUpdate()
@@ -210,11 +213,10 @@ public class Defensa : PlayerID, IResettable
         );
     }
 
-
-    private void move()
+   
+    private void move(string targetTag)
     {
-
-        if (this.id == characterManager.index) { return; }
+        if (this.id == characterManager.index) return;
 
         if (stop)
         {
@@ -222,6 +224,12 @@ public class Defensa : PlayerID, IResettable
             return;
         }
 
+        if (targetTag != this.targetTag)
+        {
+            this.targetTag = targetTag;
+            npcTarget = Vector3.zero;   
+            PickNewTarget();
+        }
 
         Vector3 direction = (npcTarget - transform.position).normalized;
 
@@ -287,7 +295,10 @@ public class Defensa : PlayerID, IResettable
     void PickNewTarget()
     {
         float x = 0, z = 0;
-        if (Random.value < moveInArea)
+        if (this.targetTag == "ownArea" || this.targetTag == "")
+        {
+            stayInAreaGoal();
+        } else if (this.targetTag == "otherArea")
         {
             GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
 
@@ -295,20 +306,45 @@ public class Defensa : PlayerID, IResettable
             {
                 AreaPeligro area = a.GetComponent<AreaPeligro>();
 
-                if (area != null && area.TEAM == this.id % 2)
+                if (area != null && area.TEAM != this.id % 2)
                 {
-                    x = Random.Range(area.minX, area.maxX);
-                    z = Random.Range(area.minZ, area.maxZ);
+                    minX = area.minX;
+                    maxX = area.maxX;
+                    break;
                 }
             }
-         
-        } else
-        {
-            x = Random.Range(field.minX, field.maxX);
+
+            x = Random.Range(minX, maxX);
             z = Random.Range(field.minZ, field.maxZ);
+
+            npcTarget = new Vector3(x, transform.position.y, z);
         }
 
-        npcTarget = new Vector3(x, transform.position.y, z);
+      
+        //if (Random.value < moveInArea)
+        //{
+        //    GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
+
+        //    foreach (GameObject a in areas)
+        //    {
+        //        AreaPeligro area = a.GetComponent<AreaPeligro>();
+
+        //        if (area != null && area.TEAM == this.id % 2)
+        //        {
+        //            x = Random.Range(area.minX, area.maxX);
+        //            z = Random.Range(area.minZ, area.maxZ);
+        //        }
+        //    }
+
+        //}
+        //else
+        //{
+
+        //    x = Random.Range(field.minX, field.maxX);
+        //    z = Random.Range(field.minZ, field.maxZ);
+        //}
+
+        //npcTarget = new Vector3(x, transform.position.y, z);
     }
 
 
@@ -388,7 +424,7 @@ public class Defensa : PlayerID, IResettable
         tiempoMarcar = 0f;
         targetDelantero = null;
 
-        PickNewTarget();
+        //PickNewTarget();
     }
 
 

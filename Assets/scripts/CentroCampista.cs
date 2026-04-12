@@ -18,9 +18,6 @@ public class CentroCampista : PlayerID, IResettable
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
     private float speed = 150;
   
-    
-    //private Vector3 npcTarget;
-
     private CharacterManager characterManager;
 
     //Probabilidad de efectuar pase 
@@ -34,45 +31,20 @@ public class CentroCampista : PlayerID, IResettable
 
     private AreaPeligro ap;
     private MedioCampo med;
-    private float maxX, minX;
+  
 
     private int areaPropia;
     private int areaContraria;
     private int medioCampo;
 
     private int contrariosInArea = 0;
-   
-
-    //public struct FranjaBola{
-    //   public int franja;
-    //   public int team;
-    //}
-
-    //public struct SideBola{
-    //    public int side;
-    //    public int team;
-    //}
-
-    
-
-    //public struct ZonaBola
-    //{
-    //    public int zona;
-    //    public int team;
-    //}
-
-    //ZonaBola franjaBola;
-    //ZonaBola sideBola;
-
+ 
+  
     private int areaPlayer;
     private int areaSmall;
     private bool chasingBall = false;
     private bool disparoPorteria = false;
     private ZoneManager zoneManager;
-
-    //IR A POR LA BOLA
-    //private bool runTowardsBall = false;
-
 
     private float refreshInterval = 0.5f;
     private float nextRefreshTime;
@@ -103,22 +75,19 @@ public class CentroCampista : PlayerID, IResettable
         PickNewTarget(); 
     }
 
-
     void Update()
     {
         whereIsBall();
         areaPlayer = whereIsPlayer();
         areaSmall = IsInSmallArea();
-        //Hacer otra función para el area pequeña
+
         if (frozen && playerStop)
         {
             StartCoroutine(StopRoutine(playerStop));
         }
 
         if (resetPos)
-        {
             return;
-        }
 
         cerebro();
 
@@ -127,131 +96,109 @@ public class CentroCampista : PlayerID, IResettable
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
+
         int miEquipo = this.id % 2;
         bool bolaEnMiArea = areaConBola == miEquipo;
         bool bolaEnOtraArea = areaConBola != -1 && areaConBola != miEquipo;
         bool bolaSinArea = areaConBola == -1;
+        bool tengoBola = Bola.instance.transform.IsChildOf(transform);
 
-        if (Bola.instance.transform.IsChildOf(transform))
+        // =========================
+        // SI TIENE LA BOLA
+        // =========================
+        if (tengoBola)
         {
             chasingBall = false;
 
+            // Movimiento con balón: una sola orden
+            move("otherArea");
 
-            if (bolaEnMiArea || bolaSinArea)
-            {
-                goToOtherArea();
-                move();
-            } else
-            {//Esta en área de ataque
-                //Buscar delantero
-                //¡¡¡¡¡!!!!!
-            }
-
-            // Solo decide cada 1 segundo
+            // Decisiones con balón
             if (AccionConBola())
             {
                 float decision = Random.value;
                 bool intentarPase = Random.value < 0.3f;
-                bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == this.id % 2;
+                bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == miEquipo;
                 bool enAreaChica = areaSmall != -1;
 
                 if (enAreaChica && bolaEnOtraArea)
                 {
-                    //Disparar a porteria en x segundos
                     if (Tirar())
                     {
-                        if (characterManager.index == this.id) return;
-                        if (Random.value < 0.5f)
+                        if (characterManager.index != this.id && Random.value < 0.5f)
                         {
                             PaseConCriterio();
                         }
                     }
-                } 
+                }
 
                 if (intentarPase)
                 {
                     bool hacerPase = !estaEnZonaPermitida || Random.value < 0.005f;
 
-                    if (decision < 0.1f)
+                    if (hacerPase)
                     {
-                        opcionPaseLoco();
+                        if (decision < 0.1f)
+                        {
+                            opcionPaseLoco();
+                        }
+                        else if (decision < 0.5f)
+                        {
+                            PaseConCriterio();
+                        }
+                        else if (decision < 0.6f)
+                        {
+                            disparoPorteria = true;
+                        }
                     }
-                    else if (decision > 0.1f && decision < 0.5f)
-                    {
-                        //Pase con criterio
-                        PaseConCriterio();
-
-                    }
-                    else if (decision > 0.5f && decision < 0.6f)
-                    {
-                        //Disparar a porteria 
-                        disparoPorteria = true;
-                    }
-
-                    //PaseConCriterio();
                 }
 
                 if (disparoPorteria && Random.value < 0.1f)
                 {
                     disparoPorteria = false;
-                    if (characterManager.index == this.id) return;
-                    tiroPorteria();
 
-                }
-
-            } 
-
-            goToOtherArea();
-            move();
-        }
-        else // SI NO SE TIENE LA BOLA ¿IR A POR ELLA ACTIVAMENTE?
-        {
-            if (bolaEnOtraArea)
-            {
-                goNearBall();
-                move();
-            }
-            //else if ((bolaEnMiArea && arbitro.idTeamBola() != miEquipo) || bolaSinArea)
-                else if (bolaEnMiArea)
+                    if (characterManager.index != this.id)
                     {
-
-                if (ChangeChasingBallTrue())
-                {
-                    if (Random.value < 0.5f) { chasingBall = true; }
-                }
-
-
-                if (chasingBall)
-                {
-                    runToBall();
-                }
-                else
-                {
-                    goNearBall();
-                    move();
+                        tiroPorteria();
+                    }
                 }
             }
-            else
+
+            return;
+        }
+
+        // =========================
+        // SI NO TIENE LA BOLA
+        // =========================
+
+        bool perseguir = false;
+
+        if (bolaEnOtraArea)
+        {
+            perseguir = false;
+        }
+        else if (bolaEnMiArea)
+        {
+            if (ChangeChasingBallTrue())
             {
-                goNearBall();
-                move();
+                chasingBall = Random.value < 0.5f;
             }
 
+            perseguir = chasingBall || getChasingBallFree(this);
+        }
+        else if (bolaSinArea)
+        {
+            perseguir = getChasingBallFree(this);
+        }
 
-            bool perseguir = getChasingBallFree(this);
-
-
-            if (perseguir)
-            {
-                runToBall();
-
-            }
-            else
-            {
-                goNearBall();
-                move();
-            }
-
+        // Una sola orden final de movimiento
+        if (perseguir)
+        {
+            runToBall();
+        }
+        else
+        {
+            move("nearBall");
         }
     }
 
@@ -264,6 +211,13 @@ public class CentroCampista : PlayerID, IResettable
 
     protected void runToBall()
     {
+        if (this.id == characterManager.index) return;
+        if (stop)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
         Vector3 dir = Bola.instance.transform.position - transform.position;
         dir.y = 0f;
 
@@ -367,7 +321,7 @@ public class CentroCampista : PlayerID, IResettable
 
    
 
-    private void move()
+    private void move(string targetTag)
     {
 
         if (this.id == characterManager.index) return;
@@ -378,6 +332,13 @@ public class CentroCampista : PlayerID, IResettable
             return;
         }
 
+        if (targetTag != this.targetTag)
+        {
+            this.targetTag = targetTag;
+            npcTarget = Vector3.zero;
+            PickNewTarget();
+        } 
+
         Vector3 direction = (npcTarget - transform.position).normalized;
 
         rb.linearVelocity = new Vector3(
@@ -386,74 +347,44 @@ public class CentroCampista : PlayerID, IResettable
             direction.z * npcSpeed
         );
 
+
+
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
             PickNewTarget();
     }
 
+
+
     void PickNewTarget()
     {
-
-
-        float x = 0, z = 0;
-        if (Random.value < moveInArea)
+        if (this.targetTag == "otherArea" || this.targetTag == "")
         {
-            x = Random.Range(field.minX, field.maxX);
-            z = Random.Range(field.minZ, field.maxZ);
-        }
-        else
-        {
-
+            float x = 0, z = 0;
             GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
 
             foreach (GameObject a in areas)
             {
                 AreaPeligro area = a.GetComponent<AreaPeligro>();
 
-                if (area != null && area.TEAM == 1)
-                { 
-                    minX = area.minX;
-                }
-                else
+                if (area != null && area.TEAM != this.id % 2)
                 {
-                     maxX = area.maxX;
-                }
+                    minX = area.minX;
+                    maxX = area.maxX;
+                    break;
+                } 
             }
-
 
             x = Random.Range(minX, maxX);
             z = Random.Range(field.minZ, field.maxZ);
-        }
 
             npcTarget = new Vector3(x, transform.position.y, z);
+        }
+        else if (this.targetTag == "nearBall")
+        {
+            goNearBall();
+        }
     }
 
-
-    //private void tiroPorteria()
-    //{
-    //    GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
-    //    Vector3 dir = new Vector3(0, 0);
-
-    //    foreach (GameObject p in porterias)
-    //    {
-    //        Porteria porteria = p.GetComponent<Porteria>();
-    //        Transform breakGol = p.transform.Find("BreakGol");
-    //        if (this.id % 2 != porteria.team % 2)
-    //        {
-    //            npcTarget = new Vector3(breakGol.position.x, transform.position.y, breakGol.position.z);
-
-    //            dir = npcTarget - transform.position;
-    //            break;
-    //        }
-
-    //    }
-
-    //    dir.y = 0f;
-    //    Vector3 velocity = dir.normalized * npcSpeed;
-    //    rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
-
-    //    Shoot.instance.disparoLibre();
-
-    //}
     private void opcionPaseLoco()
     {
 

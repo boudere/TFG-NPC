@@ -29,6 +29,8 @@ public class PlayerID : MonoBehaviour
     float renaudarMoveTime;
     float renaudarMove = 1f;
 
+    protected string targetTag = "";
+    protected float maxX, minX;
 
     protected virtual void Awake()
     {
@@ -60,23 +62,6 @@ public class PlayerID : MonoBehaviour
     {
         chasingBallFree = value;
     }
-
-    //public IEnumerator PararJugador(GameObject target)
-    //{
-    //    stop = true;
-    //    playerStop = target;
-
-    //    Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
-    //    if (rbPlayer != null)
-    //    {
-    //        rbPlayer.linearVelocity = Vector3.zero;
-    //        rbPlayer.angularVelocity = Vector3.zero;
-    //    }
-
-    //    yield return new WaitForSeconds(2f);
-    //    stop = false;
-    //    playerStop = null;
-    //}
 
     public void whereIsBall()  // SABER DONDE ESTA LA BOLA
     {
@@ -175,7 +160,7 @@ public class PlayerID : MonoBehaviour
         stop = false;
     }
 
-    protected void goToOtherArea() // PROBAR
+    protected void goToOtherArea() 
     {
 
         if (Vector3.Distance(transform.position, npcTarget) > changeTargetDistance)
