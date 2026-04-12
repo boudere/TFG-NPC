@@ -31,6 +31,7 @@ public class PlayerID : MonoBehaviour
 
     protected string targetTag = "";
     protected float maxX, minX;
+    protected bool isOutside = false;
 
     protected virtual void Awake()
     {

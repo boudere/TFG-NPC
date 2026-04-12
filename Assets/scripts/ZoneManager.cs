@@ -52,20 +52,6 @@ public class ZoneManager : MonoBehaviour
                 break;
             }
         }
-
-        //foreach (GameObject s in sides)
-        //{
-        //    SideTrigger side = s.GetComponent<SideTrigger>();
-        //    if (side != null && side.IsBallInside())
-        //    {
-        //        ZonaBola zona = new ZonaBola();
-        //        zona.zona = side.sideIndex;
-        //        zona.team = side.team;
-        //        Debug.Log("BBS");
-        //        zonas.Add(zona);
-        //        break;
-        //    }
-        //}
       
         return zonas;
     }

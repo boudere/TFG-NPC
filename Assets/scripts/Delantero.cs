@@ -252,18 +252,13 @@ public class Delantero : PlayerID, IResettable
             {
                 tiroPorteria();
             }
-             
-
-            //else if ( < aux && aux < )
+            
         }
     }
 
     void PickNewTarget()
     {
-        float x = 0, z = 0;
-        if (Random.value < moveInArea)
-        {
-
+            float x = 0, z = 0;
             GameObject[] areas = GameObject.FindGameObjectsWithTag("AreaPeligro");
 
             foreach (GameObject a in areas)
@@ -272,20 +267,16 @@ public class Delantero : PlayerID, IResettable
 
                 if (area != null && area.TEAM != this.id % 2)
                 {
-                    x = Random.Range(area.minX, area.maxX);
-                    z = Random.Range(area.minZ, area.maxZ);
+                    minX = area.minX;
+                    maxX = area.maxX;
+                    break;
                 }
             }
-        }
-        else
-        {
-            x = Random.Range(field.minX, field.maxX);
+
+            x = Random.Range(minX, maxX);
             z = Random.Range(field.minZ, field.maxZ);
-        }
 
-        npcTarget = new Vector3(x, transform.position.y, z);
-
-
+            npcTarget = new Vector3(x, transform.position.y, z);   
     }
 
     protected bool Tirar()

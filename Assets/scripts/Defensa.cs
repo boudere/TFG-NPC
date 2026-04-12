@@ -128,7 +128,7 @@ public class Defensa : PlayerID, IResettable
             goToOtherAreaDefender();
 
          
-            if (PuedoTirar() && Random.value < 0.01) // Aumentar probabiliadad según llegue al centro o al area de peligro
+            if (PuedoTirar()) // Aumentar probabiliadad según llegue al centro o al area de peligro
             {
                 opcionPase();
             }

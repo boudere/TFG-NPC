@@ -30,6 +30,8 @@ public class Bola : MonoBehaviour
     private float refreshInterval = 1;
     private float nextRefreshTime;
 
+    public bool ballIsOutside = false;
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -90,9 +92,6 @@ public class Bola : MonoBehaviour
         }
 
       
-
-
-
         if (EnPosesion)
             return;
 

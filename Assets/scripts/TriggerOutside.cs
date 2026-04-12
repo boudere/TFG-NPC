@@ -1,21 +1,25 @@
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
+using UnityEngine;
 
 
 public class TriggerOutside : MonoBehaviour
 {
     public string dimension;
     public FieldLimits field;
+    private Bola bola;
 
+   
     void Start()
     {
         field = FieldLimits.instance;
+        bola = Bola.instance;
     }
     private void OnTriggerEnter(Collider other)
     {
        
-        if (other.CompareTag("Ball"))
+        if (other.CompareTag("Ball") || Bola.instance.transform.IsChildOf(other.transform))
         {
             StartCoroutine(ResetBallAfterDelay(other.gameObject));
         }
@@ -23,7 +27,16 @@ public class TriggerOutside : MonoBehaviour
 
     private IEnumerator ResetBallAfterDelay(GameObject ball)
     {
-        yield return new WaitForSeconds(3f);
+        GameObject[] allPlayers = GetAllFieldPlayers();
+
+        foreach (GameObject go in allPlayers)
+        {
+                detectTag(go);
+        }
+
+            
+
+        yield return new WaitForSeconds(2f);
 
         float media;
 
@@ -72,5 +85,42 @@ public class TriggerOutside : MonoBehaviour
         }
        
        
+    }
+
+    public void detectTag(GameObject go)
+    {
+        if (go.CompareTag("CentroCampista"))
+        {
+            CentroCampista p = go.GetComponent<CentroCampista>();
+            StartCoroutine(p.PararJugador(p));
+        }
+        else if (go.CompareTag("Defensa"))
+        {
+            Defensa p = go.GetComponent<Defensa>();
+            StartCoroutine(p.PararJugador(p));
+        }
+        else if (go.CompareTag("Delantero"))
+        {
+            Delantero p = go.GetComponent<Delantero>();
+            StartCoroutine(p.PararJugador(p));
+        }
+        else if (!go.CompareTag("Portero"))
+        {
+            CharacterGV p = go.GetComponent<CharacterGV>();
+            StartCoroutine(p.PararJugador(p));
+        }
+
+
+    }
+
+    private GameObject[] GetAllFieldPlayers()
+    {
+        List<GameObject> allPlayers = new List<GameObject>();
+
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Defensa"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("CentroCampista"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Delantero"));
+
+        return allPlayers.ToArray();
     }
 }
