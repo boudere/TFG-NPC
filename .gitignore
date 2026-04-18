@@ -1,0 +1,90 @@
+# =====================================================
+# .gitignore — TFG-NPC (Unity + Python)
+# =====================================================
+
+# -----------------------------------------------
+# UNITY — carpetas generadas automáticamente
+# -----------------------------------------------
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Asset Store tools
+Assets/AssetStoreTools*
+
+# -----------------------------------------------
+# UNITY — archivos de proyecto Visual Studio
+# -----------------------------------------------
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.pdb
+*.mdb
+
+# -----------------------------------------------
+# UNITY — builds y binarios
+# -----------------------------------------------
+*.apk
+*.aab
+*.unitypackage
+*.app
+ExportedObj/
+
+# -----------------------------------------------
+# PYTHON — entorno virtual y caché
+# -----------------------------------------------
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+dist/
+*.egg-info/
+*.egg
+
+# -----------------------------------------------
+# DATOS DE ENTRENAMIENTO — CSVs (pueden ser grandes)
+# -----------------------------------------------
+Assets/SoccerData_*.csv
+
+# Logs de entrenamiento y ficheros temporales
+PythonTraining/results.txt
+PythonTraining/_out.txt
+PythonTraining/_check.py
+
+# -----------------------------------------------
+# LOGS DE BUILD
+# -----------------------------------------------
+build*.log
+build_*.log
+build_warnings.log
+results.txt
+
+# -----------------------------------------------
+# SISTEMA OPERATIVO — Windows
+# -----------------------------------------------
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# -----------------------------------------------
+# EDITORES
+# -----------------------------------------------
+.vscode/
+.idea/
