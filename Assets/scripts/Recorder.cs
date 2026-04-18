@@ -7,9 +7,15 @@ using UnityEngine;
 public class Recorder : MonoBehaviour
 {
     [Header("Configuration")]
-    public bool recordMode = true;
+    [Tooltip("Tecla para iniciar/parar la grabacion (por defecto: R)")]
+    public KeyCode recordToggleKey = KeyCode.R;
     public float snapshotTime = 0.1f;
     public string csvOutputName = "SoccerData";
+
+    // Estado de grabacion
+    private bool isRecording  = false;
+    private int  totalFrames  = 0;      // snapshots acumulados en esta sesion
+    private int  totalSegments = 0;     // veces que se ha activado la grabacion
 
     [Header("References")]
     public PlayerID myPlayer;
@@ -29,6 +35,29 @@ public class Recorder : MonoBehaviour
 
     private static readonly System.Globalization.CultureInfo Inv =
         System.Globalization.CultureInfo.InvariantCulture;
+
+    // ---- GUI ---------------------------------------------------------------
+    private GUIStyle _guiStyle;
+    private void OnGUI()
+    {
+        if (_guiStyle == null)
+        {
+            _guiStyle = new GUIStyle(GUI.skin.box)
+            {
+                fontSize  = 18,
+                alignment = TextAnchor.MiddleLeft
+            };
+            _guiStyle.normal.textColor = Color.white;
+        }
+
+        string status = isRecording
+            ? $"<color=red>● REC</color>   {totalFrames} frames  |  segmento {totalSegments}"
+            : $"<color=grey>■ PARADO</color>   {totalFrames} frames totales  |  {totalSegments} segmento(s)";
+
+        GUI.Box(new Rect(10, 10, 370, 34), status, _guiStyle);
+        GUI.Label(new Rect(14, 48, 370, 22),
+            $"Pulsa [{recordToggleKey}] para {(isRecording ? "parar" : "iniciar")} la grabacion");
+    }
 
     private void Start()
     {
@@ -91,13 +120,31 @@ public class Recorder : MonoBehaviour
 
     private void Update()
     {
-        if (!recordMode) return;
+        // --- Toggle de grabación ---
+        if (Input.GetKeyDown(recordToggleKey))
+        {
+            isRecording = !isRecording;
+            if (isRecording)
+            {
+                totalSegments++;
+                Debug.Log($"[Recorder] Grabación INICIADA (segmento {totalSegments})");
+            }
+            else
+            {
+                Debug.Log($"[Recorder] Grabación PAUSADA — {totalFrames} frames acumulados en {totalSegments} segmento(s)");
+            }
+        }
+
+        if (!isRecording) return;
+
         totalTime   += Time.deltaTime;
         timeElapsed += Time.deltaTime;
+
         if (timeElapsed >= snapshotTime)
         {
             timeElapsed -= snapshotTime;
             RecordSnapshot();
+            totalFrames++;
         }
     }
 
