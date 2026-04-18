@@ -134,7 +134,7 @@ public class CentroCampista : PlayerID, IResettable
 
                 if (intentarPase)
                 {
-                    bool hacerPase = !estaEnZonaPermitida || Random.value < 0.005f;
+                    bool hacerPase = !estaEnZonaPermitida || Random.value < 0.2f;
 
                     if (hacerPase)
                     {

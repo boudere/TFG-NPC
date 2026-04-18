@@ -88,10 +88,12 @@ public class Pase : MonoBehaviour
             }
         }
 
-        if (calculateDistance(p[i].transform.position) < 25)
-        {
-            passBall(id);
-        }
+        //if (calculateDistance(p[i].transform.position) < 25)
+        //{
+           
+        //}
+
+        passBall(id);
     }
 
 
@@ -113,7 +115,7 @@ public class Pase : MonoBehaviour
                 id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
                 if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
                 {
-                    if (id != index && team == id % 2)
+                    if (team == id % 2)
                     {
                         currentDistance = calculateDistance(p[i].transform.position);
                         if (currentDistance < minDistance)
@@ -180,7 +182,7 @@ public class Pase : MonoBehaviour
 
 
         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
-
+        rb.isKinematic = false;
 
         Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 

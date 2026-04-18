@@ -31,11 +31,8 @@ public class TriggerHavePlayer : MonoBehaviour
 
             Defensa defensa = otherPlayer.GetComponent<Defensa>();
 
-            if (defensa != null)
+            if (defensa != null && Bola.instance.transform.IsChildOf(owner.transform))
             {
-                //detectTag(owner.gameObject);
-                //StartCoroutine(owner.PararJugador(owner.gameObject));
-               // owner.PararJugador(owner.gameObject);
                detectTag(owner.gameObject);
             }
 

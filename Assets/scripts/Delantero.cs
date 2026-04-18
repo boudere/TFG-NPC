@@ -23,7 +23,7 @@ public class Delantero : PlayerID, IResettable
     private CharacterManager characterManager;
 
     //Probabilidad de efectuar pase 
-    private float npcPass = 0.01f; //PROVISIONAL
+    private float npcPass = 0.1f; //PROVISIONAL
 
     public bool defaultMove = true;
 
