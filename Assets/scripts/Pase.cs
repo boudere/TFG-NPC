@@ -186,7 +186,7 @@ public class Pase : MonoBehaviour
 
         Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 
-         float passSpeed = 200f;
+         float passSpeed = 300f;
          rb.linearVelocity = direction * passSpeed;
          rb.angularVelocity = Vector3.zero;
 
@@ -254,7 +254,7 @@ public class Pase : MonoBehaviour
 
         direction = direction.normalized;
 
-        float passSpeed = 200f;
+        float passSpeed = 300f;
         rbBall.linearVelocity = direction * passSpeed;
         rbBall.angularVelocity = Vector3.zero;
         rbBall.angularVelocity = Vector3.zero;

@@ -363,10 +363,8 @@ MonoBehaviour:
   posicion: Defensa
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 202939608}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -496,10 +494,8 @@ MonoBehaviour:
   posicion: CentroCampista
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 283558380}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -625,10 +621,8 @@ MonoBehaviour:
   posicion: CentroCampista
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 292062941}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -1689,10 +1683,8 @@ MonoBehaviour:
   posicion: Delantero
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 980140374}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2065,10 +2057,8 @@ MonoBehaviour:
   posicion: Delantero
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1490026766}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2202,10 +2192,8 @@ MonoBehaviour:
   posicion: Defensa
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1528111959}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2906,10 +2894,8 @@ MonoBehaviour:
   posicion: Defensa
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1026487310500677388}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3051,10 +3037,8 @@ MonoBehaviour:
   posicion: Defensa
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 3345642324323717115}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3131,6 +3115,10 @@ PrefabInstance:
       propertyPath: posicion
       value: Delantero
       objectReference: {fileID: 0}
+    - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
       value: 0
@@ -3154,6 +3142,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3625312987260654814}
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654815}
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654821}
   m_SourcePrefab: {fileID: 100100000, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
 --- !u!4 &3625312987260654812 stripped
 Transform:
@@ -3181,14 +3175,63 @@ MonoBehaviour:
   posicion: Delantero
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 3625312987260654813}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &3625312987260654815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 32
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &3625312987260654821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d548acf49f9d5f3409122e97d5c28417, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rolTactico: 1
+  modelRecover: {fileID: 5022602860645237092, guid: 4b5b1b139efac6a41ab3c6e40b1c387b, type: 3}
+  modelApproach: {fileID: 5022602860645237092, guid: 8c6d4c68f5e7e2d46aae422b254c22b8, type: 3}
+  modelPass: {fileID: 5022602860645237092, guid: 01e7f2beed38c8e438b0eed6fbaec5b4, type: 3}
+  modelShoot: {fileID: 5022602860645237092, guid: 1f2965da10d82c346b3c4dcd7315b500, type: 3}
+  scalerJson: {fileID: 4900000, guid: 52c23dcda94eb8345beceaa2e57cf1df, type: 3}
+  distanceToShoot: 15
+  distanceToPass: 10
+  actionThreshold: 0.5
+  actionCooldown: 0.5
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 350
+  currentState: 0
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3310,10 +3353,8 @@ MonoBehaviour:
   posicion: Delantero
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 6738770865320173678}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3439,10 +3480,8 @@ MonoBehaviour:
   posicion: CentroCampista
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 7727232850989682732}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3568,10 +3607,8 @@ MonoBehaviour:
   posicion: CentroCampista
   haveBall: 0
   holdPoint: {fileID: 0}
-  self: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 8757151642796768869}
-  chasingBallFree: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12

@@ -8,9 +8,20 @@ public class AIController : MonoBehaviour
     {
         Recover,
         Approach,
-        Pass,
-        Shoot
+        Shoot,
+        Pass
     }
+
+    public enum RolTactico
+    {
+        Defensa,
+        Medio,
+        Delantero
+    }
+
+    [Header("Tactical Role")]
+    [Tooltip("Define cómo se comportará este jugador tácticamente según el ZoneManager")]
+    public RolTactico rolTactico = RolTactico.Medio;
 
     [Header("AI Models (Mixture of Experts)")]
     public Unity.InferenceEngine.ModelAsset modelRecover;
@@ -58,6 +69,7 @@ public class AIController : MonoBehaviour
     private const int ExpectedInputSize = 40;
     private float nextActionTime = 0f;
     private bool scalerWarningShown = false;
+    private bool mantenerPosicionDefensiva = false;
 
     [Header("Debug")]
     public BehaviorState currentState = BehaviorState.Recover;
@@ -153,39 +165,28 @@ public class AIController : MonoBehaviour
         NormalizeFeatures(normalizedInputs);
 
         // 5. Ejecutar inferencia en el modelo correspondiente
+        float[] aiOutputs;
+        float shootProb;
+        float passProb;
+
         var prediction = Predecir(activeWorker, normalizedInputs);
+        aiOutputs = prediction.movement;
+        shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
+        passProb = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
 
-        // Salida continua de movimiento: [InputX, InputZ]
-        float aiInputX = prediction.movement.Length > 0 ? prediction.movement[0] : 0f;
-        float aiInputZ = prediction.movement.Length > 1 ? prediction.movement[1] : 0f;
-        // Salida discreta de acciones: [Disparo, Pase]
-        float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
-        float passProb = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
-
-        // Ruido de exploracion para evitar que se quede atascado
-        float noiseAmount = 0.0f; // Lo ponemos a 0 temporalmente para ver la salida REAL de la red
-        aiInputX = Mathf.Clamp(aiInputX + Random.Range(-noiseAmount, noiseAmount), -1f, 1f);
-        aiInputZ = Mathf.Clamp(aiInputZ + Random.Range(-noiseAmount, noiseAmount), -1f, 1f);
-
-        // --- TRAZAS DE DEPURACION ---
-        // Lo imprimimos cada 30 frames (aprox 2 veces por segundo) para no saturar Unity
-        if (Time.frameCount % 30 == 0)
+        // --- TÁCTICA: MANTENER POSICIÓN DEFENSIVA ---
+        if (mantenerPosicionDefensiva)
         {
-            Debug.Log($"[TFG-DEBUG] --- FRAME {Time.frameCount} ---");
-            Debug.Log($"[TFG-DEBUG] 1. ESTADO: {currentState} | myHasBall (Raw[4]): {rawInputs[4]:F1} | hasBallTeam (Raw[8]): {rawInputs[8]:F1}");
-            
-            // Imprimimos un par de features en crudo y luego normalizadas para ver si el scaler está actuando
-            Debug.Log($"[TFG-DEBUG] 2. RAW RelPelotaX: {rawInputs[5]:F2}, RelPelotaZ: {rawInputs[6]:F2} | NORM RelPelotaX: {normalizedInputs[5]:F2}, RelPelotaZ: {normalizedInputs[6]:F2}");
-            
-            if (scaler == null || scaler.mean.Length == 0)
-                Debug.LogWarning("[TFG-DEBUG] CUIDADO: El scaler está VACÍO. Las variables normalizadas son iguales a las crudas. ¡Revisa el inspector!");
-
-            Debug.Log($"[TFG-DEBUG] 3. PREDICCIÓN IA -> InputX: {aiInputX:F2}, InputZ: {aiInputZ:F2} | Prob Shoot: {shootProb:F2}, Prob Pass: {passProb:F2}");
+            // Forzamos a la IA a quedarse quieta (no persigue ciegamente la pelota)
+            aiOutputs[0] = 0f;
+            aiOutputs[1] = 0f;
+            shootProb = 0f;
+            passProb = 0f;
         }
 
         // --- APLICAR RESULTADOS AL PERSONAJE ---
         float speed = 100f; 
-        Vector3 moveDir = new Vector3(aiInputX, 0f, aiInputZ).normalized;
+        Vector3 moveDir = new Vector3(aiOutputs[0], 0f, aiOutputs[1]).normalized;
         Vector3 movement = moveDir * speed;
         
         myRigidbody.linearVelocity = new Vector3(movement.x, myRigidbody.linearVelocity.y, movement.z);
@@ -219,40 +220,72 @@ public class AIController : MonoBehaviour
     private void DetermineBehaviorState(float[] rawInputs)
     {
         // Variables crudas relevantes para la toma de decisión basadas en el nuevo array de 40:
-        // Index 4: myHasBall (0/1)
-        // Index 8: hasBallTeam (0=Nadie, 1=Mi equipo, 2=Rival)
-        // Index 9: distToRivalGoal
-        // Index 14: distClosestAlly
-
         float myHasBall = rawInputs[4];
         float hasBallTeam = rawInputs[8];
         float distToRivalGoal = rawInputs[9];
         float distClosestAlly = rawInputs[14];
 
+        // --- CONSULTA AL ZONE MANAGER ---
+        int zonaBalon = -1;
+        int equipoBalonZonal = -1; // 0 o 1
+        if (ZoneManager.instance != null)
+        {
+            var zonas = ZoneManager.instance.whereIsBall();
+            if (zonas != null && zonas.Count > 0)
+            {
+                zonaBalon = zonas[0].zona;
+                equipoBalonZonal = zonas[0].team;
+            }
+        }
+
+        int miEquipo = myPlayer != null ? (myPlayer.id % 2) : 0;
+        int equipoRival = (miEquipo == 0) ? 1 : 0;
+
+        // Franjas 3 o 4 del rival (Zonas de peligro/ataque)
+        bool balonEnRivalAtaque = (equipoBalonZonal == equipoRival && zonaBalon >= 3);
+        bool balonEnMiCampo = (equipoBalonZonal == miEquipo);
+
+        // --- DECISIÓN TÁCTICA ---
         if (hasBallTeam != 1f) // Nadie tiene la pelota o la tiene el rival
         {
-            currentState = BehaviorState.Recover;
+            if (rolTactico == RolTactico.Defensa && !balonEnMiCampo)
+            {
+                // El balón está en campo rival, el defensa no sube a presionar.
+                mantenerPosicionDefensiva = true; 
+                currentState = BehaviorState.Approach; // Usamos approach para que no dispare ni pase
+            }
+            else
+            {
+                mantenerPosicionDefensiva = false;
+                currentState = BehaviorState.Recover;
+            }
         }
-        else // MI EQUIPO tiene la pelota (Approach, Pass o Shoot)
+        else // MI EQUIPO tiene la pelota
         {
+            mantenerPosicionDefensiva = false;
+
             if (myHasBall > 0.5f) // YO tengo la pelota
             {
-                if (distToRivalGoal < distanceToShoot)
-                {
+                // Disparo Zonal: Dispara si estoy en la zona de ataque del rival, o si estoy lo suficientemente cerca
+                if (balonEnRivalAtaque || distToRivalGoal < distanceToShoot)
                     currentState = BehaviorState.Shoot;
-                }
                 else if (distClosestAlly < distanceToPass)
-                {
                     currentState = BehaviorState.Pass;
+                else
+                    currentState = BehaviorState.Approach;
+            }
+            else // Un ALIADO tiene la pelota
+            {
+                if (rolTactico == RolTactico.Defensa && balonEnRivalAtaque)
+                {
+                    // Si el balón está arriba y un aliado ataca, el defensa se queda atrás
+                    mantenerPosicionDefensiva = true;
+                    currentState = BehaviorState.Approach;
                 }
                 else
                 {
                     currentState = BehaviorState.Approach;
                 }
-            }
-            else // Un ALIADO tiene la pelota
-            {
-                currentState = BehaviorState.Approach;
             }
         }
     }
