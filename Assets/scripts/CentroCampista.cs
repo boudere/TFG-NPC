@@ -118,7 +118,7 @@ public class CentroCampista : PlayerID, IResettable
             {
                 float decision = Random.value;
                 bool intentarPase = Random.value < 0.3f;
-                bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == miEquipo;
+                //bool estaEnZonaPermitida = areaPlayer == -1 || areaPlayer == miEquipo;
                 bool enAreaChica = areaSmall != -1;
 
                 if (enAreaChica && bolaEnOtraArea)
@@ -134,19 +134,19 @@ public class CentroCampista : PlayerID, IResettable
 
                 if (intentarPase)
                 {
-                    bool hacerPase = !estaEnZonaPermitida || Random.value < 0.2f;
+                    bool hacerPase = Random.value < 0.5f;
 
                     if (hacerPase)
                     {
-                        if (decision < 0.1f)
+                        if (decision < 0.05f)
                         {
                             opcionPaseLoco();
                         }
-                        else if (decision < 0.5f)
+                        else if (decision < 0.6f)
                         {
                             PaseConCriterio();
                         }
-                        else if (decision < 0.6f)
+                        else if (decision < 0.95f)
                         {
                             disparoPorteria = true;
                         }

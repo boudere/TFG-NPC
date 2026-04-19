@@ -8,7 +8,7 @@ public class CharacterGV : PlayerID
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-    private float speed = 150;
+    private float speed = 100f;
 
     public int index;
     private CharacterManager characterManager;
