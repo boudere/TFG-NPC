@@ -141,7 +141,18 @@ public class Recorder : MonoBehaviour
         totalTime   += Time.deltaTime;
         timeElapsed += Time.deltaTime;
 
-        if (timeElapsed >= snapshotTime)
+        bool iHaveBall = (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.GetComponent<PlayerID>() == myPlayer);
+
+        bool forcePase = Input.GetKeyDown(KeyCode.P) && iHaveBall;
+        bool forceTiro = Input.GetKeyDown(KeyCode.O) && iHaveBall;
+
+        if (forcePase || forceTiro)
+        {
+            RecordSnapshot(forcePase, forceTiro);
+            totalFrames++;
+            timeElapsed = 0f;
+        }
+        else if (timeElapsed >= snapshotTime)
         {
             timeElapsed -= snapshotTime;
             RecordSnapshot();
@@ -150,7 +161,7 @@ public class Recorder : MonoBehaviour
     }
 
     // ------------------------------------------------------------------ //
-    private void RecordSnapshot()
+    private void RecordSnapshot(bool forcePase = false, bool forceTiro = false)
     {
         Vector3 myPos = transform.position;
 
@@ -245,8 +256,8 @@ public class Recorder : MonoBehaviour
         // ---- Labels -------------------------------------------------------
         float inputX     = Input.GetAxisRaw("Horizontal");
         float inputZ     = Input.GetAxisRaw("Vertical");
-        int disparo = Input.GetKey(KeyCode.O) ? 1 : 0;
-        int pase    = Input.GetKey(KeyCode.P) ? 1 : 0;
+        int disparo = (forceTiro || Input.GetKey(KeyCode.O)) ? 1 : 0;
+        int pase    = (forcePase || Input.GetKey(KeyCode.P)) ? 1 : 0;
 
         // ---- Serializar fila CSV ------------------------------------------
         string F(float v) => v.ToString("F3", Inv);
