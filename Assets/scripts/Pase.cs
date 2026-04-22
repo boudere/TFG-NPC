@@ -81,7 +81,7 @@ public class Pase : MonoBehaviour
             for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
-                if (id == team) //El team es el id (lo he llamado as�)
+                if (id == team) //El team es el id (lo he llamado así)
                 {
                     break;
                 }
@@ -106,21 +106,26 @@ public class Pase : MonoBehaviour
         float currentDistance;
 
         int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
-        int j = 0; // Es la posici�n de la lista (no el id)
+        int j = 0; // Es la posición de la lista (no el id)
         int team = index % 2;
         string posicionPlayer = " ";
         
             for (int i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
+
+                if (id == index) continue; // No pasarse a uno mismo
+
+                float baseDist = calculateDistance(p[i].transform.position);
+                float distEval = (id == characterManager.index) ? baseDist * 0.3f : baseDist; // Priorizar al jugador
+
                 if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
                 {
                     if (team == id % 2)
                     {
-                        currentDistance = calculateDistance(p[i].transform.position);
-                        if (currentDistance < minDistance)
+                        if (distEval < minDistance)
                         {
-                            minDistance = currentDistance;
+                            minDistance = distEval;
                             player = p[i];
                             j = i;
                         }
@@ -129,41 +134,13 @@ public class Pase : MonoBehaviour
                 else
                 {
                     posicionPlayer = p[i].GetComponent<PlayerID>().posicion;
-                    if (this.tagPlayer == "Defensa")
+                    if (this.tagPlayer == "Defensa" || this.tagPlayer == "CentroCampista" || this.tagPlayer == "Delantero")
                     {
-
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                        if (team == id % 2 && posicionPlayer == this.tagPlayer)
                         {
-                            currentDistance = calculateDistance(p[i].transform.position);
-                            if (currentDistance < minDistance)
+                            if (distEval < minDistance)
                             {
-                                minDistance = currentDistance;
-                                player = p[i];
-                                j = i;
-                            }
-                        }
-                    }
-                    else if (this.tagPlayer == "CentroCampista")
-                    {
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
-                        {
-                            currentDistance = calculateDistance(p[i].transform.position);
-                            if (currentDistance < minDistance)
-                            {
-                                minDistance = currentDistance;
-                                player = p[i];
-                                j = i;
-                            }
-                        }
-                    }
-                    else if (this.tagPlayer == "Delantero")
-                    {
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
-                        {
-                            currentDistance = calculateDistance(p[i].transform.position);
-                            if (currentDistance < minDistance)
-                            {
-                                minDistance = currentDistance;
+                                minDistance = distEval;
                                 player = p[i];
                                 j = i;
                             }
@@ -184,11 +161,16 @@ public class Pase : MonoBehaviour
         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
         rb.isKinematic = false;
 
-        Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
+        Vector3 direction = (player.transform.position - Bola.instance.transform.position);
+        float distance = direction.magnitude;
+        direction.y = 0f;
+        direction = direction.normalized;
+        direction.y = 0.15f; // Ligera parábola
+        direction = direction.normalized;
 
-         float passSpeed = 300f;
-         rb.linearVelocity = direction * passSpeed;
-         rb.angularVelocity = Vector3.zero;
+        float passSpeed = Mathf.Clamp(distance * 1.5f, 15f, 40f);
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
 
      
     }
@@ -245,6 +227,7 @@ public class Pase : MonoBehaviour
         Rigidbody rbBall = Bola.instance.GetComponent<Rigidbody>();
 
         Vector3 direction = (bestPlayer.transform.position - Bola.instance.transform.position);
+        float distance = direction.magnitude;
         direction.y = 0f;
 
         if (direction != Vector3.zero)
@@ -253,10 +236,11 @@ public class Pase : MonoBehaviour
         }
 
         direction = direction.normalized;
+        direction.y = 0.15f; // Ligera parábola
+        direction = direction.normalized;
 
-        float passSpeed = 300f;
+        float passSpeed = Mathf.Clamp(distance * 1.5f, 15f, 40f);
         rbBall.linearVelocity = direction * passSpeed;
-        rbBall.angularVelocity = Vector3.zero;
         rbBall.angularVelocity = Vector3.zero;
     }
 

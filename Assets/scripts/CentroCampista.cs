@@ -15,7 +15,7 @@ public class CentroCampista : PlayerID, IResettable
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
-    private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
+    private Vector3 smoothDir = Vector3.forward;           // direcciÃ³n suavizada
     private float speed = 150;
   
     private CharacterManager characterManager;
@@ -50,7 +50,7 @@ public class CentroCampista : PlayerID, IResettable
     private float nextRefreshTime;
 
     float nextDecisionTime;
-    float decisionInterval = 1f;
+    float decisionInterval = 0.3f;
 
     float tiroTime;
     float tiroInterval = 0.5f;
@@ -110,10 +110,10 @@ public class CentroCampista : PlayerID, IResettable
         {
             chasingBall = false;
 
-            // Movimiento con balón: una sola orden
+            // Movimiento con balÃ³n: una sola orden
             move("otherArea");
 
-            // Decisiones con balón
+            // Decisiones con balÃ³n
             if (AccionConBola())
             {
                 float decision = Random.value;
@@ -387,25 +387,37 @@ public class CentroCampista : PlayerID, IResettable
 
     private void opcionPaseLoco()
     {
+        if (this.id == characterManager.index) return;
 
-        if (this.id == characterManager.index) { return; }
-  
-        float aux = Random.value;
-        if (aux < 0.1f)
+        Transform rivalGoal = null;
+        Porteria[] porterias = FindObjectsByType<Porteria>(FindObjectsSortMode.None);
+        int myTeam = this.id % 2;
+        foreach (Porteria p in porterias)
         {
-            Shoot.instance.disparoLibre();
+            if (p.team % 2 != myTeam)
+            {
+                rivalGoal = p.transform;
+                break;
+            }
         }
-        else if (0.1f < aux && aux < 0.4f)
+
+        if (rivalGoal != null)
         {
-            Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+            float distToGoal = Vector3.Distance(transform.position, rivalGoal.position);
+            if (distToGoal < 30f)
+            {
+                Shoot.instance.disparoLibre();
+                return;
+            }
         }
-        else if (0.4f < aux && aux < 0.7f) // Que estén en el area
+
+        if (Random.value < 0.6f)
         {
-            Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
+            Pase.instance.searchPlayersToPass("Delantero", transform.position, this.id);
         }
         else
         {
-            Pase.instance.searchPlayersToPass("Delantero", transform.position, this.id);
+            Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
         }
     }
 
@@ -449,7 +461,7 @@ public class CentroCampista : PlayerID, IResettable
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
         rbPlayer.linearVelocity = Vector3.zero;
         rbPlayer.angularVelocity = Vector3.zero;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.3f);
         frozen = false;
     }
 
@@ -492,7 +504,7 @@ public class CentroCampista : PlayerID, IResettable
             rbPlayer.angularVelocity = Vector3.zero;
         }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.3f);
         stop = false;
         playerStop = null;
     }

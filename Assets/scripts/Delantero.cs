@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -227,7 +227,7 @@ public class Delantero : PlayerID, IResettable
 
     private void opcionPase()
     {
-        if (this.id == characterManager.index) { return; }
+        if (this.id == characterManager.index) return;
 
         if (disparoPorteria)
         {
@@ -237,22 +237,40 @@ public class Delantero : PlayerID, IResettable
 
         if (Random.value < npcPass)
         {
-            float aux = Random.value;
-            if (aux < 0.1f)
+            Transform rivalGoal = null;
+            Porteria[] porterias = FindObjectsByType<Porteria>(FindObjectsSortMode.None);
+            int myTeam = this.id % 2;
+            foreach (Porteria p in porterias)
             {
-                Shoot.instance.disparoLibre();
+                if (p.team % 2 != myTeam)
+                {
+                    rivalGoal = p.transform;
+                    break;
+                }
             }
-            else if (0.1f < aux && aux < 0.4f)
+
+            if (rivalGoal != null)
             {
-                Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-            } else if (0.4f < aux && aux < 0.6f)
+                float distToGoal = Vector3.Distance(transform.position, rivalGoal.position);
+                if (distToGoal < 30f)
+                {
+                    if (Random.value < 0.5f) {
+                        Shoot.instance.disparoLibre();
+                    } else {
+                        tiroPorteria();
+                    }
+                    return;
+                }
+            }
+
+            if (Random.value < 0.5f)
             {
                 PaseConCriterio();
-            } else if (0.6f < aux && aux < 0.9f)
-            {
-                tiroPorteria();
             }
-            
+            else
+            {
+                Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+            }
         }
     }
 
@@ -355,7 +373,7 @@ public class Delantero : PlayerID, IResettable
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
         rbPlayer.linearVelocity = Vector3.zero;
         rbPlayer.angularVelocity = Vector3.zero;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.3f);
         frozen = false;
     }
 
@@ -414,7 +432,7 @@ public class Delantero : PlayerID, IResettable
             rbPlayer.angularVelocity = Vector3.zero;
         }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.3f);
         stop = false;
         playerStop = null;
     }

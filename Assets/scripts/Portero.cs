@@ -11,7 +11,7 @@ public class Portero : PlayerID, IResettable
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
-    private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
+    private Vector3 smoothDir = Vector3.forward;           // direcciÃ³n suavizada
     private float speed = 150;
 
     public int index;
@@ -96,7 +96,7 @@ public class Portero : PlayerID, IResettable
 
     IEnumerator EsperarYSacar(float exito)
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
 
         Bola.instance.Soltar();
 
@@ -105,16 +105,7 @@ public class Portero : PlayerID, IResettable
         rb.isKinematic = false;
         rb.useGravity = true;
 
-        if (Random.value < exito)
-        {
-
-            Pase.instance.searchPlayersToPass("portero", transform.position, this.id);
-        }
-        else
-        {
-
-            disparoAleatorio();
-        }
+        Pase.instance.searchPlayersToPass("portero", transform.position, this.id);
 
         saqueEnProceso = false;
         rb.WakeUp();
@@ -134,9 +125,13 @@ public class Portero : PlayerID, IResettable
 
     void othersBehaviour()
     {
-        //Hacer un swich con las distinas posibilidades (ir a un destino y llegar al objetivo), estar quieto
         if (index == characterManager.index)
             return;
+
+        if (Bola.instance != null) {
+            float targetZ = Mathf.Clamp(Bola.instance.transform.position.z, minZ, maxZ);
+            npcTarget = new Vector3(transform.position.x, transform.position.y, targetZ);
+        }
 
         Vector3 direction = (npcTarget - transform.position).normalized;
 
@@ -145,9 +140,6 @@ public class Portero : PlayerID, IResettable
             rb.linearVelocity.y,
             direction.z * npcSpeed
         );
-
-        if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
-            PickNewTarget();
     }
 
     void PickNewTarget()
@@ -178,7 +170,7 @@ public class Portero : PlayerID, IResettable
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
         rbPlayer.linearVelocity = Vector3.zero;
         rbPlayer.angularVelocity = Vector3.zero;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.3f);
         frozen = false;
     }
 
