@@ -3117,7 +3117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
@@ -3148,6 +3148,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3625312987260654821}
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654827}
   m_SourcePrefab: {fileID: 100100000, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
 --- !u!4 &3625312987260654812 stripped
 Transform:
@@ -3188,7 +3191,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
   m_Name: 
@@ -3208,12 +3211,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d548acf49f9d5f3409122e97d5c28417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rolTactico: 1
+  rolTactico: 2
   modelRecover: {fileID: 5022602860645237092, guid: 4b5b1b139efac6a41ab3c6e40b1c387b, type: 3}
   modelApproach: {fileID: 5022602860645237092, guid: 8c6d4c68f5e7e2d46aae422b254c22b8, type: 3}
   modelPass: {fileID: 5022602860645237092, guid: 01e7f2beed38c8e438b0eed6fbaec5b4, type: 3}
@@ -3222,7 +3225,7 @@ MonoBehaviour:
   distanceToShoot: 15
   distanceToPass: 10
   actionThreshold: 0.5
-  actionCooldown: 0.5
+  actionCooldown: 1
   myPlayer: {fileID: 0}
   myRigidbody: {fileID: 0}
   characterGV: {fileID: 0}
@@ -3232,6 +3235,18 @@ MonoBehaviour:
   fieldLimitX: 600
   fieldLimitZ: 350
   currentState: 0
+--- !u!114 &3625312987260654827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd131acb1b802c142a400cf93486bb28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0
