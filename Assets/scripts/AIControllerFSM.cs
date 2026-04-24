@@ -33,6 +33,12 @@ public class AIControllerFSM : MonoBehaviour
     [Header("State Hysteresis")]
     [Tooltip("Tiempo mínimo que el NPC permanece en un estado antes de poder cambiar")]
     public float minStateTime = 2.0f;
+    [Tooltip("Tiempo mínimo en estado Defendiendo (más alto para evitar salidas prematuras)")]
+    public float minDefendingTime = 3.5f;
+
+    [Header("Transition Confidence")]
+    [Tooltip("Probabilidad mínima que el nuevo estado necesita para aceptar la transición")]
+    [Range(0.5f, 0.95f)] public float transitionThreshold = 0.75f;
 
     [Header("Movement")]
     [Tooltip("Velocidad de movimiento del NPC")]
@@ -94,11 +100,6 @@ public class AIControllerFSM : MonoBehaviour
         public float[] std  = new float[0];
     }
     private ScalerData scaler = new ScalerData();
-
-    // ========================================================================
-    // UNITY LIFECYCLE
-    // ========================================================================
-
     private void Start()
     {
         if (myPlayer    == null) myPlayer    = GetComponent<PlayerID>();
@@ -153,7 +154,7 @@ public class AIControllerFSM : MonoBehaviour
     {
         if (myPlayer == null || worker == null) return;
 
-        // 1. Recopilar observaciones del entorno (40 features)
+        // Recopilar observaciones del entorno (40 features)
         float[] rawInputs = RecopilarVariablesDelEntorno();
         if (rawInputs.Length != ExpectedInputSize)
         {
@@ -161,39 +162,70 @@ public class AIControllerFSM : MonoBehaviour
             return;
         }
 
-        // 2. Normalizar
+        // Normalizar
         float[] normalizedInputs = (float[])rawInputs.Clone();
         NormalizeFeatures(normalizedInputs);
 
-        // 3. Ejecutar inferencia
+        // Ejecutar inferencia
         var prediction = Predecir(normalizedInputs);
         float[] stateLogits = prediction.stateLogits;
         float[] movement    = prediction.movement;
 
-        // 4. Convertir logits a probabilidades (softmax) y elegir estado (argmax)
+        // Convertir logits a probabilidades (softmax) y elegir estado (argmax)
         stateProbabilities = Softmax(stateLogits);
         int bestState = Argmax(stateProbabilities);
         FSMState proposedState = (FSMState)bestState;
 
-        // Hysteresis: solo cambiar de estado si ha pasado el tiempo mínimo
+        // ── VETO DE ESTADO POR POSESIÓN ──
+        // Determinar posesión actual de la pelota
+        bool ballFree = (Bola.instance == null || !Bola.instance.EnPosesion || Bola.instance.Owner == null);
+        bool myTeamHasBall = false;
+        bool iHaveBall = false;
+
+        if (!ballFree)
+        {
+            PlayerID ownerID = Bola.instance.Owner.GetComponent<PlayerID>();
+            if (ownerID != null)
+            {
+                myTeamHasBall = (ownerID.id % 2 == myPlayer.id % 2);
+                iHaveBall = (ownerID == myPlayer);
+            }
+        }
+
+        // Aplicar vetos: bloquear estados físicamente imposibles
+        proposedState = ApplyStateVeto(proposedState, ballFree, myTeamHasBall, iHaveBall);
+
+        // ── TRANSICIÓN CON HYSTERESIS + UMBRAL DE CONFIANZA ──
         if (proposedState != currentState)
         {
-            if (Time.time - stateEnteredTime >= minStateTime)
+            // Tiempo mínimo según estado actual
+            float requiredTime = (currentState == FSMState.Defendiendo) ? minDefendingTime : minStateTime;
+            float confidence = stateProbabilities[(int)proposedState];
+
+            if (Time.time - stateEnteredTime >= requiredTime && confidence >= transitionThreshold)
             {
                 if (enableDebugLogs)
                 {
                     Debug.Log($"[FSM {myPlayer.id}] Transición: {currentState} → {proposedState}  " +
                               $"(Prob: Def={stateProbabilities[0]:F2} Ata={stateProbabilities[1]:F2} " +
-                              $"Pas={stateProbabilities[2]:F2} Tir={stateProbabilities[3]:F2})");
+                              $"Pas={stateProbabilities[2]:F2} Tir={stateProbabilities[3]:F2})" +
+                              $" [conf={confidence:F2} >= {transitionThreshold:F2}]");
                 }
                 currentState = proposedState;
                 previousState = currentState;
                 stateEnteredTime = Time.time;
             }
-            // Si no ha pasado el tiempo mínimo, se queda en el estado actual
+            else if (enableDebugLogs && Time.time >= nextLogTime)
+            {
+                string reason = (Time.time - stateEnteredTime < requiredTime)
+                    ? $"hysteresis ({Time.time - stateEnteredTime:F1}s < {requiredTime:F1}s)"
+                    : $"baja confianza ({confidence:F2} < {transitionThreshold:F2})";
+                // Solo logear bloqueos esporádicamente para no saturar
+            }
+            // Si no pasa los filtros, se queda en el estado actual
         }
 
-        // 5. Ejecutar comportamiento del estado
+        // Ejecutar comportamiento del estado
         lastActionDetail = "";
         ExecuteState(currentState, movement, rawInputs);
 
@@ -206,10 +238,10 @@ public class AIControllerFSM : MonoBehaviour
             Debug.Log($"[FSM {myPlayer.id}] Estado={currentState} | {lastActionDetail} | Prob: [{probStr}]");
         }
 
-        // 6. Desactivar CharacterGV si existe (lo mismo que hace AIController)
+        // Desactivar CharacterGV si existe (lo mismo que hace AIController)
         if (characterGV != null) characterGV.enabled = false;
 
-        // 7. Restricción de campo
+        // Restricción de campo
         if (constrainToField)
         {
             Vector3 pos = transform.position;
@@ -223,10 +255,7 @@ public class AIControllerFSM : MonoBehaviour
         }
     }
 
-    // ========================================================================
     // EJECUCIÓN DE ESTADOS
-    // ========================================================================
-
     private void ExecuteState(FSMState state, float[] aiMovement, float[] rawInputs)
     {
          switch (state)
@@ -255,7 +284,6 @@ public class AIControllerFSM : MonoBehaviour
     ///  0. YO tengo la pelota → pasar a un compañero para sacar del área
     ///  1. Pelota LIBRE (nadie la tiene) → correr a recuperarla
     ///  2. RIVAL tiene la pelota → correr hacia la pelota para robarla
-    ///  3. ALIADO tiene la pelota → posicionarse entre pelota y portería propia
     /// </summary>
     private void ExecuteDefending(float[] aiMovement, float[] rawInputs)
     {
@@ -467,10 +495,41 @@ public class AIControllerFSM : MonoBehaviour
         }
     }
 
-    // ========================================================================
-    // MOVIMIENTO
-    // ========================================================================
+    // ── VETO DE ESTADO ──
+    /// <summary>
+    /// Bloquea transiciones a estados físicamente imposibles según la posesión actual.
+    /// - Tirando/Pasando: requieren que YO tenga la pelota.
+    /// - Atacando: requiere que mi EQUIPO tenga la pelota.
+    /// - Defendiendo: siempre permitido.
+    /// </summary>
+    private FSMState ApplyStateVeto(FSMState proposed, bool ballFree, bool myTeamHasBall, bool iHaveBall)
+    {
+        switch (proposed)
+        {
+            case FSMState.Tirando:
+            case FSMState.Pasando:
+                if (!iHaveBall)
+                {
+                    if (enableDebugLogs && Time.time >= nextLogTime)
+                        Debug.Log($"[FSM {myPlayer.id}] VETO: {proposed} bloqueado (no tengo pelota) → Defendiendo");
+                    return FSMState.Defendiendo;
+                }
+                break;
 
+            case FSMState.Atacando:
+                if (!myTeamHasBall && !ballFree)
+                {
+                    if (enableDebugLogs && Time.time >= nextLogTime)
+                        Debug.Log($"[FSM {myPlayer.id}] VETO: Atacando bloqueado (rival tiene pelota) → Defendiendo");
+                    return FSMState.Defendiendo;
+                }
+                break;
+        }
+
+        return proposed;
+    }
+
+    // MOVIMIENTO
     private void ApplyMovement(Vector3 moveDir)
     {
         if (moveDir.sqrMagnitude < 0.001f)
@@ -533,16 +592,13 @@ public class AIControllerFSM : MonoBehaviour
         }
 
         // Fallback: apuntar hacia la portería rival
-        if (rivalGoalTransform != null)
+        if (rivalGoalTransform != null)  
         {
             attackTarget = rivalGoalTransform.position;
         }
     }
 
-    // ========================================================================
     // INFERENCIA
-    // ========================================================================
-
     private (float[] stateLogits, float[] movement) Predecir(float[] inputFeatures)
     {
         using var inputTensor = new Unity.InferenceEngine.Tensor<float>(
@@ -550,9 +606,9 @@ public class AIControllerFSM : MonoBehaviour
 
         worker.Schedule(inputTensor);
 
-        // Cabeza 1: state_logits (4 valores)
+        // state_logits (4 valores)
         using var stateTensor = worker.PeekOutput("state_logits") as Unity.InferenceEngine.Tensor<float>;
-        // Cabeza 2: continuous_actions (2 valores: InputX, InputZ)
+        // continuous_actions (2 valores: InputX, InputZ)
         using var movementTensor = worker.PeekOutput("continuous_actions") as Unity.InferenceEngine.Tensor<float>;
 
         float[] stateLogits = stateTensor != null ? stateTensor.DownloadToArray() : new float[NumStates];
@@ -561,9 +617,7 @@ public class AIControllerFSM : MonoBehaviour
         return (stateLogits, movement);
     }
 
-    // ========================================================================
     // UTILIDADES
-    // ========================================================================
 
     private bool HasBallControl()
     {
@@ -642,7 +696,7 @@ public class AIControllerFSM : MonoBehaviour
         float relBallZ   = ballPos.z - myPos.z;
         float distToBall = Vector3.Distance(myPos, ballPos);
 
-        // ---- ¿Quién tiene la pelota? ----
+        // ---- Quién tiene la pelota? ----
         int hasBallTeam = 0;
         int myHasBall   = 0;
         if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null)
@@ -691,7 +745,7 @@ public class AIControllerFSM : MonoBehaviour
         float distClosestAlly  = allies.Count > 0 ? allies[0].dist : 999f;
         float distClosestEnemy = enemies.Count > 0 ? enemies[0].dist : 999f;
 
-        // ---- Helper: datos relativos de un jugador ----
+        // ---- datos relativos de un jugador ----
         (float relPx, float relPz, float dx, float dz) GetPlayerData(List<(float dist, PlayerID p)> list, int index)
         {
             if (index >= list.Count) return (0f, 0f, 0f, 0f);

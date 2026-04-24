@@ -8,7 +8,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, Subset
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (accuracy_score, classification_report,
+                             precision_score, recall_score, f1_score,
+                             confusion_matrix)
 import os
 import json
 import glob
@@ -314,12 +316,38 @@ def train_fsm():
 
     # Métricas de estado
     acc_state = accuracy_score(all_true_state, all_pred_state)
-    print(f"\n  Accuracy Estado Global: {acc_state*100:.1f}%")
-    print("\n  Classification Report (Estados):")
+    prec_macro = precision_score(all_true_state, all_pred_state, average='macro', zero_division=0)
+    rec_macro  = recall_score(all_true_state, all_pred_state, average='macro', zero_division=0)
+    f1_macro   = f1_score(all_true_state, all_pred_state, average='macro', zero_division=0)
+    prec_weighted = precision_score(all_true_state, all_pred_state, average='weighted', zero_division=0)
+    rec_weighted  = recall_score(all_true_state, all_pred_state, average='weighted', zero_division=0)
+    f1_weighted   = f1_score(all_true_state, all_pred_state, average='weighted', zero_division=0)
+
+    print(f"\n  ┌─────────────────────────────────────────────┐")
+    print(f"  │        MÉTRICAS GLOBALES DE ESTADO          │")
+    print(f"  ├─────────────────────────────────────────────┤")
+    print(f"  │  Accuracy:            {acc_state*100:6.1f}%              │")
+    print(f"  │  Precision (macro):    {prec_macro*100:6.1f}%              │")
+    print(f"  │  Recall    (macro):    {rec_macro*100:6.1f}%              │")
+    print(f"  │  F1-Score  (macro):    {f1_macro*100:6.1f}%              │")
+    print(f"  │  Precision (weighted): {prec_weighted*100:6.1f}%              │")
+    print(f"  │  Recall    (weighted): {rec_weighted*100:6.1f}%              │")
+    print(f"  │  F1-Score  (weighted): {f1_weighted*100:6.1f}%              │")
+    print(f"  └─────────────────────────────────────────────┘")
+
+    print("\n  Classification Report (por clase):")
     print(classification_report(
         all_true_state, all_pred_state,
         target_names=STATE_NAMES, zero_division=0
     ))
+
+    # Matriz de confusión
+    cm = confusion_matrix(all_true_state, all_pred_state)
+    print("  Matriz de Confusión:")
+    print(f"  {'':>15s}  {'Pred Def':>8s} {'Pred Ata':>8s} {'Pred Pas':>8s} {'Pred Tir':>8s}")
+    for i, name in enumerate(STATE_NAMES):
+        row = '  '.join(f'{v:8d}' for v in cm[i])
+        print(f"  {('Real '+name):>15s}  {row}")
 
     # Métricas de movimiento
     pred_mov = np.vstack(all_pred_mov)
