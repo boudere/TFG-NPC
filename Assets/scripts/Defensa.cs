@@ -107,8 +107,8 @@ public class Defensa : PlayerID, IResettable
 
         if (stop)
         {
-           rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-           return;
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
         }
 
         if (defender && !Bola.instance.transform.IsChildOf(transform) && puedePerseguir)
@@ -127,17 +127,18 @@ public class Defensa : PlayerID, IResettable
         {
             goToOtherAreaDefender();
 
-         
+
             if (PuedoTirar()) // Aumentar probabiliadad según llegue al centro o al area de peligro
             {
                 opcionPase();
             }
-               
+
 
             move("otherArea");
-           
+
         }
-        else {
+        else
+        {
             stayInAreaGoal();
             move("ownArea");
         }
@@ -213,7 +214,7 @@ public class Defensa : PlayerID, IResettable
         );
     }
 
-   
+
     private void move(string targetTag)
     {
         if (this.id == characterManager.index) return;
@@ -227,20 +228,38 @@ public class Defensa : PlayerID, IResettable
         if (targetTag != this.targetTag)
         {
             this.targetTag = targetTag;
-            npcTarget = Vector3.zero;   
+            npcTarget = Vector3.zero;
             PickNewTarget();
         }
 
-        Vector3 direction = (npcTarget - transform.position).normalized;
+        Vector3 direction = npcTarget - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.001f)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
+        direction = direction.normalized;
+
+        float currentSpeed = npcSpeed;
+
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            currentSpeed *= 0.75f;
+        }
 
         rb.linearVelocity = new Vector3(
-            direction.x * npcSpeed,
+            direction.x * currentSpeed,
             rb.linearVelocity.y,
-            direction.z * npcSpeed
+            direction.z * currentSpeed
         );
 
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
+        {
             PickNewTarget();
+        }
     }
 
     private void stayInAreaGoal()
@@ -284,8 +303,11 @@ public class Defensa : PlayerID, IResettable
             else if (0.1f < aux && aux < 0.4f)
             {
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
+            }else if (0.4f < aux && aux < 0.7f)
+            {
+                Pase.instance.passBallOwnPlayer();
             }
-            else if (0.4f < aux && aux < 0.7f)
+            else if (aux > 0.7f && aux > 0.8f)
             {
                 Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
             }

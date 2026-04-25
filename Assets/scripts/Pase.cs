@@ -11,6 +11,7 @@ public class Pase : MonoBehaviour
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
     public static event Action <PlayerID> OnCharacterGVSelected;
+    public static event Action<PlayerID> OnCharacterGVPass;
     public static Pase instance;
     private string tagPlayer;
     public List<PlayerID> jugadores = new List<PlayerID>();
@@ -115,7 +116,7 @@ public class Pase : MonoBehaviour
                 id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
                 if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
                 {
-                    if (team == id % 2)
+                    if (id != index && team == id % 2)
                     {
                         currentDistance = calculateDistance(p[i].transform.position);
                         if (currentDistance < minDistance)
@@ -193,6 +194,27 @@ public class Pase : MonoBehaviour
      
     }
 
+    public void passBallOwnPlayer()
+    {
+        for (int i = 0; i < p.Length; i++)
+        {
+            int id = p[i].GetComponent<PlayerID>().id;
+            if (id == characterManager.index)
+            {
+                PlayerID playerID = p[i].GetComponent<PlayerID>();
+               // OnCharacterGVPass?.Invoke(playerID);
+                Bola.instance.Soltar();
+                Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
+                rb.isKinematic = false;
+                Vector3 direction = (p[i].transform.position - Bola.instance.transform.position).normalized;
+                float passSpeed = 300f;
+                rb.linearVelocity = direction * passSpeed;
+                rb.angularVelocity = Vector3.zero;
+                break;
+            }
+        }
+    }
+
     public void PassBallNear(Vector3 positionPlayer, Vector3 porteriaTeam, int teamID, PlayerID playerID)
     {
 
@@ -257,7 +279,6 @@ public class Pase : MonoBehaviour
         float passSpeed = 300f;
         rbBall.linearVelocity = direction * passSpeed;
         rbBall.angularVelocity = Vector3.zero;
-        rbBall.angularVelocity = Vector3.zero;
     }
 
 
@@ -275,7 +296,7 @@ public class Pase : MonoBehaviour
         });
     }
 
-    float calculateDistance(Vector3 myPos)
+    public float calculateDistance(Vector3 myPos)
     {
         Vector3 ballPosition = Bola.instance.transform.position;
         myPos.y = 0;

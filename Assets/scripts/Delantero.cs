@@ -215,10 +215,17 @@ public class Delantero : PlayerID, IResettable
 
         Vector3 direction = (npcTarget - transform.position).normalized;
 
+        float currentSpeed = npcSpeed;
+
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            currentSpeed *= 0.75f;
+        }
+
         rb.linearVelocity = new Vector3(
-            direction.x * npcSpeed,
+            direction.x * currentSpeed,
             rb.linearVelocity.y,
-            direction.z * npcSpeed
+            direction.z * currentSpeed
         );
 
         if (Vector3.Distance(transform.position, npcTarget) < changeTargetDistance)
@@ -242,17 +249,21 @@ public class Delantero : PlayerID, IResettable
             {
                 Shoot.instance.disparoLibre();
             }
-            else if (0.1f < aux && aux < 0.4f)
+            else if (0.1f < aux && aux < 0.2f)
             {
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-            } else if (0.4f < aux && aux < 0.6f)
+            }
+            else if (0.2f < aux && aux < 0.45f)
             {
                 PaseConCriterio();
-            } else if (0.6f < aux && aux < 0.9f)
+            }
+            else if (0.45f < aux && aux < 0.7f)
             {
                 tiroPorteria();
             }
-            
+            else if (0.7f < aux && aux < 0.9f) { Pase.instance.passBallOwnPlayer(); }
+
+
         }
     }
 

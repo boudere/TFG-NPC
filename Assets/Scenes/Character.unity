@@ -3117,7 +3117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
@@ -3242,7 +3242,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a1ee6e1ebb7ade4fad823f257214eda, type: 3}
   m_Name: 
@@ -3251,6 +3251,8 @@ MonoBehaviour:
   scalerJson: {fileID: 4900000, guid: 479cea49f2fc9834fad0dc19c4a44827, type: 3}
   actionCooldown: 0.5
   minStateTime: 1
+  minDefendingTime: 3.5
+  transitionThreshold: 0.75
   moveSpeed: 100
   turnSpeedDeg: 540
   defendInterceptLerp: 0.4
