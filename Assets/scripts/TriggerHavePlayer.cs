@@ -44,7 +44,7 @@ public class TriggerHavePlayer : MonoBehaviour
         if (rb == null) return;
         if (!rb.CompareTag("Ball")) return;
 
-        if (!Bola.instance.PuedeSerRecogida()) return;
+        if (!Bola.instance.PuedeSerRecogida(owner)) return;
 
         locked = true;
         Bola.instance.AsignarPosesion(owner);

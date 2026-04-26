@@ -25,7 +25,10 @@ public class Bola : MonoBehaviour
     public PlayerID Owner { get; private set; }
     private Collider[] ownerColliders;
 
-    private float blockPickupUntil = 0f;
+
+    [SerializeField] private float pickupCooldown = 0.25f;
+    private Dictionary<int, float> blockedPickupByPlayerId = new Dictionary<int, float>();
+
     private CharacterManager characterManager;
 
     private float refreshInterval = 1;
@@ -159,11 +162,29 @@ public class Bola : MonoBehaviour
     }
 
 
-    public bool PuedeSerRecogida()
+    public bool PuedeSerRecogida(PlayerID player)
     {
-        return Time.time >= blockPickupUntil;
+        if (player == null) return false;
+
+        if (!blockedPickupByPlayerId.TryGetValue(player.id, out float blockedUntil))
+            return true;
+
+        if (Time.time >= blockedUntil)
+        {
+            blockedPickupByPlayerId.Remove(player.id);
+            return true;
+        }
+
+        return false;
     }
 
+
+    private void BloquearRecogidaParaJugador(PlayerID player)
+    {
+        if (player == null) return;
+
+        blockedPickupByPlayerId[player.id] = Time.time + pickupCooldown;
+    }
 
 
 
@@ -253,8 +274,12 @@ public class Bola : MonoBehaviour
 
         ownerColliders = null;
     }
+
+
     public void Soltar()
     {
+        PlayerID previousOwner = Owner;
+
         gameObject.layer = LayerMask.NameToLayer("Default");
 
         RestaurarColisionesConOwner();
@@ -269,9 +294,7 @@ public class Bola : MonoBehaviour
         rb.isKinematic = false;
         rb.useGravity = true;
 
-     
-        blockPickupUntil = Time.time + 0.25f;
-        //rb.WakeUp();
+        BloquearRecogidaParaJugador(previousOwner);
     }
 
 
