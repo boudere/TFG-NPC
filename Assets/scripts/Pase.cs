@@ -114,18 +114,22 @@ public class Pase : MonoBehaviour
             for (int i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
+
+            if (id != index && team == id % 2)
+            {
+
+
                 if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
                 {
-                    if (id != index && team == id % 2)
+
+                    currentDistance = calculateDistance(p[i].transform.position);
+                    if (currentDistance < minDistance)
                     {
-                        currentDistance = calculateDistance(p[i].transform.position);
-                        if (currentDistance < minDistance)
-                        {
-                            minDistance = currentDistance;
-                            player = p[i];
-                            j = i;
-                        }
+                        minDistance = currentDistance;
+                        player = p[i];
+                        j = i;
                     }
+
                 }
                 else
                 {
@@ -170,6 +174,7 @@ public class Pase : MonoBehaviour
                             }
                         }
                     }
+                }
                 }
             }
 
@@ -247,6 +252,7 @@ public class Pase : MonoBehaviour
                 bestScore = score;
                 bestPlayer = candidate;
             }
+          
         }
 
         Rigidbody rbPlayer = playerID.GetComponent<Rigidbody>();
@@ -279,6 +285,7 @@ public class Pase : MonoBehaviour
         float passSpeed = 300f;
         rbBall.linearVelocity = direction * passSpeed;
         rbBall.angularVelocity = Vector3.zero;
+        rbBall.WakeUp();
     }
 
 

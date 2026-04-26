@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -32,6 +33,8 @@ public class Bola : MonoBehaviour
 
     public bool ballIsOutside = false;
 
+    private bool resettingBall = false;
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -54,6 +57,9 @@ public class Bola : MonoBehaviour
 
     private void Update()
     {
+        if (resettingBall)
+            return;
+
         if (Time.time < nextRefreshTime)
             return;
 
@@ -265,7 +271,7 @@ public class Bola : MonoBehaviour
 
      
         blockPickupUntil = Time.time + 0.25f;
-        rb.WakeUp();
+        //rb.WakeUp();
     }
 
 
@@ -284,4 +290,16 @@ public class Bola : MonoBehaviour
     {
         return jugadoresOrdenados;
     }
+
+    public IEnumerator resetBall()
+    {
+        yield return new WaitForSeconds(4f);
+    }
+
+    public Rigidbody GetRigidbody()
+    {
+        return rb;
+    }
+
+
 }

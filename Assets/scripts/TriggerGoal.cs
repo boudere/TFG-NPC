@@ -48,7 +48,7 @@ public class TriggerGoal : MonoBehaviour
         StartCoroutine(ResetBallAfterDelay(ballRoot));
         searchPlayersReset();
         StartCoroutine(GoalThenScoreSequence());
-
+        //Bola.instance.resetBall();
 
 
     }
@@ -64,14 +64,18 @@ public class TriggerGoal : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
-        ball.transform.position = new Vector3(59, 9.391f, 80.6f);
-
         Rigidbody rb = ball.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
+        if (rb == null) yield break;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rb.position = new Vector3(59f, 9.391f, 80.6f);
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rb.Sleep();
 
         goalLocked = false;
     }
@@ -120,15 +124,15 @@ public class TriggerGoal : MonoBehaviour
     private void resetByTag<T>(string tag) where T : PlayerID, IResettable
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag(tag);
+
         foreach (GameObject p in players)
         {
-            T character =p.GetComponent<T>();
+            T character = p.GetComponent<T>();
 
             if (character != null)
             {
                 character.ResetToSpawn();
             }
         }
-          
     }
 }

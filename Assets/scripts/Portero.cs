@@ -117,7 +117,7 @@ public class Portero : PlayerID, IResettable
         }
 
         saqueEnProceso = false;
-        rb.WakeUp();
+       // rb.WakeUp();
     }
 
     void disparoAleatorio()
