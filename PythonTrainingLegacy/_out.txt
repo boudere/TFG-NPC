@@ -1,0 +1,49 @@
+﻿Filas: 3732  |  Columnas: 45
+
+=== ACCIONES BINARIAS ===
+ActionShoot = 1 :    43 filas  (1.2%)
+ActionPass  = 1 :    29 filas  (0.8%)
+Ninguna accion  :  3660 filas
+
+Pulsaciones reales de Shoot (rßfagas): 32
+Pulsaciones reales de Pass  (rßfagas): 27
+
+=== MOVIMIENTO (labels) ===
+InputX: {-1: 865, 0: 1390, 1: 1477}
+InputZ: {-1: 1133, 0: 1754, 1: 845}
+Quieto: 704 (18.9%)  |  Moviendo: 3028 (81.1%)
+
+=== BUG CHECKS ===
+python : Traceback (most recent call 
+last):
+En línea: 1 Carácter: 1
++ python _check.py *>&1 | Out-File 
+-Encoding utf8 _out.txt; Get-Content ...
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecif 
+   ied: (Traceback (most recent call l  
+  ast)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCom 
+   mandError
+ 
+  File "C:\Universidad\Universidad\4║\TF
+G\TFG-NPC\PythonTraining\_check.py", 
+line 41, in <module>
+    print(f"Ally1==MyPos BUG: 
+{same}/{len(df)}  {'\u274c SIGUE' if 
+same>0 else '\u2705 OK'}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^
+  File "C:\Program Files\WindowsApps\Pyt
+honSoftwareFoundation.Python.3.13_3.13.3
+312.0_x64__qbz5n2kfra8p0\Lib\encodings\c
+p1252.py", line 19, in encode
+    return codecs.charmap_encode(input,s
+elf.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec 
+can't encode character '\u2705' in 
+position 26: character maps to 
+<undefined>
