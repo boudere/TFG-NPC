@@ -11,9 +11,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import (accuracy_score, classification_report,
                              precision_score, recall_score, f1_score,
                              confusion_matrix)
+from imblearn.over_sampling import SMOTE
 import os
 import json
 import glob
+import datetime
+
+# ============================================================================
+# TEE — escribe en consola Y en fichero de log simultaneamente
+# ============================================================================
+class Tee:
+    """Duplica stdout a un fichero de log y a la consola al mismo tiempo."""
+    def __init__(self, filepath):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        self._file   = open(filepath, 'w', encoding='utf-8')
+        self._stdout = sys.stdout
+    def write(self, data):
+        self._stdout.write(data)
+        self._file.write(data)
+    def flush(self):
+        self._stdout.flush()
+        self._file.flush()
+    def close(self):
+        sys.stdout = self._stdout
+        self._file.close()
+        print(f"[Tee] Log guardado en: {self._file.name}")
 
 # ============================================================================
 # 1. PARAMETROS
@@ -35,6 +57,8 @@ STATE_NAMES = ['Defendiendo', 'Atacando', 'Pasando', 'Tirando']
 NUM_STATES  = len(STATE_NAMES)
 
 # Definicion de columnas (Mismo orden que Unity AIController / Recorder)
+# NOTA: AbsMyPosX, AbsMyPosZ, AbsBallPosX, AbsBallPosZ NO están aquí.
+# Son columnas de visualización (heatmap) — nunca se usan como features.
 FEATURE_COLS = [
     'RelPorteriaRivalX', 'RelPorteriaRivalZ',
     'RelPorteriaPropiaX', 'RelPorteriaPropiaZ',
@@ -52,7 +76,8 @@ FEATURE_COLS = [
     'RelEnemigo1PosX', 'RelEnemigo1PosZ', 'Enemigo1DirX', 'Enemigo1DirZ',
     'RelEnemigo2PosX', 'RelEnemigo2PosZ', 'Enemigo2DirX', 'Enemigo2DirZ',
     'RelEnemigo3PosX', 'RelEnemigo3PosZ', 'Enemigo3DirX', 'Enemigo3DirZ',
-]
+]  # 40 features exactas
+assert len(FEATURE_COLS) == 40, f"Se esperaban 40 features, hay {len(FEATURE_COLS)}"
 MOVEMENT_COLS = ['InputX', 'InputZ']
 
 
@@ -118,50 +143,69 @@ class SoccerFSMDataset(Dataset):
         # ── Derivar la columna Estado ──
         raw['Estado'] = raw.apply(derive_state, axis=1)
 
-        # ── BALANCEO HÍBRIDO: oversampling moderado + class weights suaves ──
+        # ── SMOTE MULTICLASE para los 4 estados FSM ──
+        # Genera muestras sintéticas interpolando entre vecinos reales
+        # de cada clase minoritaria en el espacio de features.
         state_counts = raw['Estado'].value_counts().sort_index()
-        print(f"  Distribución de estados ORIGINAL:")
+        print(f"  Distribución de estados ANTES de SMOTE:")
         for s_id, s_name in enumerate(STATE_NAMES):
-            count = state_counts.get(s_id, 0)
-            print(f"    {s_name} ({s_id}): {count}")
+            print(f"    {s_name} ({s_id}): {state_counts.get(s_id, 0)}")
 
-        # Oversampling moderado: las clases minoritarias se llevan a la MEDIANA
-        # (no al máximo), así no se duplican 100x
-        sorted_counts = sorted(state_counts.values)
-        oversample_target = int(sorted_counts[len(sorted_counts) // 2])  # mediana
-        oversample_target = max(oversample_target, 3000)  # mínimo 3000
-        print(f"  Target de oversampling (mediana capped): {oversample_target}")
+        smote_cols = FEATURE_COLS + MOVEMENT_COLS
 
-        balanced = []
-        for state_val, group in raw.groupby('Estado'):
-            if len(group) < oversample_target:
-                group = group.sample(n=oversample_target, replace=True, random_state=42)
-            balanced.append(group)
+        # k_neighbors no puede superar el nº de muestras de la clase más pequeña - 1
+        min_state_count = min(
+            state_counts.get(s, 0) for s in range(NUM_STATES) if state_counts.get(s, 0) > 0
+        )
+        k = max(min(5, min_state_count - 1), 1)
 
-        df_bal = pd.concat(balanced).reset_index(drop=True)
-        self.data = df_bal.sample(frac=1, random_state=42).reset_index(drop=True)
+        # Objetivo: llevar cada estado minoritario a la mediana
+        # (mínimo 3000 para garantizar datos suficientes)
+        sorted_counts  = sorted(state_counts.values)
+        smote_target   = max(int(sorted_counts[len(sorted_counts) // 2]), 3000)
 
-        state_counts_after = self.data['Estado'].value_counts().sort_index()
-        print(f"  Distribución de estados TRAS oversampling moderado:")
+        sampling_strategy = {}
+        for s_id in range(NUM_STATES):
+            current = state_counts.get(s_id, 0)
+            if current > 0 and current < smote_target:
+                sampling_strategy[s_id] = smote_target
+
+        if sampling_strategy:
+            X_sm = raw[smote_cols].values
+            y_sm = raw['Estado'].values
+
+            smote = SMOTE(sampling_strategy=sampling_strategy, k_neighbors=k, random_state=42)
+            X_res, y_res = smote.fit_resample(X_sm, y_sm)
+
+            df_res = pd.DataFrame(X_res, columns=smote_cols)
+            # Discretizar InputX/Z sintéticos al valor más cercano {-1, 0, 1}
+            for col in MOVEMENT_COLS:
+                df_res[col] = df_res[col].apply(
+                    lambda v: 1.0 if v > 0.5 else (-1.0 if v < -0.5 else 0.0)
+                )
+            df_res['Estado'] = y_res.astype(int)
+            raw = df_res
+        # Si todos los estados ya alcanzan el target, no hace falta SMOTE
+
+        state_counts_after = raw['Estado'].value_counts().sort_index()
+        print(f"  Distribución de estados TRAS SMOTE (k={k}, target={smote_target}):")
         for s_id, s_name in enumerate(STATE_NAMES):
-            count = state_counts_after.get(s_id, 0)
-            print(f"    {s_name} ({s_id}): {count}")
+            print(f"    {s_name} ({s_id}): {state_counts_after.get(s_id, 0)}")
 
-        # Class weights SUAVES (raíz cuadrada del ratio inverso)
-        # Esto compensa el desbalance restante sin desestabilizar gradientes
-        total = len(self.data)
+        # ── Class weights SUAVES (sqrt-dampened) para el desbalance residual ──
+        total = len(raw)
         self.class_weights = torch.zeros(NUM_STATES, dtype=torch.float32)
         for s_id in range(NUM_STATES):
             count = state_counts_after.get(s_id, 1)
             raw_weight = total / (NUM_STATES * count)
-            # Raíz cuadrada para suavizar: 45x → ~6.7x, 1x → 1x
             self.class_weights[s_id] = float(np.sqrt(raw_weight))
 
-        print(f"  Pesos de clase para CrossEntropyLoss (sqrt-dampened):")
+        print(f"  Pesos de clase (sqrt-dampened):")
         for s_id, s_name in enumerate(STATE_NAMES):
-            print(f"    {s_name}: {self.class_weights[s_id]:.2f}")
+            print(f"    {s_name}: {self.class_weights[s_id]:.3f}")
 
         # Tensores
+        self.data = raw.sample(frac=1, random_state=42).reset_index(drop=True)
         self.X  = torch.tensor(self.data[FEATURE_COLS].values, dtype=torch.float32)
         self.Ys = torch.tensor(self.data['Estado'].values,     dtype=torch.long)
         self.Ym = torch.tensor(self.data[MOVEMENT_COLS].values, dtype=torch.float32)
@@ -234,7 +278,7 @@ def load_data(csv_files):
 # ============================================================================
 # 7. ENTRENAMIENTO
 # ============================================================================
-def train_fsm():
+def train_fsm(timestamp=''):
     print("=" * 60)
     print("  ENTRENANDO MODELO FSM (Máquina de Estados)")
     print("=" * 60)
@@ -292,6 +336,9 @@ def train_fsm():
             n = len(train_loader)
             print(f"  Epoch [{epoch+1:3d}/{EPOCHS}] "
                   f"Loss={total_loss/n:.4f}  CE={total_ce/n:.4f}  MSE={total_mse/n:.4f}")
+
+    n_batches = len(train_loader)
+    last_loss = total_loss / n_batches if n_batches > 0 else 0.0
 
     # ── EVALUACIÓN ──
     print("\n" + "=" * 60)
@@ -358,8 +405,28 @@ def train_fsm():
     true_Z = discretize(true_mov[:, 1])
     combined_pred = [f"{x},{z}" for x, z in zip(pred_X, pred_Z)]
     combined_true = [f"{x},{z}" for x, z in zip(true_X, true_Z)]
-    acc_mov = accuracy_score(combined_true, combined_pred)
-    print(f"  Accuracy Movimiento Combinado: {acc_mov*100:.1f}%")
+    acc_mov  = accuracy_score(combined_true, combined_pred)
+    prec_mov = precision_score(combined_true, combined_pred, average='macro', zero_division=0)
+    rec_mov  = recall_score(combined_true,   combined_pred, average='macro', zero_division=0)
+    f1_mov   = f1_score(combined_true,       combined_pred, average='macro', zero_division=0)
+    print(f"  Movimiento Combinado: Acc={acc_mov*100:.1f}%  Prec={prec_mov*100:.1f}%  Rec={rec_mov*100:.1f}%  F1={f1_mov*100:.1f}%")
+
+    print("[METRICS_START]")
+    print(f"MODEL=FSM")
+    print(f"TIMESTAMP={timestamp}")
+    print(f"ACC_STATE={acc_state*100:.2f}")
+    print(f"PREC_STATE={prec_macro*100:.2f}")
+    print(f"REC_STATE={rec_macro*100:.2f}")
+    print(f"F1_STATE={f1_macro*100:.2f}")
+    print(f"PREC_STATE_W={prec_weighted*100:.2f}")
+    print(f"REC_STATE_W={rec_weighted*100:.2f}")
+    print(f"F1_STATE_W={f1_weighted*100:.2f}")
+    print(f"ACC_MOV={acc_mov*100:.2f}")
+    print(f"PREC_MOV={prec_mov*100:.2f}")
+    print(f"REC_MOV={rec_mov*100:.2f}")
+    print(f"F1_MOV={f1_mov*100:.2f}")
+    print(f"LOSS_FINAL={last_loss:.4f}")
+    print("[METRICS_END]")
 
     # ── EXPORTAR ONNX ──
     print("\n" + "=" * 60)
@@ -387,4 +454,12 @@ def train_fsm():
 
 
 if __name__ == "__main__":
-    train_fsm()
+    ts  = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_dir  = os.path.join(os.path.dirname(__file__) or '.', 'logs')
+    log_path = os.path.join(log_dir, f'train_fsm_{ts}.txt')
+    tee = Tee(log_path)
+    sys.stdout = tee
+    try:
+        train_fsm(timestamp=ts)
+    finally:
+        tee.close()

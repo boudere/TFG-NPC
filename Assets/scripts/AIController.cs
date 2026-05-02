@@ -43,6 +43,8 @@ public class AIController : MonoBehaviour
     [Range(0f, 1f)] public float actionThreshold = 0.5f;
     [Tooltip("Tiempo minimo entre acciones para evitar spam")]
     public float actionCooldown = 0.5f;
+    [Tooltip("Dispersion angular del disparo en grados (0 = tiro perfecto)")]
+    [Range(0f, 30f)] public float shootSpreadDeg = 8f;
 
     [Header("References (Mismas que el Recorder)")]
     public PlayerID myPlayer;
@@ -59,6 +61,16 @@ public class AIController : MonoBehaviour
     public bool constrainToField = true;
     public float fieldLimitX = 600f;
     public float fieldLimitZ = 350f;
+    [Tooltip("Distancia desde el borde donde empieza la fuerza de repulsion")]
+    public float boundaryMargin = 80f;
+
+    [Header("Movement — Seek Steering Behavior")]
+    [Tooltip("Velocidad máxima del NPC")]
+    public float moveSpeed = 100f;
+    [Tooltip("Fuerza máxima de steering (controla la suavidad del giro)")]
+    public float maxSteeringForce = 8f;
+    [Tooltip("Velocidad de giro en grados/segundo")]
+    public float turnSpeedDeg = 540f;
     
     // Componentes de Sentis (Motor de Inferencia de Unity)
     private Unity.InferenceEngine.Worker workerRecover;
@@ -184,25 +196,16 @@ public class AIController : MonoBehaviour
             passProb = 0f;
         }
 
-        // --- APLICAR RESULTADOS AL PERSONAJE ---
-        float speed = 100f; 
+        // --- APLICAR RESULTADOS AL PERSONAJE (Seek Steering Behavior) ---
         Vector3 moveDir = new Vector3(aiOutputs[0], 0f, aiOutputs[1]).normalized;
-        Vector3 movement = moveDir * speed;
-        
-        myRigidbody.linearVelocity = new Vector3(movement.x, myRigidbody.linearVelocity.y, movement.z);
-        
-        if (moveDir.sqrMagnitude > 0.001f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(moveDir, Vector3.up);
-            myRigidbody.MoveRotation(Quaternion.RotateTowards(myRigidbody.rotation, targetRot, 540f * Time.deltaTime));
-        }
+        ApplyMovement(moveDir);
 
         // --- Gatillo de acciones ---
         TryApplyAction(shootProb, passProb);
 
         if (characterGV != null) characterGV.enabled = false;
 
-        // --- Restriccion de Campo ---
+        // --- Restriccion de Campo (seguridad: clamp suave sin frenar) ---
         if (constrainToField)
         {
             Vector3 pos = transform.position;
@@ -211,8 +214,6 @@ public class AIController : MonoBehaviour
                 pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
                 pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
                 transform.position = pos;
-                // Frenar al instante para evitar rebotes
-                myRigidbody.linearVelocity = Vector3.zero;
             }
         }
     }
@@ -316,6 +317,72 @@ public class AIController : MonoBehaviour
         {
             Debug.LogWarning($"[AIController] scaler.json no coincide con {inputs.Length} features. Se omite normalizacion.");
             scalerWarningShown = true;
+        }
+    }
+
+    // ── MOVIMIENTO — Seek Steering Behavior (Reynolds) + Boundary Avoidance ──
+    private void ApplyMovement(Vector3 moveDir)
+    {
+        if (moveDir.sqrMagnitude < 0.001f)
+        {
+            Vector3 brakeVel = myRigidbody.linearVelocity;
+            brakeVel.x *= 0.9f;
+            brakeVel.z *= 0.9f;
+            myRigidbody.linearVelocity = brakeVel;
+            return;
+        }
+
+        // 1. Velocidad deseada (del modelo IA)
+        Vector3 desiredVelocity = moveDir.normalized * moveSpeed;
+
+        // 2. Boundary Avoidance — fuerza de repulsión suave cerca de los bordes
+        if (constrainToField && boundaryMargin > 0f)
+        {
+            Vector3 pos = transform.position;
+            Vector3 boundaryForce = Vector3.zero;
+
+            float distToEdgeXPos = fieldLimitX - pos.x;
+            float distToEdgeXNeg = fieldLimitX + pos.x;
+            if (distToEdgeXPos < boundaryMargin)
+                boundaryForce.x -= (1f - distToEdgeXPos / boundaryMargin);
+            if (distToEdgeXNeg < boundaryMargin)
+                boundaryForce.x += (1f - distToEdgeXNeg / boundaryMargin);
+
+            float distToEdgeZPos = fieldLimitZ - pos.z;
+            float distToEdgeZNeg = fieldLimitZ + pos.z;
+            if (distToEdgeZPos < boundaryMargin)
+                boundaryForce.z -= (1f - distToEdgeZPos / boundaryMargin);
+            if (distToEdgeZNeg < boundaryMargin)
+                boundaryForce.z += (1f - distToEdgeZNeg / boundaryMargin);
+
+            desiredVelocity += boundaryForce * moveSpeed;
+            if (desiredVelocity.magnitude > moveSpeed)
+                desiredVelocity = desiredVelocity.normalized * moveSpeed;
+        }
+
+        // 3. Velocidad actual (plano XZ)
+        Vector3 currentVelocity = myRigidbody.linearVelocity;
+        currentVelocity.y = 0f;
+
+        // 4. Fuerza de steering = deseada - actual
+        Vector3 steering = desiredVelocity - currentVelocity;
+        if (steering.magnitude > maxSteeringForce)
+            steering = steering.normalized * maxSteeringForce;
+
+        // 5. Aplicar
+        Vector3 newVelocity = currentVelocity + steering;
+        if (newVelocity.magnitude > moveSpeed)
+            newVelocity = newVelocity.normalized * moveSpeed;
+
+        myRigidbody.linearVelocity = new Vector3(newVelocity.x, myRigidbody.linearVelocity.y, newVelocity.z);
+
+        // Rotación suave
+        if (newVelocity.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(newVelocity.normalized, Vector3.up);
+            myRigidbody.MoveRotation(
+                Quaternion.RotateTowards(myRigidbody.rotation, targetRot, turnSpeedDeg * Time.deltaTime)
+            );
         }
     }
     
@@ -482,6 +549,7 @@ public class AIController : MonoBehaviour
 
         if (doShoot && Shoot.instance != null)
         {
+            AimAtGoal();
             Shoot.instance.disparoLibre();
             nextActionTime = Time.time + actionCooldown;
             return;
@@ -502,6 +570,23 @@ public class AIController : MonoBehaviour
 
         PlayerID ownerID = Bola.instance.Owner.GetComponent<PlayerID>();
         return ownerID != null && ownerID == myPlayer;
+    }
+
+    /// <summary>
+    /// Aim Assist: rota el NPC hacia la porteria rival con dispersion aleatoria.
+    /// </summary>
+    private void AimAtGoal()
+    {
+        if (rivalGoalTransform == null) return;
+
+        Vector3 dir = rivalGoalTransform.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        float spread = Random.Range(-shootSpreadDeg, shootSpreadDeg);
+        dir = Quaternion.Euler(0f, spread, 0f) * dir;
+
+        transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private void OnDestroy()

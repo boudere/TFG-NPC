@@ -8,11 +8,34 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, Subset
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, classification_report
+from sklearn.metrics import (accuracy_score, precision_score, recall_score,
+                             f1_score, classification_report)
+from imblearn.over_sampling import SMOTE
 import os
 import json
-
 import glob
+import datetime
+
+# ============================================================================
+# TEE — escribe en consola Y en fichero de log simultaneamente
+# ============================================================================
+class Tee:
+    """Duplica stdout a un fichero de log y a la consola al mismo tiempo."""
+    def __init__(self, filepath):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        self._file   = open(filepath, 'w', encoding='utf-8')
+        self._stdout = sys.stdout
+    def write(self, data):
+        self._stdout.write(data)
+        self._file.write(data)
+    def flush(self):
+        self._stdout.flush()
+        self._file.flush()
+    def close(self):
+        sys.stdout = self._stdout
+        self._file.close()
+        print(f"[Tee] Log guardado en: {self._file.name}")
+
 # 1. PARAMETERS
 CSV_FILES = glob.glob('../Assets/SoccerData_*.csv')
 
@@ -27,6 +50,8 @@ MOVEMENT_LOSS_WEIGHT = 1.0
 ACTION_LOSS_WEIGHT   = 2.0
 
 # Definicion de columnas (Mismo orden que Unity AIController)
+# NOTA: AbsMyPosX, AbsMyPosZ, AbsBallPosX, AbsBallPosZ NO están aquí.
+# Son columnas de visualización (heatmap) — nunca se usan como features.
 FEATURE_COLS = [
     'RelPorteriaRivalX', 'RelPorteriaRivalZ',
     'RelPorteriaPropiaX', 'RelPorteriaPropiaZ',
@@ -44,7 +69,8 @@ FEATURE_COLS = [
     'RelEnemigo1PosX', 'RelEnemigo1PosZ', 'Enemigo1DirX', 'Enemigo1DirZ',
     'RelEnemigo2PosX', 'RelEnemigo2PosZ', 'Enemigo2DirX', 'Enemigo2DirZ',
     'RelEnemigo3PosX', 'RelEnemigo3PosZ', 'Enemigo3DirX', 'Enemigo3DirZ',
-]
+]  # 40 features exactas
+assert len(FEATURE_COLS) == 40, f"Se esperaban 40 features, hay {len(FEATURE_COLS)}"
 MOVEMENT_COLS = ['InputX', 'InputZ']
 ACTION_COLS   = ['Disparo', 'Pase']
 
@@ -64,15 +90,15 @@ class SoccerAgentModel(nn.Module):
             nn.Linear(64, 2),
             nn.Tanh()
         )
+        # Sin Sigmoid: BCEWithLogitsLoss lo aplica internamente (mas estable)
         self.action_head = nn.Sequential(
             nn.Linear(64, 2),
-            nn.Sigmoid()
         )
 
     def forward(self, x):
         shared   = self.backbone(x)
         movement = self.movement_head(shared)
-        actions  = self.action_head(shared)
+        actions  = self.action_head(shared)   # logits, sin Sigmoid
         return movement, actions
 
 
@@ -83,36 +109,89 @@ class SoccerDataset(Dataset):
             raise ValueError("El DataFrame esta vacio.")
 
         raw = df.copy()
-        
-        # ── BALANCEO 1: Clases de movimiento ──
+
+        # ── CORRECCIÓN DE TIMING: propagar etiqueta al frame con TienePelota=1 ──
+        LOOKBACK = 5
+        shifted_shoot = shifted_pass = 0
+        for action_col in ['Disparo', 'Pase']:
+            for idx in raw.index[raw[action_col] == 1].tolist():
+                if raw.loc[idx, 'TienePelota'] == 1:
+                    continue
+                found = False
+                for offset in range(1, LOOKBACK + 1):
+                    prev_idx = idx - offset
+                    if prev_idx < 0:
+                        break
+                    if prev_idx in raw.index and raw.loc[prev_idx, 'TienePelota'] == 1:
+                        raw.loc[idx, action_col]      = 0
+                        raw.loc[prev_idx, action_col] = 1
+                        if action_col == 'Disparo': shifted_shoot += 1
+                        else:                       shifted_pass  += 1
+                        found = True
+                        break
+                if not found:
+                    raw.loc[idx, action_col] = 0  # ruido
+        print(f"  Timing-shift: Disparo={shifted_shoot}, Pase={shifted_pass} etiquetas movidas")
+
+        # ── SMOTE: Synthetic Minority Oversampling Technique ──
+        # Clase combinada: 0=sin acción, 1=Disparo, 2=Pase
+        raw['_smote_class'] = 0
+        raw.loc[raw['Pase']    == 1, '_smote_class'] = 2
+        raw.loc[raw['Disparo'] == 1, '_smote_class'] = 1
+
+        smote_cols   = FEATURE_COLS + MOVEMENT_COLS
+        class_counts = raw['_smote_class'].value_counts().sort_index()
+        print(f"  Clases antes de SMOTE: {dict(class_counts)}")
+
+        n_minority = sum(class_counts.get(c, 0) for c in [1, 2])
+        if n_minority > 0:
+            X_sm = raw[smote_cols].values
+            y_sm = raw['_smote_class'].values
+
+            min_count = min(class_counts.get(c, 0) for c in [1, 2] if class_counts.get(c, 0) > 0)
+            k = max(min(5, min_count - 1), 1)
+
+            majority_n = class_counts.get(0, 1)
+            target     = max(int(majority_n * 0.15), min_count)
+
+            sampling_strategy = {}
+            for c in [1, 2]:
+                if class_counts.get(c, 0) > 0:
+                    sampling_strategy[c] = max(target, class_counts.get(c, 0))
+
+            smote = SMOTE(sampling_strategy=sampling_strategy, k_neighbors=k, random_state=42)
+            X_res, y_res = smote.fit_resample(X_sm, y_sm)
+
+            df_res = pd.DataFrame(X_res, columns=smote_cols)
+            for col in MOVEMENT_COLS:
+                df_res[col] = df_res[col].apply(
+                    lambda v: 1.0 if v > 0.5 else (-1.0 if v < -0.5 else 0.0)
+                )
+            df_res['Disparo'] = (y_res == 1).astype(int)
+            df_res['Pase']    = (y_res == 2).astype(int)
+            raw = df_res
+            print(f"  SMOTE aplicado (k={k}): {len(raw)} filas | "
+                  f"Disparo={int(raw['Disparo'].sum())} | Pase={int(raw['Pase'].sum())}")
+        else:
+            print("  WARNING: Sin eventos Disparo/Pase — SMOTE omitido.")
+
+        if '_smote_class' in raw.columns:
+            raw.drop('_smote_class', axis=1, inplace=True)
+
+        # ── BALANCEO DE MOVIMIENTO (oversampling a la clase max) ──
         raw['_mov'] = raw['InputX'].astype(str) + '_' + raw['InputZ'].astype(str)
-        mov_counts  = raw['_mov'].value_counts()
-        mov_max     = int(mov_counts.max())
-        
+        mov_max = int(raw['_mov'].value_counts().max())
         balanced = []
         for _, group in raw.groupby('_mov'):
             if len(group) < mov_max:
                 group = group.sample(n=mov_max, replace=True, random_state=42)
             balanced.append(group)
-            
-        df_bal = pd.concat(balanced).reset_index(drop=True)
+        raw = pd.concat(balanced).reset_index(drop=True)
+        if '_mov' in raw.columns:
+            raw.drop('_mov', axis=1, inplace=True)
 
-        # ── BALANCEO 2: Oversampling de Disparo y Pase ──
-        n_shoot_pos = int(df_bal['Disparo'].sum())
-        n_shoot_neg = len(df_bal) - n_shoot_pos
-        if n_shoot_pos > 0 and n_shoot_neg > 0 and n_shoot_pos < n_shoot_neg:
-            shoot_pos   = df_bal[df_bal['Disparo'] == 1]
-            shoot_extra = shoot_pos.sample(n=n_shoot_neg - n_shoot_pos, replace=True, random_state=42)
-            df_bal = pd.concat([df_bal, shoot_extra], ignore_index=True)
-
-        n_pass_pos = int(df_bal['Pase'].sum())
-        n_pass_neg = len(df_bal) - n_pass_pos
-        if n_pass_pos > 0 and n_pass_neg > 0 and n_pass_pos < n_pass_neg:
-            pass_pos   = df_bal[df_bal['Pase'] == 1]
-            pass_extra = pass_pos.sample(n=n_pass_neg - n_pass_pos, replace=True, random_state=42)
-            df_bal = pd.concat([df_bal, pass_extra], ignore_index=True)
-
-        self.data = df_bal.sample(frac=1, random_state=42).reset_index(drop=True)
+        self.data = raw.sample(frac=1, random_state=42).reset_index(drop=True)
+        print(f"  Filas tras balanceo movimiento: {len(self.data)}")
 
         self.X  = torch.tensor(self.data[FEATURE_COLS].values,  dtype=torch.float32)
         self.Ym = torch.tensor(self.data[MOVEMENT_COLS].values, dtype=torch.float32)
@@ -227,7 +306,15 @@ def train_model(model_name, df, global_mean, global_std):
     INPUT_SIZE = len(FEATURE_COLS)
     model     = SoccerAgentModel(INPUT_SIZE)
     mse_crit  = nn.MSELoss()
-    bce_crit  = nn.BCELoss()
+    # BCEWithLogitsLoss + pos_weight para compensar desbalance residual
+    action_counts = dataset.Ya.sum(dim=0)
+    total_samples = len(dataset)
+    pos_weight = torch.zeros(2)
+    for i, name in enumerate(['Disparo', 'Pase']):
+        pos = max(action_counts[i].item(), 1.0)
+        neg = total_samples - pos
+        pos_weight[i] = min(neg / pos, 50.0)
+    bce_crit  = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     for epoch in range(EPOCHS):
@@ -267,8 +354,19 @@ def train_model(model_name, df, global_mean, global_std):
     pred_Z = discretize(pred_mov[:, 1]); true_Z = discretize(true_mov[:, 1])
     combined_pred = [f"{x},{z}" for x,z in zip(pred_X, pred_Z)]
     combined_true = [f"{x},{z}" for x,z in zip(true_X, true_Z)]
-    acc = accuracy_score(combined_true, combined_pred)
-    print(f"[{model_name}] Validacion - Accuracy Movimiento Combinado: {acc*100:.1f}%")
+    acc_mov  = accuracy_score(combined_true, combined_pred)
+    prec_mov = precision_score(combined_true, combined_pred, average='macro', zero_division=0)
+    rec_mov  = recall_score(combined_true,   combined_pred, average='macro', zero_division=0)
+    f1_mov   = f1_score(combined_true,       combined_pred, average='macro', zero_division=0)
+
+    print(classification_report(true_X, pred_X, labels=[-1,0,1],
+        target_names=['Izq(-1)','Stop(0)','Der(+1)'], zero_division=0))
+    print(classification_report(true_Z, pred_Z, labels=[-1,0,1],
+        target_names=['Atras(-1)','Stop(0)','Adelante(+1)'], zero_division=0))
+    print(f"[{model_name}] Movimiento Combinado: Acc={acc_mov*100:.1f}%  Prec={prec_mov*100:.1f}%  Rec={rec_mov*100:.1f}%  F1={f1_mov*100:.1f}%")
+
+    n_batches = len(train_loader)
+    last_loss = total_loss / n_batches if n_batches > 0 else 0.0
 
     # Exportar ONNX
     output_path = f"{ONNX_OUTPUT_PREFIX}{model_name}.onnx"
@@ -290,13 +388,51 @@ def train_model(model_name, df, global_mean, global_std):
     except Exception as e:
         print(f"[{model_name}] ONNX export fallo ({e})")
 
+    return {'acc': acc_mov, 'prec': prec_mov, 'rec': rec_mov, 'f1': f1_mov, 'loss': last_loss}
 
-def train_all():
+
+def train_all(timestamp=''):
     print("Iniciando carga de datos...")
     data_dict, global_mean, global_std = load_and_split_data(CSV_FILES)
-    
+
+    results = {}
     for behavior_name, df_subset in data_dict.items():
-        train_model(behavior_name, df_subset, global_mean, global_std)
+        m = train_model(behavior_name, df_subset, global_mean, global_std)
+        if m is not None:
+            results[behavior_name] = m
+
+    # Tabla comparativa entre sub-modelos
+    print("\n" + "="*60)
+    print("  COMPARATIVA SUB-MODELOS (MultiModel)")
+    print("="*60)
+    print(f"  {'Modelo':<12}  {'Acc':>6}  {'Prec':>6}  {'Rec':>6}  {'F1':>6}  {'Loss':>8}")
+    print(f"  {'-'*12}  {'-'*6}  {'-'*6}  {'-'*6}  {'-'*6}  {'-'*8}")
+    for name, m in results.items():
+        print(f"  {name:<12}  {m['acc']*100:6.1f}  {m['prec']*100:6.1f}  {m['rec']*100:6.1f}  {m['f1']*100:6.1f}  {m['loss']:8.4f}")
+
+    # METRICS_BLOCK para compare_logs.py
+    print("[METRICS_START]")
+    print(f"MODEL=MultiModel")
+    print(f"TIMESTAMP={timestamp}")
+    for name, m in results.items():
+        n = name.upper()
+        print(f"ACC_MOV_{n}={m['acc']*100:.2f}")
+        print(f"PREC_MOV_{n}={m['prec']*100:.2f}")
+        print(f"REC_MOV_{n}={m['rec']*100:.2f}")
+        print(f"F1_MOV_{n}={m['f1']*100:.2f}")
+        print(f"LOSS_{n}={m['loss']:.4f}")
+    print("[METRICS_END]")
+
+    print("\n¡Entrenamiento multi-modelo completado!")
+
 
 if __name__ == "__main__":
-    train_all()
+    ts  = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_dir  = os.path.join(os.path.dirname(__file__) or '.', 'logs')
+    log_path = os.path.join(log_dir, f'train_multimodel_{ts}.txt')
+    tee = Tee(log_path)
+    sys.stdout = tee
+    try:
+        train_all(timestamp=ts)
+    finally:
+        tee.close()

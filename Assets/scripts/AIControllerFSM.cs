@@ -29,6 +29,8 @@ public class AIControllerFSM : MonoBehaviour
     [Header("Action Cooldowns")]
     [Tooltip("Tiempo mínimo entre acciones de Pase/Tiro para evitar spam")]
     public float actionCooldown = 2f;
+    [Tooltip("Dispersión angular del disparo en grados (0 = tiro perfecto)")]
+    [Range(0f, 30f)] public float shootSpreadDeg = 8f;
 
     [Header("State Hysteresis")]
     [Tooltip("Tiempo mínimo que el NPC permanece en un estado antes de poder cambiar")]
@@ -41,8 +43,10 @@ public class AIControllerFSM : MonoBehaviour
     [Range(0.5f, 0.95f)] public float transitionThreshold = 0.75f;
 
     [Header("Movement")]
-    [Tooltip("Velocidad de movimiento del NPC")]
+    [Tooltip("Velocidad máxima del NPC")]
     public float moveSpeed = 100f;
+    [Tooltip("Fuerza máxima de steering (controla la suavidad del giro)")]
+    public float maxSteeringForce = 8f;
     [Tooltip("Velocidad de giro en grados/segundo")]
     public float turnSpeedDeg = 540f;
 
@@ -69,6 +73,8 @@ public class AIControllerFSM : MonoBehaviour
     public bool constrainToField = true;
     public float fieldLimitX = 600f;
     public float fieldLimitZ = 350f;
+    [Tooltip("Distancia desde el borde donde empieza la fuerza de repulsión")]
+    public float boundaryMargin = 80f;
 
     [Header("Debug")]
     public FSMState currentState = FSMState.Defendiendo;
@@ -250,7 +256,6 @@ public class AIControllerFSM : MonoBehaviour
                 pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
                 pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
                 transform.position = pos;
-                myRigidbody.linearVelocity = Vector3.zero;
             }
         }
     }
@@ -474,13 +479,15 @@ public class AIControllerFSM : MonoBehaviour
             return;
         }
 
-        // Rotar hacia la portería rival antes de disparar
+        // Rotar hacia la portería rival con dispersión aleatoria (aim assist)
         if (rivalGoalTransform != null)
         {
             Vector3 dir = (rivalGoalTransform.position - transform.position);
             dir.y = 0f;
             if (dir.sqrMagnitude > 0.001f)
             {
+                float spread = Random.Range(-shootSpreadDeg, shootSpreadDeg);
+                dir = Quaternion.Euler(0f, spread, 0f) * dir;
                 transform.rotation = Quaternion.LookRotation(dir);
             }
         }
@@ -529,23 +536,70 @@ public class AIControllerFSM : MonoBehaviour
         return proposed;
     }
 
-    // MOVIMIENTO
+    // MOVIMIENTO — Seek Steering Behavior (Reynolds) + Boundary Avoidance
     private void ApplyMovement(Vector3 moveDir)
     {
         if (moveDir.sqrMagnitude < 0.001f)
         {
-            myRigidbody.linearVelocity = new Vector3(0f, myRigidbody.linearVelocity.y, 0f);
+            Vector3 brakeVel = myRigidbody.linearVelocity;
+            brakeVel.x *= 0.9f;
+            brakeVel.z *= 0.9f;
+            myRigidbody.linearVelocity = brakeVel;
             return;
         }
 
-        Vector3 movement = moveDir * moveSpeed;
-        myRigidbody.linearVelocity = new Vector3(movement.x, myRigidbody.linearVelocity.y, movement.z);
+        // 1. Velocidad deseada
+        Vector3 desiredVelocity = moveDir.normalized * moveSpeed;
 
-        // Rotación suave hacia la dirección de movimiento
-        Quaternion targetRot = Quaternion.LookRotation(moveDir, Vector3.up);
-        myRigidbody.MoveRotation(
-            Quaternion.RotateTowards(myRigidbody.rotation, targetRot, turnSpeedDeg * Time.deltaTime)
-        );
+        // 2. Boundary Avoidance — fuerza de repulsión suave cerca de los bordes
+        if (constrainToField && boundaryMargin > 0f)
+        {
+            Vector3 pos = transform.position;
+            Vector3 boundaryForce = Vector3.zero;
+
+            float distToEdgeXPos = fieldLimitX - pos.x;
+            float distToEdgeXNeg = fieldLimitX + pos.x;
+            if (distToEdgeXPos < boundaryMargin)
+                boundaryForce.x -= (1f - distToEdgeXPos / boundaryMargin);
+            if (distToEdgeXNeg < boundaryMargin)
+                boundaryForce.x += (1f - distToEdgeXNeg / boundaryMargin);
+
+            float distToEdgeZPos = fieldLimitZ - pos.z;
+            float distToEdgeZNeg = fieldLimitZ + pos.z;
+            if (distToEdgeZPos < boundaryMargin)
+                boundaryForce.z -= (1f - distToEdgeZPos / boundaryMargin);
+            if (distToEdgeZNeg < boundaryMargin)
+                boundaryForce.z += (1f - distToEdgeZNeg / boundaryMargin);
+
+            desiredVelocity += boundaryForce * moveSpeed;
+            if (desiredVelocity.magnitude > moveSpeed)
+                desiredVelocity = desiredVelocity.normalized * moveSpeed;
+        }
+
+        // 3. Velocidad actual (plano XZ)
+        Vector3 currentVelocity = myRigidbody.linearVelocity;
+        currentVelocity.y = 0f;
+
+        // 4. Fuerza de steering = deseada - actual
+        Vector3 steering = desiredVelocity - currentVelocity;
+        if (steering.magnitude > maxSteeringForce)
+            steering = steering.normalized * maxSteeringForce;
+
+        // 5. Aplicar
+        Vector3 newVelocity = currentVelocity + steering;
+        if (newVelocity.magnitude > moveSpeed)
+            newVelocity = newVelocity.normalized * moveSpeed;
+
+        myRigidbody.linearVelocity = new Vector3(newVelocity.x, myRigidbody.linearVelocity.y, newVelocity.z);
+
+        // Rotación suave
+        if (newVelocity.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(newVelocity.normalized, Vector3.up);
+            myRigidbody.MoveRotation(
+                Quaternion.RotateTowards(myRigidbody.rotation, targetRot, turnSpeedDeg * Time.deltaTime)
+            );
+        }
     }
 
     /// <summary>

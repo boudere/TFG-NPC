@@ -9,15 +9,37 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, Subset
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (accuracy_score, precision_score, recall_score,
-                             classification_report, confusion_matrix)
+                             f1_score, classification_report, confusion_matrix)
 import os
 import json
 import glob
+import datetime
+from imblearn.over_sampling import SMOTE
+
+# ============================================================================
+# TEE — escribe en consola Y en fichero de log simultaneamente
+# ============================================================================
+class Tee:
+    """Duplica stdout a un fichero de log y a la consola al mismo tiempo."""
+    def __init__(self, filepath):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        self._file   = open(filepath, 'w', encoding='utf-8')
+        self._stdout = sys.stdout
+    def write(self, data):
+        self._stdout.write(data)
+        self._file.write(data)
+    def flush(self):
+        self._stdout.flush()
+        self._file.flush()
+    def close(self):
+        sys.stdout = self._stdout
+        self._file.close()
+        print(f"[Tee] Log guardado en: {self._file.name}")
 
 # ============================================================================
 # 1. PARAMETROS
 # ============================================================================
-CSV_FILES = glob.glob('../Assets/SoccerData_*.csv')
+CSV_FILES = glob.glob('../Assets/SoccerData_2026_05_02_19_47_14.csv')
 
 ONNX_OUTPUT_PATH  = '../Assets/SoccerModel_Legacy.onnx'
 SCALER_OUTPUT     = '../Assets/scaler_legacy.json'
@@ -96,6 +118,8 @@ class SoccerDataset(Dataset):
         print(f"  Disparo=1 en total: {int(raw['Disparo'].sum())}")
         print(f"  Pase=1    en total: {int(raw['Pase'].sum())}")
 
+        # NOTA: AbsMyPosX, AbsMyPosZ, AbsBallPosX, AbsBallPosZ NO están aquí.
+        # Son columnas de visualización (heatmap) — nunca se usan como features.
         feature_cols = [
             'RelPorteriaRivalX', 'RelPorteriaRivalZ',
             'RelPorteriaPropiaX', 'RelPorteriaPropiaZ',
@@ -115,7 +139,8 @@ class SoccerDataset(Dataset):
             'RelEnemigo1PosX', 'RelEnemigo1PosZ', 'Enemigo1DirX', 'Enemigo1DirZ',
             'RelEnemigo2PosX', 'RelEnemigo2PosZ', 'Enemigo2DirX', 'Enemigo2DirZ',
             'RelEnemigo3PosX', 'RelEnemigo3PosZ', 'Enemigo3DirX', 'Enemigo3DirZ',
-        ]
+        ]  # 40 features exactas
+        assert len(feature_cols) == 40, f"Se esperaban 40 features, hay {len(feature_cols)}"
         movement_cols = ['InputX', 'InputZ']
         action_cols   = ['Disparo', 'Pase']
 
@@ -158,22 +183,72 @@ class SoccerDataset(Dataset):
         print(f"    Disparo: {shifted_shoot} etiquetas movidas -> {clean_shoot} validas")
         print(f"    Pase:    {shifted_pass} etiquetas movidas -> {clean_pass} validas")
 
-        # -- OVERSAMPLING de frames con acciones (Disparo/Pase) --
-        action_frames = raw[(raw['Disparo'] == 1) | (raw['Pase'] == 1)]
-        normal_frames = raw[(raw['Disparo'] == 0) & (raw['Pase'] == 0)]
+        # -- SMOTE: Synthetic Minority Oversampling Technique --
+        # Genera muestras sintéticas interpolando entre vecinos de la clase
+        # minoritaria, en lugar de duplicar filas existentes.
+        # Clase combinada: 0=sin acción, 1=Disparo, 2=Pase
+        raw['_smote_class'] = 0
+        raw.loc[raw['Pase'] == 1, '_smote_class'] = 2
+        raw.loc[raw['Disparo'] == 1, '_smote_class'] = 1  # prioridad si ambos
 
-        if len(action_frames) > 0:
-            target_action_ratio = 0.05
-            target_action_count = max(int(len(normal_frames) * target_action_ratio), len(action_frames))
-            oversampled_actions = action_frames.sample(n=target_action_count, replace=True, random_state=42)
-            raw = pd.concat([normal_frames, oversampled_actions], ignore_index=True)
-            print(f"\n  Oversampling acciones: {len(action_frames)} -> {target_action_count} frames de accion")
-            print(f"  Dataset total tras oversampling: {len(raw)}")
+        smote_cols = feature_cols + movement_cols
+
+        class_counts = raw['_smote_class'].value_counts().sort_index()
+        print(f"\n  Distribución de clases antes de SMOTE:")
+        for cls, name in [(0, 'Sin acción'), (1, 'Disparo'), (2, 'Pase')]:
+            print(f"    {name} ({cls}): {class_counts.get(cls, 0)}")
+
+        n_minority = sum(class_counts.get(c, 0) for c in [1, 2])
+        if n_minority > 0:
+            X_sm = raw[smote_cols].values
+            y_sm = raw['_smote_class'].values
+
+            # k_neighbors no puede superar el nº de muestras de la clase más pequeña - 1
+            min_minority_count = min(
+                class_counts.get(c, 0) for c in [1, 2] if class_counts.get(c, 0) > 0
+            )
+            k = min(5, min_minority_count - 1)
+            k = max(k, 1)
+
+            # Objetivo: llevar cada clase minoritaria al 15% de la mayoritaria
+            majority_n = class_counts.get(0, 1)
+            target = max(int(majority_n * 0.15), min_minority_count)
+
+            sampling_strategy = {}
+            for c in [1, 2]:
+                if class_counts.get(c, 0) > 0:
+                    sampling_strategy[c] = max(target, class_counts.get(c, 0))
+
+            smote = SMOTE(
+                sampling_strategy=sampling_strategy,
+                k_neighbors=k,
+                random_state=42
+            )
+            X_res, y_res = smote.fit_resample(X_sm, y_sm)
+
+            # Reconstruir DataFrame con las columnas necesarias
+            df_res = pd.DataFrame(X_res, columns=smote_cols)
+
+            # Discretizar InputX/InputZ sintéticos al valor original más cercano {-1, 0, 1}
+            for col in movement_cols:
+                df_res[col] = df_res[col].apply(
+                    lambda v: 1.0 if v > 0.5 else (-1.0 if v < -0.5 else 0.0)
+                )
+
+            df_res['Disparo'] = (y_res == 1).astype(int)
+            df_res['Pase']    = (y_res == 2).astype(int)
+
+            raw = df_res
+            print(f"\n  SMOTE aplicado (k_neighbors={k}, target={target}):")
+            print(f"  Dataset total tras SMOTE: {len(raw)}")
             print(f"  Disparo=1: {int(raw['Disparo'].sum())} ({raw['Disparo'].mean()*100:.1f}%)")
             print(f"  Pase=1:    {int(raw['Pase'].sum())} ({raw['Pase'].mean()*100:.1f}%)")
         else:
             print("\n  WARNING: No hay frames de Disparo/Pase con pelota en los datos!")
-            print("  El modelo NO aprendera a disparar ni pasar.")
+            print("  El modelo NO aprenderá a disparar ni pasar.")
+
+        if '_smote_class' in raw.columns:
+            raw.drop('_smote_class', axis=1, inplace=True)
 
         # -- Balanceo de clases sobre movimiento --
         raw['_action'] = raw['InputX'].astype(str) + '_' + raw['InputZ'].astype(str)
@@ -224,7 +299,7 @@ def binarize(values, threshold=0.5):
 # ============================================================================
 # 5. ENTRENAMIENTO
 # ============================================================================
-def train():
+def train(timestamp=''):
     print("=" * 60)
     print("  ENTRENANDO MODELO LEGACY (Monolitico dual-head)")
     print("=" * 60)
@@ -292,6 +367,8 @@ def train():
                   f"MSE(mov)={total_mse/n:.4f}  "
                   f"BCE(shoot+pass)={total_bce/n:.4f}")
 
+    n_batches = len(train_loader)
+    last_loss = total_loss / n_batches if n_batches > 0 else 0.0
     print("\nEntrenamiento finalizado.")
 
     # ── EVALUACION ──
@@ -335,7 +412,8 @@ def train():
     acc  = accuracy_score(combined_true, combined_pred)
     prec = precision_score(combined_true, combined_pred, average='macro', zero_division=0)
     rec  = recall_score(combined_true,   combined_pred, average='macro', zero_division=0)
-    print(f"[Mov Combinado]  Accuracy={acc*100:.1f}%  Precision={prec*100:.1f}%  Recall={rec*100:.1f}%")
+    f1   = f1_score(combined_true,       combined_pred, average='macro', zero_division=0)
+    print(f"[Mov Combinado]  Accuracy={acc*100:.1f}%  Prec={prec*100:.1f}%  Rec={rec*100:.1f}%  F1={f1*100:.1f}%")
 
     # -- Acciones binarias --
     pred_shoot = binarize(pred_act[:, 0]);  true_shoot = true_act[:, 0].astype(int)
@@ -350,6 +428,34 @@ def train():
     print(classification_report(true_pass, pred_pass, labels=[0,1],
                                 target_names=["No pasa","Pasa"],
                                 zero_division=0))
+
+    # -- Metricas escalares para METRICS_BLOCK --
+    acc_shoot  = accuracy_score(true_shoot, pred_shoot)
+    prec_shoot = precision_score(true_shoot, pred_shoot, average='binary', zero_division=0)
+    rec_shoot  = recall_score(true_shoot, pred_shoot, average='binary', zero_division=0)
+    f1_shoot   = f1_score(true_shoot, pred_shoot, average='binary', zero_division=0)
+    acc_pass   = accuracy_score(true_pass, pred_pass)
+    prec_pass  = precision_score(true_pass, pred_pass, average='binary', zero_division=0)
+    rec_pass   = recall_score(true_pass, pred_pass, average='binary', zero_division=0)
+    f1_pass    = f1_score(true_pass, pred_pass, average='binary', zero_division=0)
+
+    print("[METRICS_START]")
+    print(f"MODEL=Legacy")
+    print(f"TIMESTAMP={timestamp}")
+    print(f"ACC_MOV={acc*100:.2f}")
+    print(f"PREC_MOV={prec*100:.2f}")
+    print(f"REC_MOV={rec*100:.2f}")
+    print(f"F1_MOV={f1*100:.2f}")
+    print(f"ACC_SHOOT={acc_shoot*100:.2f}")
+    print(f"PREC_SHOOT={prec_shoot*100:.2f}")
+    print(f"REC_SHOOT={rec_shoot*100:.2f}")
+    print(f"F1_SHOOT={f1_shoot*100:.2f}")
+    print(f"ACC_PASS={acc_pass*100:.2f}")
+    print(f"PREC_PASS={prec_pass*100:.2f}")
+    print(f"REC_PASS={rec_pass*100:.2f}")
+    print(f"F1_PASS={f1_pass*100:.2f}")
+    print(f"LOSS_FINAL={last_loss:.4f}")
+    print("[METRICS_END]")
 
     # -- Distribucion de predicciones de acciones --
     print("=" * 60)
@@ -412,4 +518,12 @@ def train():
 
 
 if __name__ == "__main__":
-    train()
+    ts  = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_dir  = os.path.join(os.path.dirname(__file__) or '.', 'logs')
+    log_path = os.path.join(log_dir, f'train_legacy_{ts}.txt')
+    tee = Tee(log_path)
+    sys.stdout = tee
+    try:
+        train(timestamp=ts)
+    finally:
+        tee.close()
