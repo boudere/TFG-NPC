@@ -71,6 +71,8 @@ public class Delantero : PlayerID, IResettable
         if (resetPos) return;
         if (frozen && playerStop) StartCoroutine(StopRoutine(playerStop));
 
+        changeSpeed();
+
         if (chasingBallFree)
         {
             runToBall();
@@ -388,7 +390,7 @@ public class Delantero : PlayerID, IResettable
 
     private IEnumerator ResetRoutine()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
         resetPos = false;
     }
 

@@ -94,6 +94,7 @@ public class Defensa : PlayerID, IResettable
     void Update()
     {
         whereIsBall();
+        changeSpeed();
 
         if (frozen && playerStop)
         {
@@ -467,7 +468,7 @@ public class Defensa : PlayerID, IResettable
 
     private IEnumerator ResetRoutine()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
         resetPos = false;
     }
 

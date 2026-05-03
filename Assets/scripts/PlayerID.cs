@@ -156,10 +156,24 @@ public class PlayerID : MonoBehaviour
         stop = true;
     }
 
+    public void changeSpeed() {
+    
+        if (Bola.instance.transform.IsChildOf(transform))
+        {
+            npcSpeed = 50f;
+        }
+        else
+        {
+            npcSpeed = 75f;
+        }
+    }
+
     public void Reanudar()
     {
         stop = false;
     }
+
+
 
     protected void goToOtherArea() 
     {

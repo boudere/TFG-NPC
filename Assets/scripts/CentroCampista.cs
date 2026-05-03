@@ -90,6 +90,7 @@ public class CentroCampista : PlayerID, IResettable
             return;
 
         cerebro();
+        changeSpeed();
 
         if (stop)
         {
@@ -486,7 +487,7 @@ public class CentroCampista : PlayerID, IResettable
 
     private IEnumerator ResetRoutine()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
         resetPos = false;
     }
 

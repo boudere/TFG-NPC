@@ -133,6 +133,18 @@ public class TriggerGoal : MonoBehaviour
             {
                 character.ResetToSpawn();
             }
+
+           if (character.id == CharacterManager.instance.index)
+            {
+                  CharacterGV characterGV = p.GetComponent<CharacterGV>();
+
+                if (characterGV != null)
+                {
+                    characterGV.ResetToSpawn();
+                }
+           }
         }
+
+        
     }
 }

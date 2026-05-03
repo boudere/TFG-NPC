@@ -8,12 +8,13 @@ public class CharacterGV : PlayerID
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-    private float speed = 100f;
+   // private float speed = 100f;
 
     public int index;
     private CharacterManager characterManager;
    
     public static CharacterGV instance;
+    private bool resetPos = false;
 
 
 
@@ -29,6 +30,12 @@ public class CharacterGV : PlayerID
 
     private void Update()
     {
+        if (resetPos)
+        {
+            return;
+        }
+
+        changeSpeed();
 
         if (frozen && playerStop)
         {
@@ -55,7 +62,7 @@ public class CharacterGV : PlayerID
         Vector3 inputDir = new Vector3(h, 0f, v);
 
         Vector3 moveDir = inputDir.normalized;
-        Vector3 movement = moveDir * speed;
+        Vector3 movement = moveDir * npcSpeed;
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
 
         if (inputDir.sqrMagnitude > 0.001f)
@@ -82,6 +89,24 @@ public class CharacterGV : PlayerID
         yield return new WaitForSeconds(0.5f);
         stop = false;
         playerStop = null;
+    }
+
+    public void ResetToSpawn()
+    {
+        resetPos = true;
+
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        rb.angularVelocity = Vector3.zero;
+
+        StartCoroutine(ResetRoutine());
+
+
+    }
+
+    private IEnumerator ResetRoutine()
+    {
+        yield return new WaitForSeconds(4f);
+        resetPos = false;
     }
 
 }
