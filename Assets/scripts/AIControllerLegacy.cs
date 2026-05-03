@@ -48,7 +48,7 @@ public class AIControllerLegacy : MonoBehaviour
     [Tooltip("Evita que la IA salga del mapa")]
     public bool constrainToField = true;
     public float fieldLimitX = 600f;
-    public float fieldLimitZ = 350f;
+    public float fieldLimitZ = 500f;
     [Tooltip("Distancia desde el borde donde empieza la fuerza de repulsión")]
     public float boundaryMargin = 30f;
 
