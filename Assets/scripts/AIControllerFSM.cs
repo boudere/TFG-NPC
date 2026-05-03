@@ -41,6 +41,10 @@ public class AIControllerFSM : MonoBehaviour
     [Header("Transition Confidence")]
     [Tooltip("Probabilidad mínima que el nuevo estado necesita para aceptar la transición")]
     [Range(0.5f, 0.95f)] public float transitionThreshold = 0.75f;
+    [Tooltip("Umbral reducido para transitar a Atacando cuando el equipo tiene la pelota")]
+    [Range(0.2f, 0.75f)] public float atacandoTeamBallThreshold = 0.30f;
+    [Tooltip("Boost al logit de Atacando cuando el equipo tiene la pelota (incrementa su probabilidad)")]
+    [Range(0f, 4f)] public float atacandoLogitBoost = 2.0f;
 
     [Header("Movement")]
     [Tooltip("Velocidad máxima del NPC")]
@@ -177,16 +181,11 @@ public class AIControllerFSM : MonoBehaviour
         float[] stateLogits = prediction.stateLogits;
         float[] movement    = prediction.movement;
 
-        // Convertir logits a probabilidades (softmax) y elegir estado (argmax)
-        stateProbabilities = Softmax(stateLogits);
-        int bestState = Argmax(stateProbabilities);
-        FSMState proposedState = (FSMState)bestState;
-
-        // ── VETO DE ESTADO POR POSESIÓN ──
-        // Determinar posesión actual de la pelota
-        bool ballFree = (Bola.instance == null || !Bola.instance.EnPosesion || Bola.instance.Owner == null);
+        // ── POSESIÓN (calculada antes del masking) ─────────────────────────────
+        bool ballFree      = (Bola.instance == null || !Bola.instance.EnPosesion
+                              || Bola.instance.Owner == null);
         bool myTeamHasBall = false;
-        bool iHaveBall = false;
+        bool iHaveBall     = false;
 
         if (!ballFree)
         {
@@ -194,41 +193,69 @@ public class AIControllerFSM : MonoBehaviour
             if (ownerID != null)
             {
                 myTeamHasBall = (ownerID.id % 2 == myPlayer.id % 2);
-                iHaveBall = (ownerID == myPlayer);
+                iHaveBall     = (ownerID == myPlayer);
             }
         }
 
-        // Aplicar vetos: bloquear estados físicamente imposibles
-        proposedState = ApplyStateVeto(proposedState, ballFree, myTeamHasBall, iHaveBall);
+        // ── ACTION MASKING (antes del softmax) ───────────────────────────────
+        // A diferencia del veto (que actuaba DESPUÉS de softmax+argmax y provocaba
+        // que la hysteresis bloqueara la transición por baja confianza), el masking
+        // actua ANTES: los estados imposibles no participan en la competición y
+        // la probabilidad se redistribuye sobre los estados válidos, garantizando
+        // que el ganador tenga siempre alta confianza.
+        float[] maskedLogits = (float[])stateLogits.Clone();
 
-        // ── TRANSICIÓN CON HYSTERESIS + UMBRAL DE CONFIANZA ──
+        if (!iHaveBall)
+        {
+            // Sin posesión: Tirando y Pasando son físicamente imposibles
+            maskedLogits[(int)FSMState.Tirando] = float.NegativeInfinity;
+            maskedLogits[(int)FSMState.Pasando] = float.NegativeInfinity;
+        }
+        if (!myTeamHasBall && !ballFree)
+        {
+            // Rival con balón: Atacando queda vetado (rival no cederá fácilmente)
+            maskedLogits[(int)FSMState.Atacando] = float.NegativeInfinity;
+        }
+        if (myTeamHasBall && !iHaveBall)
+        {
+            // Mi equipo tiene la pelota: boosteamos Atacando para que compita
+            // frente a Defendiendo (el modelo subestima Atacando por escasez de datos).
+            maskedLogits[(int)FSMState.Atacando] += atacandoLogitBoost;
+        }
+
+        // Softmax + argmax sobre logits ya filtrados
+        stateProbabilities = Softmax(maskedLogits);
+        int bestState      = Argmax(stateProbabilities);
+        FSMState proposedState = (FSMState)bestState;
+
+        // ── TRANSICIÓN CON HYSTERESIS + UMBRAL DE CONFIANZA ────────────────────
         if (proposedState != currentState)
         {
-            // Tiempo mínimo según estado actual
-            float requiredTime = (currentState == FSMState.Defendiendo) ? minDefendingTime : minStateTime;
+            float requiredTime = (currentState == FSMState.Defendiendo)
+                ? minDefendingTime : minStateTime;
             float confidence = stateProbabilities[(int)proposedState];
 
-            if (Time.time - stateEnteredTime >= requiredTime && confidence >= transitionThreshold)
+            // Umbral reducido para Atacando cuando el equipo tiene la pelota:
+            // el modelo históricamente infravalora este estado.
+            bool teamBallAtacando = (proposedState == FSMState.Atacando && myTeamHasBall);
+            float effectiveThreshold = teamBallAtacando
+                ? atacandoTeamBallThreshold
+                : transitionThreshold;
+
+            if (Time.time - stateEnteredTime >= requiredTime
+                && confidence >= effectiveThreshold)
             {
                 if (enableDebugLogs)
                 {
                     Debug.Log($"[FSM {myPlayer.id}] Transición: {currentState} → {proposedState}  " +
                               $"(Prob: Def={stateProbabilities[0]:F2} Ata={stateProbabilities[1]:F2} " +
                               $"Pas={stateProbabilities[2]:F2} Tir={stateProbabilities[3]:F2})" +
-                              $" [conf={confidence:F2} >= {transitionThreshold:F2}]");
+                              $" [conf={confidence:F2} >= {effectiveThreshold:F2}]");
                 }
-                currentState = proposedState;
-                previousState = currentState;
+                currentState     = proposedState;
+                previousState    = currentState;
                 stateEnteredTime = Time.time;
             }
-            else if (enableDebugLogs && Time.time >= nextLogTime)
-            {
-                string reason = (Time.time - stateEnteredTime < requiredTime)
-                    ? $"hysteresis ({Time.time - stateEnteredTime:F1}s < {requiredTime:F1}s)"
-                    : $"baja confianza ({confidence:F2} < {transitionThreshold:F2})";
-                // Solo logear bloqueos esporádicamente para no saturar
-            }
-            // Si no pasa los filtros, se queda en el estado actual
         }
 
         // Ejecutar comportamiento del estado

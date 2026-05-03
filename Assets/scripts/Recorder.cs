@@ -290,7 +290,7 @@ public class Recorder : MonoBehaviour
         else                                               _stoppedFrames++;
 
         if (disparo == 1) _shotCount++;
-        if (pase    == 1) _passCount++;
+        if (pase == 1) _passCount++;
 
         // Zona: comparar distancias a cada portería
         if (rivalGoalTransform != null && ownGoalTransform != null)

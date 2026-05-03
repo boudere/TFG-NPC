@@ -49,8 +49,16 @@ BATCH_SIZE    = 32
 LEARNING_RATE = 0.001
 
 # Pesos relativos de cada pérdida
-STATE_LOSS_WEIGHT    = 2.0
-MOVEMENT_LOSS_WEIGHT = 1.0
+STATE_LOSS_WEIGHT     = 2.0
+MOVEMENT_LOSS_WEIGHT  = 1.0
+# Penalización por predecir Tirando/Pasando sin tener la pelota.
+NO_BALL_PENALTY_WEIGHT = 0.5
+
+# Máximo de muestras sintéticas por clase minoritaria (SMOTE cap).
+# Sube este número si el modelo ignora Tirando/Pasando.
+# Bájalo si dispara/pasa demasiado agresivamente.
+# Regla general: 5-15% del tamaño de la clase mayoritaria.
+SMOTE_MINORITY_CAP = 600
 
 # Nombres de los estados
 STATE_NAMES = ['Defendiendo', 'Atacando', 'Pasando', 'Tirando']
@@ -88,10 +96,16 @@ def derive_state(row):
     """
     Regla heurística para derivar el estado a partir de las columnas existentes.
     Prioridad: Tirando > Pasando > Atacando > Defendiendo
+
+    IMPORTANTE: Tirando y Pasando sólo se asignan cuando TienePelota==1.
+    Si el frame tiene Disparo=1 pero TienePelota=0 es un artefacto de timing
+    (la pelota ya salió) y debe clasificarse como Atacando o Defendiendo.
     """
-    if row['Disparo'] == 1:
+    has_ball = row['TienePelota'] == 1
+
+    if row['Disparo'] == 1 and has_ball:
         return 3  # Tirando
-    elif row['Pase'] == 1:
+    elif row['Pase'] == 1 and has_ball:
         return 2  # Pasando
     elif row['TienePelotaEquipo'] == 1:
         return 1  # Atacando
@@ -159,16 +173,29 @@ class SoccerFSMDataset(Dataset):
         )
         k = max(min(5, min_state_count - 1), 1)
 
-        # Objetivo: llevar cada estado minoritario a la mediana
-        # (mínimo 3000 para garantizar datos suficientes)
-        sorted_counts  = sorted(state_counts.values)
-        smote_target   = max(int(sorted_counts[len(sorted_counts) // 2]), 3000)
+        # Objetivo: SMOTE_MINORITY_CAP muestras para clases que estén por debajo.
+        # Se usa la mediana como referencia para las clases medias, pero se limita
+        # el cap a SMOTE_MINORITY_CAP para las clases muy minoritarias.
+        sorted_counts = sorted(state_counts.values)
+        median_count  = int(sorted_counts[len(sorted_counts) // 2])
 
         sampling_strategy = {}
         for s_id in range(NUM_STATES):
             current = state_counts.get(s_id, 0)
-            if current > 0 and current < smote_target:
-                sampling_strategy[s_id] = smote_target
+            if current == 0:
+                continue  # Sin muestras reales, SMOTE no puede generar
+            # Las clases muy pequeñas se limitan al cap;
+            # las clases medianas llegan a la mediana normalmente.
+            target = min(median_count, SMOTE_MINORITY_CAP) if current < SMOTE_MINORITY_CAP \
+                     else median_count
+            if current < target:
+                sampling_strategy[s_id] = target
+
+        print(f"  SMOTE targets (cap={SMOTE_MINORITY_CAP}):")
+        for s_id, s_name in enumerate(STATE_NAMES):
+            current = state_counts.get(s_id, 0)
+            tgt = sampling_strategy.get(s_id, current)
+            print(f"    {s_name}: {current} → {tgt}")
 
         if sampling_strategy:
             X_sm = raw[smote_cols].values
@@ -188,7 +215,7 @@ class SoccerFSMDataset(Dataset):
         # Si todos los estados ya alcanzan el target, no hace falta SMOTE
 
         state_counts_after = raw['Estado'].value_counts().sort_index()
-        print(f"  Distribución de estados TRAS SMOTE (k={k}, target={smote_target}):")
+        print(f"  Distribución de estados TRAS SMOTE (k={k}, cap={SMOTE_MINORITY_CAP}):")
         for s_id, s_name in enumerate(STATE_NAMES):
             print(f"    {s_name} ({s_id}): {state_counts_after.get(s_id, 0)}")
 
@@ -204,11 +231,13 @@ class SoccerFSMDataset(Dataset):
         for s_id, s_name in enumerate(STATE_NAMES):
             print(f"    {s_name}: {self.class_weights[s_id]:.3f}")
 
-        # Tensores
+        # Tensores principales
         self.data = raw.sample(frac=1, random_state=42).reset_index(drop=True)
-        self.X  = torch.tensor(self.data[FEATURE_COLS].values, dtype=torch.float32)
-        self.Ys = torch.tensor(self.data['Estado'].values,     dtype=torch.long)
-        self.Ym = torch.tensor(self.data[MOVEMENT_COLS].values, dtype=torch.float32)
+        self.X       = torch.tensor(self.data[FEATURE_COLS].values,   dtype=torch.float32)
+        self.Ys      = torch.tensor(self.data['Estado'].values,        dtype=torch.long)
+        self.Ym      = torch.tensor(self.data[MOVEMENT_COLS].values,   dtype=torch.float32)
+        # TienePelota (col 4 de FEATURE_COLS) guardado por separado para la penalty
+        self.has_ball = torch.tensor(self.data['TienePelota'].values,  dtype=torch.float32)
 
         # Normalización global
         self.X = (self.X - global_mean) / global_std
@@ -217,7 +246,7 @@ class SoccerFSMDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.X[idx], self.Ys[idx], self.Ym[idx]
+        return self.X[idx], self.Ys[idx], self.Ym[idx], self.has_ball[idx]
 
 
 # ============================================================================
@@ -257,6 +286,40 @@ def load_data(csv_files):
 
     raw = pd.concat(frames, ignore_index=True)
     print(f"\nTOTAL combinado: {len(raw)} filas")
+    print(f"  Disparo=1 en total: {int(raw['Disparo'].sum())}")
+    print(f"  Pase=1    en total: {int(raw['Pase'].sum())}")
+
+    # ── CORRECCIÓN DE TIMING ───────────────────────────────────────────────
+    # El Recorder graba Disparo/Pase en el frame donde la pelota ya salió
+    # (TienePelota=0). derive_state() necesita TienePelota=1 para asignar
+    # el estado correcto, así que desplazamos la etiqueta al frame anterior
+    # más cercano donde TienePelota=1.
+    LOOKBACK = 5
+    for action_col in ['Disparo', 'Pase']:
+        action_indices = raw.index[raw[action_col] == 1].tolist()
+        shifted = 0
+        removed = 0
+        for idx in action_indices:
+            if raw.loc[idx, 'TienePelota'] == 1:
+                continue   # ya está en el frame correcto
+            found = False
+            for offset in range(1, LOOKBACK + 1):
+                prev_idx = idx - offset
+                if prev_idx < 0 or prev_idx not in raw.index:
+                    break
+                if raw.loc[prev_idx, 'TienePelota'] == 1:
+                    raw.loc[idx,      action_col] = 0
+                    raw.loc[prev_idx, action_col] = 1
+                    shifted += 1
+                    found = True
+                    break
+            if not found:
+                # Sin frame previo con balón → ruido, eliminar la etiqueta
+                raw.loc[idx, action_col] = 0
+                removed += 1
+        valid = int(raw[action_col].sum())
+        print(f"  Timing fix [{action_col:7s}]: {shifted} desplazadas, "
+              f"{removed} eliminadas → {valid} válidas")
 
     # Calcular scaler global
     X_raw = torch.tensor(raw[FEATURE_COLS].values, dtype=torch.float32)
@@ -310,20 +373,37 @@ def train_fsm(timestamp=''):
     mse_crit   = nn.MSELoss()
     optimizer  = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
+    # Índices de los estados que requieren posesión de balón
+    IDX_PASANDO = 2
+    IDX_TIRANDO = 3
+
     # Entrenamiento
     print(f"\nEntrenando {EPOCHS} epochs...")
+    print(f"  Penalización sin balón (NO_BALL_PENALTY_WEIGHT): {NO_BALL_PENALTY_WEIGHT}")
     for epoch in range(EPOCHS):
         model.train()
-        total_loss = total_ce = total_mse = 0.0
+        total_loss = total_ce = total_mse = total_pen = 0.0
 
-        for batch_X, batch_Ys, batch_Ym in train_loader:
+        for batch_X, batch_Ys, batch_Ym, batch_has_ball in train_loader:
             optimizer.zero_grad()
 
             pred_state, pred_mov = model(batch_X)
 
+            # Pérdida principal
             loss_ce  = ce_crit(pred_state, batch_Ys)
             loss_mse = mse_crit(pred_mov, batch_Ym)
-            loss     = STATE_LOSS_WEIGHT * loss_ce + MOVEMENT_LOSS_WEIGHT * loss_mse
+
+            # Penalización: si no tiene balón, el logit de Tirando y Pasando
+            # debe ser negativo (el modelo aprende a suprimirlos por sí solo).
+            # Se usa clamp(min=0) para penalizar solo logits positivos.
+            no_ball = (batch_has_ball == 0).float()  # 1 donde NO hay balón
+            pen_tirando = (pred_state[:, IDX_TIRANDO] * no_ball).clamp(min=0).mean()
+            pen_pasando = (pred_state[:, IDX_PASANDO] * no_ball).clamp(min=0).mean()
+            loss_penalty = pen_tirando + pen_pasando
+
+            loss = (STATE_LOSS_WEIGHT    * loss_ce  +
+                    MOVEMENT_LOSS_WEIGHT  * loss_mse +
+                    NO_BALL_PENALTY_WEIGHT * loss_penalty)
 
             loss.backward()
             optimizer.step()
@@ -331,11 +411,13 @@ def train_fsm(timestamp=''):
             total_loss += loss.item()
             total_ce   += loss_ce.item()
             total_mse  += loss_mse.item()
+            total_pen  += loss_penalty.item()
 
         if (epoch + 1) % 30 == 0:
             n = len(train_loader)
             print(f"  Epoch [{epoch+1:3d}/{EPOCHS}] "
-                  f"Loss={total_loss/n:.4f}  CE={total_ce/n:.4f}  MSE={total_mse/n:.4f}")
+                  f"Loss={total_loss/n:.4f}  CE={total_ce/n:.4f}  "
+                  f"MSE={total_mse/n:.4f}  Penalty={total_pen/n:.4f}")
 
     n_batches = len(train_loader)
     last_loss = total_loss / n_batches if n_batches > 0 else 0.0
@@ -350,7 +432,7 @@ def train_fsm(timestamp=''):
     all_pred_mov, all_true_mov = [], []
 
     with torch.no_grad():
-        for batch_X, batch_Ys, batch_Ym in test_loader:
+        for batch_X, batch_Ys, batch_Ym, _ in test_loader:
             pred_state, pred_mov = model(batch_X)
 
             # Estado: argmax de logits
