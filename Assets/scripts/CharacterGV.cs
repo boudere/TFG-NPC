@@ -79,7 +79,7 @@ public class CharacterGV : PlayerID
             rbPlayer.angularVelocity = Vector3.zero;
         }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         stop = false;
         playerStop = null;
     }
