@@ -38,7 +38,7 @@ class Tee:
 # ============================================================================
 # 1. PARAMETROS
 # ============================================================================
-CSV_FILES = glob.glob('../Assets/SoccerData_*.csv')
+CSV_FILES = glob.glob('../Assets/SoccerData_Temporal_2026_05_05_18_15_22.csv')
 
 ONNX_OUTPUT_PATH  = '../Assets/SoccerModel_GRU.onnx'
 SCALER_OUTPUT     = '../Assets/scaler_gru.json'

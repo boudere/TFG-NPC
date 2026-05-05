@@ -387,6 +387,10 @@ public class AIControllerGRU : MonoBehaviour
 
         return inputs;
     }
+    public void ResetHiddenState()
+    {
+        hiddenStateArray = new float[HiddenStateSize];
+    }
 
     private void OnDestroy()
     {

@@ -386,6 +386,10 @@ public class AIControllerSlidingWindow : MonoBehaviour
 
         return inputs;
     }
+    public void ResetHistory()
+    {
+        previousInputs = null;
+    }
 
     private void OnDestroy()
     {

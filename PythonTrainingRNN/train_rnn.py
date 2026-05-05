@@ -38,7 +38,7 @@ class Tee:
 # ============================================================================
 # 1. PARAMETROS
 # ============================================================================
-CSV_FILES = glob.glob('../Assets/SoccerData_*.csv')
+CSV_FILES = glob.glob('../Assets/SoccerData_Temporal_2026_05_05_18_15_22.csv')
 
 ONNX_OUTPUT_PATH  = '../Assets/SoccerModel_RNN.onnx'
 SCALER_OUTPUT     = '../Assets/scaler_rnn.json'
@@ -115,62 +115,68 @@ class SoccerRNNDataset(Dataset):
         for path in csv_files:
             if not os.path.exists(path):
                 continue
-            tmp = pd.read_csv(path)
+            df_full = pd.read_csv(path)
             
-            # -- CORRECCION DE TIMING (antes de filtrar y concatenar) --
-            LOOKBACK = 5
-            shifted_shoot = 0
-            shifted_pass  = 0
-            for action_col in ['Disparo', 'Pase']:
-                action_indices = tmp.index[tmp[action_col] == 1].tolist()
-                for idx in action_indices:
-                    if tmp.loc[idx, 'TienePelota'] == 1:
-                        continue
-                    found = False
-                    for offset in range(1, LOOKBACK + 1):
-                        prev_idx = idx - offset
-                        if prev_idx < 0:
-                            break
-                        if tmp.loc[prev_idx, 'TienePelota'] == 1:
-                            tmp.loc[idx, action_col] = 0
-                            tmp.loc[prev_idx, action_col] = 1
-                            if action_col == 'Disparo': shifted_shoot += 1
-                            else: shifted_pass += 1
-                            found = True
-                            break
-                    if not found:
-                        tmp.loc[idx, action_col] = 0
+            if 'EpisodeID' not in df_full.columns:
+                df_full['EpisodeID'] = 0
 
-            # -- PARES PARA RNN (t-1, t) --
-            feature_cols = [
-                'RelPorteriaRivalX', 'RelPorteriaRivalZ',
-                'RelPorteriaPropiaX', 'RelPorteriaPropiaZ',
-                'TienePelota', 'RelPelotaX', 'RelPelotaZ', 'DistPelota', 'TienePelotaEquipo',
-                'DistPorteriaContraria', 'DistPorteriaPropia', 'PuntuacionPropia', 'PuntuacionContraria',
-                'DistPelotaPorteriaPropia', 'DistAliadoCercano', 'DistEnemigoCercano',
-                'RelAliado1PosX', 'RelAliado1PosZ', 'Aliado1DirX', 'Aliado1DirZ',
-                'RelAliado2PosX', 'RelAliado2PosZ', 'Aliado2DirX', 'Aliado2DirZ',
-                'RelAliado3PosX', 'RelAliado3PosZ', 'Aliado3DirX', 'Aliado3DirZ',
-                'RelEnemigo1PosX', 'RelEnemigo1PosZ', 'Enemigo1DirX', 'Enemigo1DirZ',
-                'RelEnemigo2PosX', 'RelEnemigo2PosZ', 'Enemigo2DirX', 'Enemigo2DirZ',
-                'RelEnemigo3PosX', 'RelEnemigo3PosZ', 'Enemigo3DirX', 'Enemigo3DirZ',
-            ]
-            
-            # Crear DataFrame shiftado
-            tmp_prev = tmp[feature_cols].shift(1).add_suffix('_prev')
-            tmp_combined = pd.concat([tmp_prev, tmp], axis=1)
-            
-            # -- FILTRO SPAWN NOISE --
-            spawn_mask = (
-                (tmp['Aliado1DirX'] == 0) & (tmp['Aliado1DirZ'] == 0) &
-                (tmp['Aliado2DirX'] == 0) & (tmp['Aliado2DirZ'] == 0)
-            )
-            
-            # Eliminar la primera fila (NaN) y las filas de spawn noise
-            valid_mask = (~spawn_mask) & (tmp_prev[feature_cols[0] + '_prev'].notna())
-            tmp_combined = tmp_combined[valid_mask]
-            
-            frames.append(tmp_combined)
+            for ep_id, tmp in df_full.groupby('EpisodeID'):
+                tmp = tmp.reset_index(drop=True)
+                
+                # -- CORRECCION DE TIMING (antes de filtrar y concatenar) --
+                LOOKBACK = 5
+                shifted_shoot = 0
+                shifted_pass  = 0
+                for action_col in ['Disparo', 'Pase']:
+                    action_indices = tmp.index[tmp[action_col] == 1].tolist()
+                    for idx in action_indices:
+                        if tmp.loc[idx, 'TienePelota'] == 1:
+                            continue
+                        found = False
+                        for offset in range(1, LOOKBACK + 1):
+                            prev_idx = idx - offset
+                            if prev_idx < 0:
+                                break
+                            if tmp.loc[prev_idx, 'TienePelota'] == 1:
+                                tmp.loc[idx, action_col] = 0
+                                tmp.loc[prev_idx, action_col] = 1
+                                if action_col == 'Disparo': shifted_shoot += 1
+                                else: shifted_pass += 1
+                                found = True
+                                break
+                        if not found:
+                            tmp.loc[idx, action_col] = 0
+
+                # -- PARES PARA RNN (t-1, t) --
+                feature_cols = [
+                    'RelPorteriaRivalX', 'RelPorteriaRivalZ',
+                    'RelPorteriaPropiaX', 'RelPorteriaPropiaZ',
+                    'TienePelota', 'RelPelotaX', 'RelPelotaZ', 'DistPelota', 'TienePelotaEquipo',
+                    'DistPorteriaContraria', 'DistPorteriaPropia', 'PuntuacionPropia', 'PuntuacionContraria',
+                    'DistPelotaPorteriaPropia', 'DistAliadoCercano', 'DistEnemigoCercano',
+                    'RelAliado1PosX', 'RelAliado1PosZ', 'Aliado1DirX', 'Aliado1DirZ',
+                    'RelAliado2PosX', 'RelAliado2PosZ', 'Aliado2DirX', 'Aliado2DirZ',
+                    'RelAliado3PosX', 'RelAliado3PosZ', 'Aliado3DirX', 'Aliado3DirZ',
+                    'RelEnemigo1PosX', 'RelEnemigo1PosZ', 'Enemigo1DirX', 'Enemigo1DirZ',
+                    'RelEnemigo2PosX', 'RelEnemigo2PosZ', 'Enemigo2DirX', 'Enemigo2DirZ',
+                    'RelEnemigo3PosX', 'RelEnemigo3PosZ', 'Enemigo3DirX', 'Enemigo3DirZ',
+                ]
+                
+                # Crear DataFrame shiftado
+                tmp_prev = tmp[feature_cols].shift(1).add_suffix('_prev')
+                tmp_combined = pd.concat([tmp_prev, tmp], axis=1)
+                
+                # -- FILTRO SPAWN NOISE --
+                spawn_mask = (
+                    (tmp['Aliado1DirX'] == 0) & (tmp['Aliado1DirZ'] == 0) &
+                    (tmp['Aliado2DirX'] == 0) & (tmp['Aliado2DirZ'] == 0)
+                )
+                
+                # Eliminar la primera fila (NaN) y las filas de spawn noise
+                valid_mask = (~spawn_mask) & (tmp_prev[feature_cols[0] + '_prev'].notna())
+                tmp_combined = tmp_combined[valid_mask]
+                
+                frames.append(tmp_combined)
 
         if not frames:
             raise FileNotFoundError("Ningun CSV valido encontrado.")
