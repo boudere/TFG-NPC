@@ -122,8 +122,29 @@ public class AIControllerSlidingWindow : MonoBehaviour
 
         var prediction = Predecir(normalizedInputs);
 
-        float aiInputX = prediction.movement.Length > 0 ? prediction.movement[0] : 0f;
-        float aiInputZ = prediction.movement.Length > 1 ? prediction.movement[1] : 0f;
+        float aiInputX = 0f;
+        float aiInputZ = 0f;
+        
+        if (prediction.movement != null && prediction.movement.Length >= 9)
+        {
+            int bestClass = 0;
+            float maxProb = -float.MaxValue;
+            for(int i = 0; i < 9; i++)
+            {
+                if(prediction.movement[i] > maxProb)
+                {
+                    maxProb = prediction.movement[i];
+                    bestClass = i;
+                }
+            }
+            aiInputX = (bestClass / 3) - 1f;
+            aiInputZ = (bestClass % 3) - 1f;
+        }
+        else if (prediction.movement != null && prediction.movement.Length >= 2)
+        {
+            aiInputX = prediction.movement[0];
+            aiInputZ = prediction.movement[1];
+        }
         float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
         float passProb  = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
 
@@ -145,7 +166,23 @@ public class AIControllerSlidingWindow : MonoBehaviour
             float distAlly = currentInputs[14];
             float distEnemy = currentInputs[15];
 
-            Debug.Log($"[SlidingWindow] Prediccion -> Mov=({aiInputX:F2},{aiInputZ:F2}) | Shoot={shootProb:F3} | Pass={passProb:F3}\n" +
+            // Debug detallado del movimiento
+            string logitsStr = "";
+            int bestClass = -1;
+            if (prediction.movement != null)
+            {
+                logitsStr = $"len={prediction.movement.Length} [";
+                float maxV = float.MinValue;
+                for(int i = 0; i < prediction.movement.Length; i++)
+                {
+                    logitsStr += $"{prediction.movement[i]:F2},";
+                    if(prediction.movement[i] > maxV) { maxV = prediction.movement[i]; bestClass = i; }
+                }
+                logitsStr += "]";
+            }
+
+            Debug.Log($"[SlidingWindow] Prediccion -> Mov=({aiInputX:F2},{aiInputZ:F2}) class={bestClass} | Shoot={shootProb:F3} | Pass={passProb:F3}\n" +
+                      $"Logits: {logitsStr}\n" +
                       $"Contexto -> {ballStatus} | Posesion: {teamHasBall} | DistPelota: {distToBall:F1} | DistPorteria: {distToGoal:F1} | DistAliado: {distAlly:F1} | DistEnemigo: {distEnemy:F1}");
         }
 
@@ -229,7 +266,7 @@ public class AIControllerSlidingWindow : MonoBehaviour
         using var movementTensor = worker.PeekOutput("continuous_actions") as Unity.InferenceEngine.Tensor<float>;
         using var actionsTensor = worker.PeekOutput("discrete_actions") as Unity.InferenceEngine.Tensor<float>;
 
-        float[] movement = movementTensor != null ? movementTensor.DownloadToArray() : new float[2];
+        float[] movement = movementTensor != null ? movementTensor.DownloadToArray() : new float[9];
         float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
 
         return (movement, actions);

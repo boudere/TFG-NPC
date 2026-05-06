@@ -111,8 +111,29 @@ public class AIControllerRNN : MonoBehaviour
 
         var prediction = Predecir(normalizedInputs);
 
-        float aiInputX = prediction.movement.Length > 0 ? prediction.movement[0] : 0f;
-        float aiInputZ = prediction.movement.Length > 1 ? prediction.movement[1] : 0f;
+        float aiInputX = 0f;
+        float aiInputZ = 0f;
+        
+        if (prediction.movement != null && prediction.movement.Length >= 9)
+        {
+            int bestClass = 0;
+            float maxProb = -float.MaxValue;
+            for(int i = 0; i < 9; i++)
+            {
+                if(prediction.movement[i] > maxProb)
+                {
+                    maxProb = prediction.movement[i];
+                    bestClass = i;
+                }
+            }
+            aiInputX = (bestClass / 3) - 1f;
+            aiInputZ = (bestClass % 3) - 1f;
+        }
+        else if (prediction.movement != null && prediction.movement.Length >= 2)
+        {
+            aiInputX = prediction.movement[0];
+            aiInputZ = prediction.movement[1];
+        }
         float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
         float passProb  = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
 
@@ -226,7 +247,7 @@ public class AIControllerRNN : MonoBehaviour
         using var actionsTensor = worker.PeekOutput("discrete_actions") as Unity.InferenceEngine.Tensor<float>;
         using var hiddenOutTensor = worker.PeekOutput("hidden_state_out") as Unity.InferenceEngine.Tensor<float>;
 
-        float[] movement = movementTensor != null ? movementTensor.DownloadToArray() : new float[2];
+        float[] movement = movementTensor != null ? movementTensor.DownloadToArray() : new float[9];
         float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
         
         if (hiddenOutTensor != null)

@@ -75,8 +75,7 @@ class SoccerRNNModel(nn.Module):
         self.rnn_cell = CustomRNNCell(input_size, hidden_size)
         
         self.movement_head = nn.Sequential(
-            nn.Linear(hidden_size, 2),
-            nn.Tanh()
+            nn.Linear(hidden_size, 9)
         )
         self.action_head = nn.Sequential(
             nn.Linear(hidden_size, 2),
@@ -246,7 +245,9 @@ class SoccerRNNDataset(Dataset):
         # Reshape a [N, 2, 40]
         self.X = X_flat.reshape(-1, 2, 40)
         
-        self.Ym = torch.tensor(self.data[movement_cols].values, dtype=torch.float32)
+        mov_vals = np.round(self.data[movement_cols].values)
+        Ym_classes = (mov_vals[:, 0] + 1) * 3 + (mov_vals[:, 1] + 1)
+        self.Ym = torch.tensor(Ym_classes, dtype=torch.long)
         self.Ya = torch.tensor(self.data[action_cols].values,   dtype=torch.float32)
         self.IsSynth = torch.tensor(self.data['is_synthetic'].values, dtype=torch.float32)
 
@@ -280,7 +281,7 @@ def train(timestamp=''):
 
     INPUT_SIZE = 40
     model = SoccerRNNModel(input_size=INPUT_SIZE)
-    mse_crit  = nn.MSELoss()
+    ce_crit  = nn.CrossEntropyLoss()
 
     action_counts = dataset.Ya.sum(dim=0)
     total_samples = len(dataset)
@@ -301,12 +302,12 @@ def train(timestamp=''):
             
             orig_mask = (batch_IsSynth == 0.0)
             if orig_mask.sum() > 0:
-                loss_mse = mse_crit(pred_movement[orig_mask], batch_Ym[orig_mask])
+                loss_ce = ce_crit(pred_movement[orig_mask], batch_Ym[orig_mask])
             else:
-                loss_mse = torch.tensor(0.0, device=batch_X.device)
+                loss_ce = torch.tensor(0.0, device=batch_X.device)
                 
             loss_bce = bce_crit(pred_actions,  batch_Ya)
-            loss = MOVEMENT_LOSS_WEIGHT * loss_mse + ACTION_LOSS_WEIGHT * loss_bce
+            loss = MOVEMENT_LOSS_WEIGHT * loss_ce + ACTION_LOSS_WEIGHT * loss_bce
             
             if loss.item() > 0:
                 loss.backward()
@@ -322,7 +323,7 @@ def train(timestamp=''):
         def forward(self, x, h):
             # x será de [batch, 1, 40], h será [1, batch, 64]
             movement, action_logits, h_new = self.base(x, h)
-            return movement, torch.sigmoid(action_logits), h_new
+            return torch.softmax(movement, dim=-1), torch.sigmoid(action_logits), h_new
 
     export_model = ExportWrapperRNN(model)
     export_model.eval()
@@ -336,7 +337,8 @@ def train(timestamp=''):
         export_params=True, opset_version=14,
         do_constant_folding=True,
         input_names=['vector_observation', 'hidden_state_in'],
-        output_names=['continuous_actions', 'discrete_actions', 'hidden_state_out']
+        output_names=['continuous_actions', 'discrete_actions', 'hidden_state_out'],
+        dynamo=False
     )
 
 if __name__ == "__main__":

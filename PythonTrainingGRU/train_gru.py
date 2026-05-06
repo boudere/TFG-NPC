@@ -83,8 +83,7 @@ class SoccerGRUModel(nn.Module):
         self.movement_branch = nn.Sequential(
             nn.Linear(hidden_size, 32),
             nn.ReLU(),
-            nn.Linear(32, 2),
-            nn.Tanh()
+            nn.Linear(32, 9)
         )
         self.action_branch = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -142,47 +141,54 @@ class SoccerGRUDataset(Dataset):
         for path in csv_files:
             if not os.path.exists(path):
                 continue
-            tmp = pd.read_csv(path)
+            df_full = pd.read_csv(path)
             
-            # -- CORRECCION DE TIMING --
-            LOOKBACK = 5
-            for action_col in ['Disparo', 'Pase']:
-                action_indices = tmp.index[tmp[action_col] == 1].tolist()
-                for idx in action_indices:
-                    if tmp.loc[idx, 'TienePelota'] == 1:
-                        continue
-                    found = False
-                    for offset in range(1, LOOKBACK + 1):
-                        prev_idx = idx - offset
-                        if prev_idx < 0:
-                            break
-                        if tmp.loc[prev_idx, 'TienePelota'] == 1:
+            if 'EpisodeID' not in df_full.columns:
+                df_full['EpisodeID'] = 0
+
+            for ep_id, tmp in df_full.groupby('EpisodeID'):
+                tmp = tmp.reset_index(drop=True)
+                
+                # -- CORRECCION DE TIMING --
+                LOOKBACK = 5
+                for action_col in ['Disparo', 'Pase']:
+                    action_indices = tmp.index[tmp[action_col] == 1].tolist()
+                    for idx in action_indices:
+                        if tmp.loc[idx, 'TienePelota'] == 1:
+                            continue
+                        found = False
+                        for offset in range(1, LOOKBACK + 1):
+                            prev_idx = idx - offset
+                            if prev_idx < 0:
+                                break
+                            if tmp.loc[prev_idx, 'TienePelota'] == 1:
+                                tmp.loc[idx, action_col] = 0
+                                tmp.loc[prev_idx, action_col] = 1
+                                found = True
+                                break
+                        if not found:
                             tmp.loc[idx, action_col] = 0
-                            tmp.loc[prev_idx, action_col] = 1
-                            found = True
-                            break
-                    if not found:
-                        tmp.loc[idx, action_col] = 0
 
-            # -- FILTRO SPAWN NOISE --
-            spawn_mask = (
-                (tmp['Aliado1DirX'] == 0) & (tmp['Aliado1DirZ'] == 0) &
-                (tmp['Aliado2DirX'] == 0) & (tmp['Aliado2DirZ'] == 0)
-            )
-            valid_idx = np.where(~spawn_mask)[0]
+                # -- FILTRO SPAWN NOISE --
+                spawn_mask = (
+                    (tmp['Aliado1DirX'] == 0) & (tmp['Aliado1DirZ'] == 0) &
+                    (tmp['Aliado2DirX'] == 0) & (tmp['Aliado2DirZ'] == 0)
+                )
+                valid_idx = np.where(~spawn_mask)[0]
 
-            if len(valid_idx) < seq_len:
-                continue
+                if len(valid_idx) < seq_len:
+                    continue
 
-            for i in range(len(valid_idx) - seq_len + 1):
-                idx_start = valid_idx[i]
-                idx_end = valid_idx[i + seq_len - 1]
-                # Validar contiguidad en el tiempo
-                if idx_end - idx_start == seq_len - 1:
-                    seq = tmp.iloc[idx_start : idx_end + 1]
-                    X_seqs.append(seq[feature_cols].values.flatten())
-                    Ym_seqs.append(seq.iloc[-1][movement_cols].values)
-                    Ya_seqs.append(seq.iloc[-1][action_cols].values)
+                for i in range(len(valid_idx) - seq_len + 1):
+                    idx_start = valid_idx[i]
+                    idx_end = valid_idx[i + seq_len - 1]
+                    # Validar contiguidad en el tiempo
+                    if idx_end - idx_start == seq_len - 1:
+                        seq = tmp.iloc[idx_start : idx_end + 1]
+                        X_seqs.append(seq[feature_cols].values.flatten())
+                        mov = seq.iloc[-1][movement_cols].values
+                        Ym_seqs.append(int((mov[0] + 1) * 3 + (mov[1] + 1)))
+                        Ya_seqs.append(seq.iloc[-1][action_cols].values)
 
         if not X_seqs:
             raise FileNotFoundError("Ningun CSV valido encontrado para generar secuencias.")
@@ -221,13 +227,14 @@ class SoccerGRUDataset(Dataset):
             smote = SMOTE(sampling_strategy=sampling_strategy, k_neighbors=k, random_state=42)
             
             # Interpolamos features y movimientos simultáneamente
-            XY_arr = np.concatenate([X_arr, Ym_arr], axis=1)
+            Ym_arr_2d = Ym_arr.reshape(-1, 1)
+            XY_arr = np.concatenate([X_arr, Ym_arr_2d], axis=1)
             n_orig = len(X_arr)
             
             XY_res, y_res = smote.fit_resample(XY_arr, smote_classes)
             
-            X_arr  = XY_res[:, :-2]
-            Ym_arr = XY_res[:, -2:]
+            X_arr  = XY_res[:, :-1]
+            Ym_arr = np.round(XY_res[:, -1]).astype(np.float32)
             
             Ya_arr = np.zeros((len(y_res), 2), dtype=np.float32)
             Ya_arr[y_res == 1, 0] = 1.0
@@ -247,7 +254,7 @@ class SoccerGRUDataset(Dataset):
 
         # Reshape a secuencias de 3D
         self.X  = torch.tensor(X_arr).view(-1, seq_len, 40)
-        self.Ym = torch.tensor(Ym_arr)
+        self.Ym = torch.tensor(Ym_arr, dtype=torch.long)
         self.Ya = torch.tensor(Ya_arr)
         self.IsSynth = torch.tensor(is_synth)
 
@@ -275,7 +282,7 @@ def train(timestamp=''):
 
     INPUT_SIZE = 40
     model = SoccerGRUModel(input_size=INPUT_SIZE)
-    mse_crit  = nn.MSELoss()
+    ce_crit  = nn.CrossEntropyLoss()
 
     action_counts = dataset.Ya.sum(dim=0)
     total_samples = len(dataset)
@@ -296,12 +303,12 @@ def train(timestamp=''):
             
             orig_mask = (batch_IsSynth == 0.0)
             if orig_mask.sum() > 0:
-                loss_mse = mse_crit(pred_movement[orig_mask], batch_Ym[orig_mask])
+                loss_ce = ce_crit(pred_movement[orig_mask], batch_Ym[orig_mask])
             else:
-                loss_mse = torch.tensor(0.0, device=batch_X.device)
+                loss_ce = torch.tensor(0.0, device=batch_X.device)
                 
             loss_bce = bce_crit(pred_actions,  batch_Ya)
-            loss = MOVEMENT_LOSS_WEIGHT * loss_mse + ACTION_LOSS_WEIGHT * loss_bce
+            loss = MOVEMENT_LOSS_WEIGHT * loss_ce + ACTION_LOSS_WEIGHT * loss_bce
             
             if loss.item() > 0:
                 loss.backward()
@@ -314,7 +321,7 @@ def train(timestamp=''):
             self.base = base_model
         def forward(self, x, h):
             movement, action_logits, h_new = self.base(x, h)
-            return movement, torch.sigmoid(action_logits), h_new
+            return torch.softmax(movement, dim=-1), torch.sigmoid(action_logits), h_new
 
     export_model = ExportWrapperGRU(model)
     export_model.eval()
@@ -328,7 +335,8 @@ def train(timestamp=''):
         export_params=True, opset_version=14,
         do_constant_folding=True,
         input_names=['vector_observation', 'hidden_state_in'],
-        output_names=['continuous_actions', 'discrete_actions', 'hidden_state_out']
+        output_names=['continuous_actions', 'discrete_actions', 'hidden_state_out'],
+        dynamo=False
     )
 
 if __name__ == "__main__":
