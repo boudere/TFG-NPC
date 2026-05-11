@@ -75,7 +75,14 @@ MOVEMENT_COLS = ['InputX', 'InputZ']
 ACTION_COLS   = ['Disparo', 'Pase']
 
 
-# 2. MODELO
+# 2. MODELO — Clasificación 9 clases de movimiento + 2 acciones binarias
+# Mapeo de las 9 clases:
+#   dx en {-1, 0, 1} -> dx + 1 en {0, 1, 2}
+#   dz en {-1, 0, 1} -> dz + 1 en {0, 1, 2}
+#   clase = (dx + 1) * 3 + (dz + 1)
+#   0: Diag Izq-Abj, 1: Izquierda, 2: Diag Izq-Arr
+#   3: Abajo,        4: Quieto,    5: Arriba
+#   6: Diag Der-Abj, 7: Derecha,   8: Diag Der-Arr
 class SoccerAgentModel(nn.Module):
     def __init__(self, input_size: int = 40):
         super().__init__()
@@ -85,20 +92,21 @@ class SoccerAgentModel(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(128, 64),
             nn.ReLU(),
+            nn.Dropout(0.2),
         )
+        # Movimiento: 9 clases discretas (logits — CrossEntropyLoss aplica softmax)
         self.movement_head = nn.Sequential(
-            nn.Linear(64, 2),
-            nn.Tanh()
+            nn.Linear(64, 9)
         )
-        # Sin Sigmoid: BCEWithLogitsLoss lo aplica internamente (mas estable)
+        # Acciones binarias (shoot, pass) — sin Sigmoid: BCEWithLogitsLoss lo aplica
         self.action_head = nn.Sequential(
             nn.Linear(64, 2),
         )
 
     def forward(self, x):
         shared   = self.backbone(x)
-        movement = self.movement_head(shared)
-        actions  = self.action_head(shared)   # logits, sin Sigmoid
+        movement = self.movement_head(shared)   # [B, 9] logits
+        actions  = self.action_head(shared)     # [B, 2] logits
         return movement, actions
 
 
@@ -144,7 +152,8 @@ class SoccerDataset(Dataset):
         print(f"  Clases antes de SMOTE: {dict(class_counts)}")
 
         n_minority = sum(class_counts.get(c, 0) for c in [1, 2])
-        if n_minority > 0:
+        min_minority = min((class_counts.get(c, 0) for c in [1, 2] if class_counts.get(c, 0) > 0), default=0)
+        if n_minority > 0 and min_minority >= 2:
             X_sm = raw[smote_cols].values
             y_sm = raw['_smote_class'].values
 
@@ -173,28 +182,38 @@ class SoccerDataset(Dataset):
             print(f"  SMOTE aplicado (k={k}): {len(raw)} filas | "
                   f"Disparo={int(raw['Disparo'].sum())} | Pase={int(raw['Pase'].sum())}")
         else:
-            print("  WARNING: Sin eventos Disparo/Pase — SMOTE omitido.")
+            if n_minority == 0:
+                print("  WARNING: Sin eventos Disparo/Pase — SMOTE omitido.")
+            else:
+                print(f"  WARNING: Clase minoritaria con solo {min_minority} muestra(s) — SMOTE necesita >=2. Omitido.")
 
         if '_smote_class' in raw.columns:
             raw.drop('_smote_class', axis=1, inplace=True)
 
-        # ── BALANCEO DE MOVIMIENTO (oversampling a la clase max) ──
-        raw['_mov'] = raw['InputX'].astype(str) + '_' + raw['InputZ'].astype(str)
-        mov_max = int(raw['_mov'].value_counts().max())
+        # Generar las 9 clases de movimiento
+        def get_movement_class(row):
+            dx = 1.0 if row['InputX'] > 0.5 else (-1.0 if row['InputX'] < -0.5 else 0.0)
+            dz = 1.0 if row['InputZ'] > 0.5 else (-1.0 if row['InputZ'] < -0.5 else 0.0)
+            return int((dx + 1) * 3 + (dz + 1))
+
+        raw['MovementClass'] = raw.apply(get_movement_class, axis=1)
+
+        # BALANCEO DE MOVIMIENTO (oversampling a la clase max)
+        mov_counts = raw['MovementClass'].value_counts()
+        mov_max = int(mov_counts.max())
         balanced = []
-        for _, group in raw.groupby('_mov'):
+        for _, group in raw.groupby('MovementClass'):
             if len(group) < mov_max:
                 group = group.sample(n=mov_max, replace=True, random_state=42)
             balanced.append(group)
         raw = pd.concat(balanced).reset_index(drop=True)
-        if '_mov' in raw.columns:
-            raw.drop('_mov', axis=1, inplace=True)
 
         self.data = raw.sample(frac=1, random_state=42).reset_index(drop=True)
         print(f"  Filas tras balanceo movimiento: {len(self.data)}")
+        print(f"  Distribución MovementClass:\n{self.data['MovementClass'].value_counts().sort_index().to_string()}")
 
         self.X  = torch.tensor(self.data[FEATURE_COLS].values,  dtype=torch.float32)
-        self.Ym = torch.tensor(self.data[MOVEMENT_COLS].values, dtype=torch.float32)
+        self.Ym = torch.tensor(self.data['MovementClass'].values, dtype=torch.long)
         self.Ya = torch.tensor(self.data[ACTION_COLS].values,   dtype=torch.float32)
 
         # Normalizacion global
@@ -208,14 +227,14 @@ class SoccerDataset(Dataset):
 
 
 # 4. HELPERS
-def discretize(values, threshold=0.3):
-    result = np.zeros_like(values, dtype=int)
-    result[values >  threshold] =  1
-    result[values < -threshold] = -1
-    return result
-
 def binarize(values, threshold=0.5):
     return (values >= threshold).astype(int)
+
+MOVEMENT_CLASS_NAMES = [
+    "Diag Izq-Abj(0)", "Izquierda(1)", "Diag Izq-Arr(2)",
+    "Abajo(3)", "Quieto(4)", "Arriba(5)",
+    "Diag Der-Abj(6)", "Derecha(7)", "Diag Der-Arr(8)"
+]
 
 
 # 5. CARGA Y PARTICION DE DATOS
@@ -227,7 +246,7 @@ def load_and_split_data(csv_files):
             continue
         tmp = pd.read_csv(path)
 
-        # ── FILTRO SPAWN NOISE ──
+        # FILTRO SPAWN NOISE 
         antes = len(tmp)
         spawn_mask = (
             (tmp['Aliado1DirX'] == 0) & (tmp['Aliado1DirZ'] == 0) &
@@ -256,8 +275,7 @@ def load_and_split_data(csv_files):
         json.dump({"mean": global_mean.squeeze().tolist(),
                    "std":  global_std.squeeze().tolist()}, f)
     print(f"Scaler GLOBAL guardado en {scaler_path}")
-
-    # ── HEURISTICAS DE DIVISION ──
+    # Los modelos 
     # 1. Recover: El equipo no tiene el balon, y no se esta disparando ni pasando
     df_recover = raw[(raw['TienePelotaEquipo'] != 1) & (raw['Disparo'] == 0) & (raw['Pase'] == 0)].copy()
     
@@ -305,7 +323,8 @@ def train_model(model_name, df, global_mean, global_std):
 
     INPUT_SIZE = len(FEATURE_COLS)
     model     = SoccerAgentModel(INPUT_SIZE)
-    mse_crit  = nn.MSELoss()
+    # Loss de movimiento: CrossEntropy para 9 clases
+    ce_crit   = nn.CrossEntropyLoss()
     # BCEWithLogitsLoss + pos_weight para compensar desbalance residual
     action_counts = dataset.Ya.sum(dim=0)
     total_samples = len(dataset)
@@ -319,70 +338,81 @@ def train_model(model_name, df, global_mean, global_std):
 
     for epoch in range(EPOCHS):
         model.train()
-        total_loss = total_mse = total_bce = 0.0
+        total_loss = total_ce = total_bce = 0.0
 
         for batch_X, batch_Ymov, batch_Yact in train_loader:
             optimizer.zero_grad()
             pm, pa = model(batch_X)
-            loss_mse = mse_crit(pm, batch_Ymov)
+            loss_ce  = ce_crit(pm, batch_Ymov)   # [B,9] logits vs [B] clase
             loss_bce = bce_crit(pa, batch_Yact)
-            loss = MOVEMENT_LOSS_WEIGHT * loss_mse + ACTION_LOSS_WEIGHT * loss_bce
+            loss = MOVEMENT_LOSS_WEIGHT * loss_ce + ACTION_LOSS_WEIGHT * loss_bce
             loss.backward()
             optimizer.step()
 
             total_loss += loss.item()
-            total_mse  += loss_mse.item()
+            total_ce   += loss_ce.item()
             total_bce  += loss_bce.item()
 
         if (epoch + 1) % 30 == 0:
             n = len(train_loader)
-            print(f"[{model_name}] Epoch [{epoch+1:3d}/{EPOCHS}] Loss={total_loss/n:.4f} MSE={total_mse/n:.4f} BCE={total_bce/n:.4f}")
+            print(f"[{model_name}] Epoch [{epoch+1:3d}/{EPOCHS}] Loss={total_loss/n:.4f} CE(mov)={total_ce/n:.4f} BCE(act)={total_bce/n:.4f}")
 
-    # Evaluacion (rapida)
+    # Evaluacion
     model.eval()
-    all_pm, all_pa, all_ym, all_ya = [], [], [], []
+    all_pred_mov, all_pred_act = [], []
+    all_true_mov, all_true_act = [], []
     with torch.no_grad():
         for batch_X, batch_Ym, batch_Ya in test_loader:
             pm, pa = model(batch_X)
-            all_pm.append(pm.cpu().numpy())
-            all_pa.append(pa.cpu().numpy())
-            all_ym.append(batch_Ym.cpu().numpy())
-            all_ya.append(batch_Ya.cpu().numpy())
+            all_pred_mov.append(torch.argmax(pm, dim=1).cpu().numpy())
+            all_pred_act.append(torch.sigmoid(pa).cpu().numpy())
+            all_true_mov.append(batch_Ym.cpu().numpy())
+            all_true_act.append(batch_Ya.cpu().numpy())
 
-    pred_mov = np.vstack(all_pm); true_mov = np.vstack(all_ym)
-    pred_X = discretize(pred_mov[:, 0]); true_X = discretize(true_mov[:, 0])
-    pred_Z = discretize(pred_mov[:, 1]); true_Z = discretize(true_mov[:, 1])
-    combined_pred = [f"{x},{z}" for x,z in zip(pred_X, pred_Z)]
-    combined_true = [f"{x},{z}" for x,z in zip(true_X, true_Z)]
-    acc_mov  = accuracy_score(combined_true, combined_pred)
-    prec_mov = precision_score(combined_true, combined_pred, average='macro', zero_division=0)
-    rec_mov  = recall_score(combined_true,   combined_pred, average='macro', zero_division=0)
-    f1_mov   = f1_score(combined_true,       combined_pred, average='macro', zero_division=0)
+    pred_mov = np.concatenate(all_pred_mov)
+    true_mov = np.concatenate(all_true_mov)
 
-    print(classification_report(true_X, pred_X, labels=[-1,0,1],
-        target_names=['Izq(-1)','Stop(0)','Der(+1)'], zero_division=0))
-    print(classification_report(true_Z, pred_Z, labels=[-1,0,1],
-        target_names=['Atras(-1)','Stop(0)','Adelante(+1)'], zero_division=0))
-    print(f"[{model_name}] Movimiento Combinado: Acc={acc_mov*100:.1f}%  Prec={prec_mov*100:.1f}%  Rec={rec_mov*100:.1f}%  F1={f1_mov*100:.1f}%")
+    # Movimiento — 9 clases
+    print(f"\n[{model_name}] Movimiento — 9 Clases:")
+    print(classification_report(true_mov, pred_mov, labels=list(range(9)),
+                                target_names=MOVEMENT_CLASS_NAMES, zero_division=0))
+    acc_mov  = accuracy_score(true_mov, pred_mov)
+    prec_mov = precision_score(true_mov, pred_mov, average='macro', zero_division=0)
+    rec_mov  = recall_score(true_mov, pred_mov, average='macro', zero_division=0)
+    f1_mov   = f1_score(true_mov, pred_mov, average='macro', zero_division=0)
+    print(f"[{model_name}] Movimiento: Acc={acc_mov*100:.1f}%  Prec={prec_mov*100:.1f}%  Rec={rec_mov*100:.1f}%  F1={f1_mov*100:.1f}%")
 
     n_batches = len(train_loader)
     last_loss = total_loss / n_batches if n_batches > 0 else 0.0
+
+    # Wrapper para exportar: softmax en movimiento, sigmoid en acciones
+    class ExportWrapper(nn.Module):
+        def __init__(self, base_model):
+            super().__init__()
+            self.base = base_model
+        def forward(self, x):
+            movement_logits, action_logits = self.base(x)
+            return torch.softmax(movement_logits, dim=-1), torch.sigmoid(action_logits)
+
+    export_model = ExportWrapper(model)
+    export_model.eval()
 
     # Exportar ONNX
     output_path = f"{ONNX_OUTPUT_PREFIX}{model_name}.onnx"
     dummy = torch.randn(1, INPUT_SIZE)
     try:
         torch.onnx.export(
-            model, dummy, output_path,
-            export_params=True, opset_version=18,
+            export_model, dummy, output_path,
+            export_params=True, opset_version=14,
             do_constant_folding=True,
             input_names=['vector_observation'],
-            output_names=['continuous_actions', 'discrete_actions'],
+            output_names=['movement_probs', 'action_probs'],
             dynamic_axes={
                 'vector_observation':  {0: 'batch_size'},
-                'continuous_actions':  {0: 'batch_size'},
-                'discrete_actions':    {0: 'batch_size'},
-            }
+                'movement_probs':     {0: 'batch_size'},
+                'action_probs':       {0: 'batch_size'},
+            },
+            dynamo=False
         )
         print(f"[{model_name}] Guardado en {output_path}")
     except Exception as e:

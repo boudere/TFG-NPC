@@ -177,27 +177,24 @@ public class AIController : MonoBehaviour
         NormalizeFeatures(normalizedInputs);
 
         // 5. Ejecutar inferencia en el modelo correspondiente
-        float[] aiOutputs;
-        float shootProb;
-        float passProb;
-
         var prediction = Predecir(activeWorker, normalizedInputs);
-        aiOutputs = prediction.movement;
-        shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
-        passProb = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
+        float dx = prediction.dx;
+        float dz = prediction.dz;
+        float shootProb = prediction.shootProb;
+        float passProb  = prediction.passProb;
 
         // --- TÁCTICA: MANTENER POSICIÓN DEFENSIVA ---
         if (mantenerPosicionDefensiva)
         {
             // Forzamos a la IA a quedarse quieta (no persigue ciegamente la pelota)
-            aiOutputs[0] = 0f;
-            aiOutputs[1] = 0f;
+            dx = 0f;
+            dz = 0f;
             shootProb = 0f;
             passProb = 0f;
         }
 
         // --- APLICAR RESULTADOS AL PERSONAJE (Seek Steering Behavior) ---
-        Vector3 moveDir = new Vector3(aiOutputs[0], 0f, aiOutputs[1]).normalized;
+        Vector3 moveDir = new Vector3(dx, 0f, dz).normalized;
         ApplyMovement(moveDir);
 
         // --- Gatillo de acciones ---
@@ -509,9 +506,11 @@ public class AIController : MonoBehaviour
     }
 
     /// <summary>
-    /// Ejecuta la Red Neuronal
+    /// Ejecuta la Red Neuronal.
+    /// El modelo exporta 9 probabilidades de movimiento (softmax) y 2 probabilidades de acción (sigmoid).
+    /// Decodificamos la clase con mayor probabilidad a (dx, dz) ∈ {-1, 0, 1}².
     /// </summary>
-    private (float[] movement, float[] actions) Predecir(Unity.InferenceEngine.Worker targetWorker, float[] inputFeatures)
+    private (float dx, float dz, float shootProb, float passProb) Predecir(Unity.InferenceEngine.Worker targetWorker, float[] inputFeatures)
     {
         // 1. Crear un Tensor en forma de matriz plana a partir de nuestras variables
         using var inputTensor = new Unity.InferenceEngine.Tensor<float>(new Unity.InferenceEngine.TensorShape(1, inputFeatures.Length), inputFeatures);
@@ -520,19 +519,38 @@ public class AIController : MonoBehaviour
         targetWorker.Schedule(inputTensor);
 
         // 3. Obtener resultados por nombre de salida
-        using var movementTensor = targetWorker.PeekOutput("continuous_actions") as Unity.InferenceEngine.Tensor<float>;
-        using var actionsTensor = targetWorker.PeekOutput("discrete_actions") as Unity.InferenceEngine.Tensor<float>;
+        using var movementTensor = targetWorker.PeekOutput("movement_probs") as Unity.InferenceEngine.Tensor<float>;
+        using var actionsTensor  = targetWorker.PeekOutput("action_probs")   as Unity.InferenceEngine.Tensor<float>;
 
         if (movementTensor == null)
         {
-            Debug.LogError("[AIController] No se pudo leer output 'continuous_actions'.");
-            return (new float[2], new float[2]);
+            Debug.LogError("[AIController] No se pudo leer output 'movement_probs'.");
+            return (0f, 0f, 0f, 0f);
         }
 
-        float[] movement = movementTensor.DownloadToArray();
-        float[] actions = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
+        // 4. Descargar las 9 probabilidades de movimiento y encontrar la clase ganadora (argmax)
+        float[] movProbs = movementTensor.DownloadToArray();
+        int bestClass = 0;
+        float bestProb = movProbs[0];
+        for (int i = 1; i < movProbs.Length; i++)
+        {
+            if (movProbs[i] > bestProb)
+            {
+                bestProb = movProbs[i];
+                bestClass = i;
+            }
+        }
 
-        return (movement, actions);
+        // 5. Decodificar clase → (dx, dz): inversa de clase = (dx+1)*3 + (dz+1)
+        float dx = (bestClass / 3) - 1f;   // {0,1,2} → {-1, 0, 1}
+        float dz = (bestClass % 3) - 1f;   // {0,1,2} → {-1, 0, 1}
+
+        // 6. Probabilidades de acción
+        float[] actProbs = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
+        float shootProb = actProbs.Length > 0 ? actProbs[0] : 0f;
+        float passProb  = actProbs.Length > 1 ? actProbs[1] : 0f;
+
+        return (dx, dz, shootProb, passProb);
     }
 
     private void TryApplyAction(float shootProb, float passProb)
