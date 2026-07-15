@@ -19,7 +19,7 @@ public class Defensa : PlayerID, IResettable
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-    private float speed = 150;
+
    // private float npcSpeed = 75;
    // private float changeTargetDistance = 50f;
     //private Vector3 npcTarget;
@@ -246,10 +246,6 @@ public class Defensa : PlayerID, IResettable
 
         float currentSpeed = npcSpeed;
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            currentSpeed *= 0.75f;
-        }
 
         rb.linearVelocity = new Vector3(
             direction.x * currentSpeed,

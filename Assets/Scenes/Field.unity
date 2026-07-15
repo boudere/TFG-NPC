@@ -7046,6 +7046,7 @@ GameObject:
   - component: {fileID: 1031457105}
   - component: {fileID: 1031457104}
   - component: {fileID: 1031457103}
+  - component: {fileID: 1031457106}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Ball
@@ -7200,6 +7201,7 @@ MonoBehaviour:
   rb: {fileID: 1031457100}
   physicalCollider: {fileID: 1031457104}
   localHoldOffset: {x: 0, y: 0, z: 1}
+  pickupCooldown: 0.25
   ballIsOutside: 0
 --- !u!135 &1031457103
 SphereCollider:
@@ -7255,6 +7257,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abc440b0f1cf94d4ea8063a081538aac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1031457106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031457095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b004c37b2ed1435439cfcd22125cafad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distanciaMaxima: 50
 --- !u!43 &1032329648
 Mesh:
   m_ObjectHideFlags: 0

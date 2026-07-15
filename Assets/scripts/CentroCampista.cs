@@ -16,7 +16,6 @@ public class CentroCampista : PlayerID, IResettable
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
     private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-    private float speed = 150;
   
     private CharacterManager characterManager;
 
@@ -352,12 +351,8 @@ public class CentroCampista : PlayerID, IResettable
 
         Vector3 direction = (npcTarget - transform.position).normalized;
 
-        float currentSpeed = npcSpeed;
-
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            currentSpeed *= 0.75f;
-        }
+           float currentSpeed = npcSpeed;
+     
 
         rb.linearVelocity = new Vector3(
             direction.x * currentSpeed,

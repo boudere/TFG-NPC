@@ -1,39 +1,36 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.LowLevel;
 
 public class CharacterGV : PlayerID
 {
+    [SerializeField] private float turnSpeedDeg = 540f;
+    [SerializeField] private float directionLerp = 12f;
+    [SerializeField] private float sprintSpeed = 300f;
+    [SerializeField] private float sprintMaxDistance = 400f;
 
-    [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
-    [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
-    private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
-   // private float speed = 100f;
+    private Vector3 smoothDir = Vector3.forward;
 
     public int index;
     private CharacterManager characterManager;
-   
-    public static CharacterGV instance;
-    private bool resetPos = false;
 
+    private bool resetPos;
 
-
+    public bool sprint;
+    private Vector3 sprintDirection;
+    private Vector3 sprintInitPosition;
+    private Vector3 sprintTargetPosition;
 
     public bool defaultMove = true;
-
 
     private void Start()
     {
         characterManager = CharacterManager.instance;
- 
     }
 
     private void Update()
     {
         if (resetPos)
-        {
             return;
-        }
 
         changeSpeed();
 
@@ -42,10 +39,10 @@ public class CharacterGV : PlayerID
             StartCoroutine(StopRoutine(playerStop));
         }
 
-        movePlayer();
-        
+        MovePlayer();
     }
-    void movePlayer()
+
+    private void MovePlayer()
     {
         if (stop)
         {
@@ -56,22 +53,90 @@ public class CharacterGV : PlayerID
         if (index != characterManager.index)
             return;
 
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        Vector3 moveDir;
 
-        Vector3 inputDir = new Vector3(h, 0f, v);
-
-        Vector3 moveDir = inputDir.normalized;
-        Vector3 movement = moveDir * npcSpeed;
-        rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
-
-        if (inputDir.sqrMagnitude > 0.001f)
+        if (sprint)
         {
-            smoothDir = Vector3.Slerp(smoothDir, moveDir, directionLerp * Time.deltaTime);
+            float distanciaRecorrida =
+                Vector3.Distance(transform.position, sprintInitPosition);
 
-            Quaternion targetRot = Quaternion.LookRotation(smoothDir, Vector3.up);
-            rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, turnSpeedDeg * Time.deltaTime));
+            float distanciaAlObjetivo =
+                Vector3.Distance(transform.position, sprintTargetPosition);
+
+            if (distanciaRecorrida >= sprintMaxDistance ||
+                distanciaAlObjetivo <= 5f)
+            {
+                StopSprint();
+                return;
+            }
+
+            moveDir = sprintDirection;
         }
+        else
+        {
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+
+            moveDir = new Vector3(h, 0f, v).normalized;
+        }
+
+        float speed = sprint ? sprintSpeed : npcSpeed;
+
+        Vector3 movement = moveDir * speed;
+
+        rb.linearVelocity = new Vector3(
+            movement.x,
+            rb.linearVelocity.y,
+            movement.z
+        );
+
+        if (moveDir.sqrMagnitude > 0.001f)
+        {
+            smoothDir = Vector3.Slerp(
+                smoothDir,
+                moveDir,
+                directionLerp * Time.deltaTime
+            );
+
+            Quaternion targetRot =
+                Quaternion.LookRotation(smoothDir, Vector3.up);
+
+            rb.MoveRotation(
+                Quaternion.RotateTowards(
+                    rb.rotation,
+                    targetRot,
+                    turnSpeedDeg * Time.deltaTime
+                )
+            );
+        }
+    }
+
+    public void SetSprint(Vector3 targetPosition)
+    {
+        // Se guardan una sola vez al pulsar K.
+        sprintInitPosition = transform.position;
+        sprintTargetPosition = targetPosition;
+
+        Vector3 direction = targetPosition - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.001f)
+            return;
+
+        sprintDirection = direction.normalized;
+        sprint = true;
+    }
+
+    private void StopSprint()
+    {
+        sprint = false;
+        sprintDirection = Vector3.zero;
+
+        rb.linearVelocity = new Vector3(
+            0f,
+            rb.linearVelocity.y,
+            0f
+        );
     }
 
     public IEnumerator PararJugador(PlayerID target)
@@ -80,6 +145,7 @@ public class CharacterGV : PlayerID
         playerStop = target;
 
         Rigidbody rbPlayer = playerStop.GetComponent<Rigidbody>();
+
         if (rbPlayer != null)
         {
             rbPlayer.linearVelocity = Vector3.zero;
@@ -87,6 +153,7 @@ public class CharacterGV : PlayerID
         }
 
         yield return new WaitForSeconds(0.5f);
+
         stop = false;
         playerStop = null;
     }
@@ -95,12 +162,12 @@ public class CharacterGV : PlayerID
     {
         resetPos = true;
 
-        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        rb.linearVelocity =
+            new Vector3(0f, rb.linearVelocity.y, 0f);
+
         rb.angularVelocity = Vector3.zero;
 
         StartCoroutine(ResetRoutine());
-
-
     }
 
     private IEnumerator ResetRoutine()
@@ -108,7 +175,4 @@ public class CharacterGV : PlayerID
         yield return new WaitForSeconds(4f);
         resetPos = false;
     }
-
 }
-
-

@@ -16,7 +16,7 @@ public class PlayerID : MonoBehaviour
     protected bool frozen = false;
     protected PlayerID playerStop = null;
     protected bool libre = true;
-    protected float npcSpeed = 75f;
+    protected float npcSpeed = 100f;
     protected Vector3 npcTarget;
 
     protected bool chasingBallFree = false;
@@ -164,7 +164,7 @@ public class PlayerID : MonoBehaviour
         }
         else
         {
-            npcSpeed = 75f;
+            npcSpeed = 100f;
         }
     }
 

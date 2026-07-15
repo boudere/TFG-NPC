@@ -219,10 +219,6 @@ public class Delantero : PlayerID, IResettable
 
         float currentSpeed = npcSpeed;
 
-        if (Bola.instance.transform.IsChildOf(transform))
-        {
-            currentSpeed *= 0.75f;
-        }
 
         rb.linearVelocity = new Vector3(
             direction.x * currentSpeed,

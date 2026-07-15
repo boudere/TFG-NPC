@@ -33,7 +33,6 @@ public class Shoot : MonoBehaviour
         rb.linearVelocity = direction * passSpeed;
         rb.angularVelocity = Vector3.zero;
 
-       // rb.WakeUp();
     }
 }
 
