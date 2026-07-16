@@ -11,6 +11,22 @@ public class TriggerHavePlayer : MonoBehaviour
     private PlayerID owner;
 
     private bool locked = false;
+    private bool robo = false;
+    public static TriggerHavePlayer instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+    void Start()
+    {
+        characterManager = CharacterManager.instance;
+    }
+
+    public void setRobo (bool robo)
+    {
+        this.robo = robo;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,11 +38,15 @@ public class TriggerHavePlayer : MonoBehaviour
         PlayerID otherPlayer = other.GetComponentInParent<PlayerID>();
         if (otherPlayer != null)
         {
-            if (otherPlayer.id % 2 == owner.id % 2)
+            if (otherPlayer.id % 2 == owner.id % 2 )
             {
                 return;
             }
 
+            if (owner.id == characterManager.index || !robo)
+            {
+                return;
+            }
 
 
             Defensa defensa = otherPlayer.GetComponent<Defensa>();
@@ -49,6 +69,7 @@ public class TriggerHavePlayer : MonoBehaviour
         locked = true;
         Bola.instance.AsignarPosesion(owner);
         Arbitro.instance.BallEntraEnArea(owner);
+        setRobo(false);
     }
 
     public void detectTag(GameObject go)

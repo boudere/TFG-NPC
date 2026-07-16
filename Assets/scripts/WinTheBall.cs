@@ -9,6 +9,7 @@ public class WinTheBall : MonoBehaviour
 
     private GameObject[] p;
     public static CharacterManager characterManager;
+    public static TriggerHavePlayer havePlayer;
     public static Bola ball;
     public static WinTheBall instance;
     public float distanciaMaxima;
@@ -24,10 +25,13 @@ public class WinTheBall : MonoBehaviour
         p = GetAllFieldPlayers();
         characterManager = CharacterManager.instance;
         ball = Bola.instance;
+        havePlayer = TriggerHavePlayer.instance;
     }
 
     void Update()
     {
+
+
         if (Input.GetKeyDown(KeyCode.L))
         {
 
@@ -41,7 +45,7 @@ public class WinTheBall : MonoBehaviour
                     float distancia = Vector3.Distance(p[i].transform.position, ball.transform.position);
                     if (distancia < distanciaMaxima)
                     {
-                     
+                        havePlayer.setRobo(true);
                         PlayerID playerID = p[i].GetComponent<PlayerID>();
                         Bola.instance.Soltar();
                         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
@@ -58,6 +62,7 @@ public class WinTheBall : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.K))
         {
             Transform poseedorBalon = null;
+            int id = -1;
 
             // Buscar quién tiene la pelota.
             for (int i = 0; i < p.Length; i++)
@@ -65,6 +70,7 @@ public class WinTheBall : MonoBehaviour
                 if (Bola.instance.transform.IsChildOf(p[i].transform))
                 {
                     poseedorBalon = p[i].transform;
+                    id = p[i].GetComponent<PlayerID>().id;
                     break;
                 }
             }
@@ -78,6 +84,7 @@ public class WinTheBall : MonoBehaviour
             for (int i = 0; i < p.Length; i++)
             {
                 PlayerID playerID = p[i].GetComponent<PlayerID>();
+
 
                 if (playerID == null ||
                     playerID.id != characterManager.index)
@@ -100,7 +107,7 @@ public class WinTheBall : MonoBehaviour
                     GameObject player = playerID.player;
                     CharacterGV character = player.GetComponent<CharacterGV>();
 
-                    if (character != null)
+                    if (character != null && id % 2 != characterManager.index % 2)
                     {
                         character.SetSprint(poseedorBalon.position);
                     }

@@ -7269,7 +7269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b004c37b2ed1435439cfcd22125cafad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distanciaMaxima: 50
+  distanciaMaxima: 100
 --- !u!43 &1032329648
 Mesh:
   m_ObjectHideFlags: 0
