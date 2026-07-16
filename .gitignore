@@ -43,7 +43,7 @@ Assets/AssetStoreTools*
 ExportedObj/
 
 # -----------------------------------------------
-# PYTHON — entorno virtual y caché
+# PYTHON — entorno virtual, caché y dependencias
 # -----------------------------------------------
 venv/
 .venv/
@@ -56,6 +56,14 @@ __pycache__/
 dist/
 *.egg-info/
 *.egg
+
+# Dependencias empaquetadas (libs de Python embebidas)
+_libs/
+
+# Logs de entrenamiento
+PythonTrainingSlidingWindow/logs/
+PythonTrainingGRU/logs/
+PythonTrainingRNN/logs/
 
 # -----------------------------------------------
 # DATOS DE ENTRENAMIENTO — CSVs (pueden ser grandes)

@@ -279,6 +279,223 @@ public class Recorder : MonoBehaviour
         recordedLines.Add(row);
     }
 
+    // ========================================================================
+    // GUI
+    // ========================================================================
+    private void InitStyles()
+    {
+        if (_statusStyle != null) return;
+
+        // Barra de estado superior
+        _statusStyle = new GUIStyle(GUI.skin.box)
+            { fontSize = 18, alignment = TextAnchor.MiddleLeft, richText = true };
+        _statusStyle.normal.textColor = Color.white;
+
+        _hintStyle = new GUIStyle(GUI.skin.label)
+            { fontSize = 13, richText = true };
+        _hintStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
+
+        // Panel de estadísticas
+        _darkBg = MakeTex(new Color(0.04f, 0.04f, 0.12f, 0.93f));
+        _panelStyle = new GUIStyle(GUI.skin.box);
+        _panelStyle.normal.background = _darkBg;
+
+        _titleStyle = new GUIStyle(GUI.skin.label)
+            { fontSize = 15, fontStyle = FontStyle.Bold, richText = true };
+        _titleStyle.normal.textColor = Color.white;
+
+        _sectionStyle = new GUIStyle(GUI.skin.label)
+            { fontSize = 13, fontStyle = FontStyle.Bold, richText = true };
+        _sectionStyle.normal.textColor = new Color(0.7f, 0.85f, 1f);
+
+        _rowStyle = new GUIStyle(GUI.skin.label)
+            { fontSize = 13, richText = true };
+        _rowStyle.normal.textColor = Color.white;
+
+        // Barras de progreso
+        _barBg     = MakeTex(new Color(0.15f, 0.15f, 0.15f, 0.9f));
+        _barGreen  = MakeTex(new Color(0.20f, 0.78f, 0.35f, 1f));
+        _barYellow = MakeTex(new Color(1.00f, 0.78f, 0.00f, 1f));
+        _barRed    = MakeTex(new Color(0.88f, 0.18f, 0.12f, 1f));
+        _barBlue   = MakeTex(new Color(0.25f, 0.55f, 0.95f, 1f));
+    }
+
+    private static Texture2D MakeTex(Color col)
+    {
+        var t = new Texture2D(1, 1);
+        t.SetPixel(0, 0, col);
+        t.Apply();
+        return t;
+    }
+
+    private void OnGUI()
+    {
+        InitStyles();
+
+        // ── Barra de estado ─────────────────────────────────────────────────
+        string recColor  = isRecording ? "red" : "grey";
+        string recSymbol = isRecording ? "● REC" : "■ PARADO";
+        string status    = $"<color={recColor}>{recSymbol}</color>   " +
+                           $"{totalFrames} frames  |  segmento {totalSegments}";
+        GUI.Box(new Rect(10, 10, 370, 34), status, _statusStyle);
+
+        string hint = $"[{recordToggleKey}] grabar   [M] {(_showStats ? "ocultar" : "ver")} stats";
+        GUI.Label(new Rect(14, 47, 370, 22), hint, _hintStyle);
+
+        if (!_showStats) return;
+
+        // ── Panel de estadísticas ────────────────────────────────────────────
+        const int W   = 310;
+        const int PAD = 8;
+        int px = Screen.width - W - PAD;
+        int py = 10;
+        int lineH   = 22;
+        int barH    = 12;
+        int panelH  = 420;
+
+        GUI.Box(new Rect(px - PAD, py, W + PAD * 2, panelH), "", _panelStyle);
+
+        int cy = py + 8;
+
+        // Título
+        GUI.Label(new Rect(px, cy, W, 24), "📊  ESTADÍSTICAS DE ENTRENAMIENTO", _titleStyle);
+        cy += 26;
+        DrawHLine(px, cy, W); cy += 6;
+
+        int n = Mathf.Max(totalFrames, 1);
+
+        // ── ACCIONES ────────────────────────────────────────────────────────
+        GUI.Label(new Rect(px, cy, W, lineH), "🎯  ACCIONES", _sectionStyle); cy += lineH;
+
+        DrawActionRow(px, ref cy, W, barH, "Tiros",
+            _shotCount, SHOT_OK,
+            _shotCount >= SHOT_OK   ? _barGreen :
+            _shotCount >= SHOT_WARN ? _barYellow : _barRed,
+            _shotCount >= SHOT_OK   ? "✓ Bien" :
+            _shotCount >= SHOT_WARN ? "⚠ Sube un poco" : "✗ Necesitas más tiros");
+
+        DrawActionRow(px, ref cy, W, barH, "Pases",
+            _passCount, PASS_OK,
+            _passCount >= PASS_OK   ? _barGreen :
+            _passCount >= PASS_WARN ? _barYellow : _barRed,
+            _passCount >= PASS_OK   ? "✓ Bien" :
+            _passCount >= PASS_WARN ? "⚠ Sube un poco" : "✗ Necesitas más pases");
+
+        cy += 4; DrawHLine(px, cy, W); cy += 6;
+
+        // ── POSESIÓN ────────────────────────────────────────────────────────
+        float possPct = 100f * _possessionFrames / n;
+        GUI.Label(new Rect(px, cy, W, lineH), "⚽  POSESIÓN DE BALÓN", _sectionStyle); cy += lineH;
+
+        Texture2D possTex  = possPct >= POSS_OK ? _barGreen : possPct >= POSS_WARN ? _barYellow : _barRed;
+        string    possHint = possPct >= POSS_OK ? "✓ Buena posesión" : possPct >= POSS_WARN ? "⚠ Un poco justa" : "✗ Busca más el balón";
+        DrawPctRow(px, ref cy, W, barH, "Con balón", possPct, possTex, possHint);
+
+        cy += 4; DrawHLine(px, cy, W); cy += 6;
+
+        // ── MOVIMIENTO ──────────────────────────────────────────────────────
+        GUI.Label(new Rect(px, cy, W, lineH), "🏃  MOVIMIENTO", _sectionStyle); cy += lineH;
+
+        float fwdPct  = 100f * _forwardFrames  / n;
+        float bwdPct  = 100f * _backwardFrames / n;
+        float latPct  = 100f * _lateralFrames  / n;
+        float stpPct  = 100f * _stoppedFrames  / n;
+
+        DrawPctRow(px, ref cy, W, barH, "▲ Adelante", fwdPct,  _barBlue,   "");
+        DrawPctRow(px, ref cy, W, barH, "▼ Atrás",    bwdPct,  _barBlue,   "");
+        DrawPctRow(px, ref cy, W, barH, "◄► Lateral",  latPct,  _barBlue,   "");
+
+        Texture2D stpTex  = stpPct < STOP_WARN ? _barGreen : stpPct < STOP_BAD ? _barYellow : _barRed;
+        string    stpHint = stpPct < STOP_WARN ? "" : stpPct < STOP_BAD ? "⚠ Mucho tiempo parado" : "✗ Demasiado parado";
+        DrawPctRow(px, ref cy, W, barH, "■ Parado",   stpPct,  stpTex,     stpHint);
+
+        cy += 4; DrawHLine(px, cy, W); cy += 6;
+
+        // ── ZONAS ───────────────────────────────────────────────────────────
+        GUI.Label(new Rect(px, cy, W, lineH), "📍  ZONAS DEL CAMPO", _sectionStyle); cy += lineH;
+
+        float ownPct = 100f * _ownZoneFrames   / n;
+        float ctrPct = 100f * _centerFrames    / n;
+        float rvlPct = 100f * _rivalZoneFrames / n;
+
+        DrawPctRow(px, ref cy, W, barH, "Zona propia", ownPct, _barBlue, "");
+        DrawPctRow(px, ref cy, W, barH, "Centro",      ctrPct, _barBlue, "");
+
+        Texture2D rvlTex  = rvlPct >= RIVAL_OK ? _barGreen : rvlPct >= RIVAL_WARN ? _barYellow : _barRed;
+        string    rvlHint = rvlPct >= RIVAL_OK ? "✓ Buena presión" : rvlPct >= RIVAL_WARN ? "⚠ Ataca más" : "✗ Muy defensivo";
+        DrawPctRow(px, ref cy, W, barH, "Zona rival",  rvlPct, rvlTex,  rvlHint);
+    }
+
+    // ── Helpers GUI ──────────────────────────────────────────────────────────
+    private void DrawHLine(int x, int y, int w)
+    {
+        var oldColor = GUI.color;
+        GUI.color = new Color(0.35f, 0.45f, 0.65f, 0.7f);
+        GUI.DrawTexture(new Rect(x, y, w, 1), Texture2D.whiteTexture);
+        GUI.color = oldColor;
+    }
+
+    private void DrawActionRow(int x, ref int cy, int w, int barH,
+        string label, int count, int target, Texture2D barTex, string hint)
+    {
+        // Texto principal
+        string countColor = barTex == _barGreen ? "#55DD66" : barTex == _barYellow ? "#FFCC00" : "#FF5544";
+        string line = $"{label,-10}  <color={countColor}><b>{count}</b></color>  / {target}   <color=#AAAAAA>{hint}</color>";
+        GUI.Label(new Rect(x, cy, w, 20), line, _rowStyle);
+        cy += 20;
+
+        // Barra
+        int  barW   = w - 4;
+        int  fillW  = Mathf.RoundToInt(barW * Mathf.Clamp01((float)count / target));
+        DrawBar(x + 2, cy, barW, barH, fillW, barTex);
+        cy += barH + 4;
+    }
+
+    private void DrawPctRow(int x, ref int cy, int w, int barH,
+        string label, float pct, Texture2D barTex, string hint)
+    {
+        string hintStr = hint.Length > 0 ? $"   <color=#AAAAAA>{hint}</color>" : "";
+        string line    = $"{label,-12}  <b>{pct:F1}%</b>{hintStr}";
+        GUI.Label(new Rect(x, cy, w, 20), line, _rowStyle);
+        cy += 20;
+
+        int barW  = w - 4;
+        int fillW = Mathf.RoundToInt(barW * Mathf.Clamp01(pct / 100f));
+        DrawBar(x + 2, cy, barW, barH, fillW, barTex);
+        cy += barH + 4;
+    }
+
+    private void DrawBar(int x, int y, int totalW, int h, int fillW, Texture2D fillTex)
+    {
+        var bgStyle   = new GUIStyle { normal = { background = _barBg } };
+        var fillStyle = new GUIStyle { normal = { background = fillTex } };
+        GUI.Box(new Rect(x, y, totalW, h), GUIContent.none, bgStyle);
+        if (fillW > 0)
+            GUI.Box(new Rect(x, y, fillW, h), GUIContent.none, fillStyle);
+    }
+
+    // ========================================================================
+    // ACCESO A DATOS (para TrainingClient)
+    // ========================================================================
+    /// <summary>
+    /// Devuelve todo el CSV grabado (header + filas) como un solo string.
+    /// </summary>
+    public string GetRecordedCSV()
+    {
+        return string.Join("\n", recordedLines);
+    }
+
+    /// <summary>
+    /// Número de filas de datos grabadas (sin contar la cabecera).
+    /// </summary>
+    public int GetRecordedLineCount()
+    {
+        return recordedLines.Count - 1; // -1 por la cabecera
+    }
+
+    // ========================================================================
+    // GUARDADO
+    // ========================================================================
     public void SaveToFile()
     {
         if (recordedLines.Count <= 1) return;
