@@ -55,6 +55,7 @@ public class Bola : MonoBehaviour
     private void Start()
     {
         characterManager = CharacterManager.instance;
+        
         InicializarJugadores();
     }
 
@@ -211,14 +212,23 @@ public class Bola : MonoBehaviour
 
     public void AsignarPosesion(PlayerID newOwner)
     {
-    
+
 
         // Si ya la tiene este jugador, no rehagas todo
+
+        if (newOwner.id == characterManager.index && !TriggerHavePlayer.instance.getRobo())
+        {
+          
+            return;
+
+        }
+
         if (EnPosesion && Owner == newOwner) return;
         
         if (EnPosesion && Owner.CompareTag("Portero")) return;
         
-      
+     
+     
 
         // Si venía con otro dueño, restaurar colisiones
         if (Owner != null) RestaurarColisionesConOwner();
@@ -254,7 +264,7 @@ public class Bola : MonoBehaviour
 
         transform.localScale = new Vector3(worldScale.x / sx, worldScale.y / sy, worldScale.z / sz);
 
-
+        TriggerHavePlayer.instance.setRobo(false);
 
     }
 

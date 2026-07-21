@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -13,6 +15,7 @@ public class TriggerHavePlayer : MonoBehaviour
     private bool locked = false;
     private bool robo = false;
     public static TriggerHavePlayer instance;
+    private GameObject[] p;
 
     private void Awake()
     {
@@ -20,13 +23,30 @@ public class TriggerHavePlayer : MonoBehaviour
     }
     void Start()
     {
+        p = GetAllFieldPlayers();
         characterManager = CharacterManager.instance;
+       
+       
     }
+
+    public void Update()
+    {
+        setRobo(NingunJugadorTienePelota());
+    }
+
 
     public void setRobo (bool robo)
     {
         this.robo = robo;
     }
+
+    public bool getRobo()
+    {
+        return this.robo;
+    }
+
+
+  
 
     private void OnTriggerEnter(Collider other)
     {
@@ -35,15 +55,13 @@ public class TriggerHavePlayer : MonoBehaviour
         owner = GetComponentInParent<PlayerID>();
         if (owner == null) return;
 
+
+
+
         PlayerID otherPlayer = other.GetComponentInParent<PlayerID>();
         if (otherPlayer != null)
         {
             if (otherPlayer.id % 2 == owner.id % 2 )
-            {
-                return;
-            }
-
-            if (owner.id == characterManager.index || !robo)
             {
                 return;
             }
@@ -69,7 +87,7 @@ public class TriggerHavePlayer : MonoBehaviour
         locked = true;
         Bola.instance.AsignarPosesion(owner);
         Arbitro.instance.BallEntraEnArea(owner);
-        setRobo(false);
+       
     }
 
     public void detectTag(GameObject go)
@@ -97,6 +115,22 @@ public class TriggerHavePlayer : MonoBehaviour
 
     }
 
+    public bool NingunJugadorTienePelota()
+    {
+       foreach (GameObject pl in p)
+        {
+            if (pl.GetComponent<PlayerID>().id == characterManager.index && Bola.instance.transform.IsChildOf(pl.transform))
+            {
+                return true;
+            }
+
+            if (Bola.instance.transform.IsChildOf(pl.transform))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
 
     private void OnTriggerExit(Collider other)
@@ -113,5 +147,16 @@ public class TriggerHavePlayer : MonoBehaviour
             Arbitro.instance.BallSaleDeArea(owner);
             owner = null;
         }
+    }
+
+    private GameObject[] GetAllFieldPlayers()
+    {
+        List<GameObject> allPlayers = new List<GameObject>();
+
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Defensa"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("CentroCampista"));
+        allPlayers.AddRange(GameObject.FindGameObjectsWithTag("Delantero"));
+
+        return allPlayers.ToArray();
     }
 }

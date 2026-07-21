@@ -132,6 +132,7 @@ public class Defensa : PlayerID, IResettable
             if (PuedoTirar()) // Aumentar probabiliadad según llegue al centro o al area de peligro
             {
                 opcionPase();
+
             }
 
 

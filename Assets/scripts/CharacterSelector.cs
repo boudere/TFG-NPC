@@ -105,7 +105,7 @@ public class CharacterSelector : MonoBehaviour
     {
         resetMaterial();
         putNewMaterial(characterManager.index);
-
+    
 
         characterManager.index = index;
 

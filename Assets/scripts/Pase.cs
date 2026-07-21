@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -10,29 +12,27 @@ public class Pase : MonoBehaviour
     private GameObject[] p;
     public static CharacterManager characterManager;
     public static CharacterGV characterGV;
-    public static event Action <PlayerID> OnCharacterGVSelected;
+    public static event Action<PlayerID> OnCharacterGVSelected;
     public static event Action<PlayerID> OnCharacterGVPass;
     public static Pase instance;
     private string tagPlayer;
     public List<PlayerID> jugadores = new List<PlayerID>();
     public List<PlayerID> jugadoresOrdenadosPorPorteria = new List<PlayerID>();
+    public PlayerID playerID;
 
     private void Awake()
     {
         instance = this;
-       
     }
 
-        void Start()
+    void Start()
     {
         p = GetAllFieldPlayers();
         characterManager = CharacterManager.instance;
     }
 
-    
     void Update()
     {
-
         if (Input.GetKeyDown(KeyCode.P))
         {
             Vector3 pos = new Vector3(0f, 0f, 0f);
@@ -41,12 +41,11 @@ public class Pase : MonoBehaviour
             int team = 0;
             searchPlayersToPass(tagPlayer, pos, team);
         }
-
     }
 
-     public void searchPlayersToPass(string tagPlayer, Vector3 pos, int team)
+    public void searchPlayersToPass(string tagPlayer, Vector3 pos, int team)
     {
-      //Busco al jugador que la va a pasar
+        //Busco al jugador que la va a pasar
         int id = -1, i;
 
         this.tagPlayer = tagPlayer;
@@ -62,10 +61,8 @@ public class Pase : MonoBehaviour
                 {
                     break;
                 }
-
             }
-
-        } 
+        }
         else if (tagPlayer == "character")
         {
             for (i = 0; i < p.Length; i++)
@@ -76,7 +73,7 @@ public class Pase : MonoBehaviour
                     break;
                 }
             }
-        } 
+        }
         else
         {
             for (i = 0; i < p.Length; i++)
@@ -89,57 +86,55 @@ public class Pase : MonoBehaviour
             }
         }
 
-        //if (calculateDistance(p[i].transform.position) < 25)
-        //{
-           
-        //}
-
         passBall(id);
     }
-
 
     void passBall(int index)
     {
         //Index es el que la pasa
-        // ID al que se la paso 
-        GameObject player = p[0]; // Cojo un jugador (el primero de la lista)
+        //ID al que se la paso
+        GameObject player = p[0];
         float minDistance = Mathf.Infinity;
         float currentDistance;
 
-        int id = p[0].GetComponent<PlayerID>().id; //Cojo su id
-        int j = 0; // Es la posición de la lista (no el id)
+        int id = p[0].GetComponent<PlayerID>().id;
+        int j = 0;
         int team = index % 2;
         string posicionPlayer = " ";
-        
-            for (int i = 0; i < p.Length; i++)
-            {
-                id = p[i].GetComponent<PlayerID>().id; //Veo si hay alguna con distancia menor 
+
+        for (int i = 0; i < p.Length; i++)
+        {
+            id = p[i].GetComponent<PlayerID>().id;
 
             if (id != index && team == id % 2)
             {
-
-
-                if (this.tagPlayer != "Defensa" && this.tagPlayer != "CentroCampista" && this.tagPlayer != "Delantero")
+                if (this.tagPlayer != "Defensa" &&
+                    this.tagPlayer != "CentroCampista" &&
+                    this.tagPlayer != "Delantero")
                 {
-
                     currentDistance = calculateDistance(p[i].transform.position);
+
                     if (currentDistance < minDistance)
                     {
                         minDistance = currentDistance;
                         player = p[i];
                         j = i;
                     }
-
                 }
                 else
                 {
+
+   
                     posicionPlayer = p[i].GetComponent<PlayerID>().posicion;
+
                     if (this.tagPlayer == "Defensa")
                     {
-
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                        if (id != index &&
+                            team == id % 2 &&
+                            posicionPlayer == this.tagPlayer)
                         {
                             currentDistance = calculateDistance(p[i].transform.position);
+
                             if (currentDistance < minDistance)
                             {
                                 minDistance = currentDistance;
@@ -150,9 +145,12 @@ public class Pase : MonoBehaviour
                     }
                     else if (this.tagPlayer == "CentroCampista")
                     {
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                        if (id != index &&
+                            team == id % 2 &&
+                            posicionPlayer == this.tagPlayer)
                         {
                             currentDistance = calculateDistance(p[i].transform.position);
+
                             if (currentDistance < minDistance)
                             {
                                 minDistance = currentDistance;
@@ -163,9 +161,12 @@ public class Pase : MonoBehaviour
                     }
                     else if (this.tagPlayer == "Delantero")
                     {
-                        if (id != index && team == id % 2 && posicionPlayer == this.tagPlayer)
+                        if (id != index &&
+                            team == id % 2 &&
+                            posicionPlayer == this.tagPlayer)
                         {
                             currentDistance = calculateDistance(p[i].transform.position);
+
                             if (currentDistance < minDistance)
                             {
                                 minDistance = currentDistance;
@@ -175,28 +176,69 @@ public class Pase : MonoBehaviour
                         }
                     }
                 }
-                }
             }
+        }
 
-            PlayerID playerID = player.GetComponent<PlayerID>();
+        playerID = player.GetComponent<PlayerID>();
+
         if (playerID.id != characterManager.index)
         {
-            OnCharacterGVSelected?.Invoke(playerID);
+            passOtherPlayer(playerID);
+        }
+        else if (playerID.id == characterManager.index)
+        {
+            passBallCharacter(playerID);
         }
 
         Bola.instance.Soltar();
-
 
         Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
         rb.isKinematic = false;
 
         Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
 
-         float passSpeed = 300f;
-         rb.linearVelocity = direction * passSpeed;
-         rb.angularVelocity = Vector3.zero;
+        float passSpeed = 300f;
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
+    }
 
-     
+    public void passOtherPlayer(PlayerID player)
+    {
+        OnCharacterGVSelected?.Invoke(playerID);
+        Bola.instance.Soltar();
+
+        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
+        rb.isKinematic = false;
+
+        Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
+
+        float passSpeed = 300f;
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
+
+    }
+
+    public void passBallCharacter(PlayerID player)
+    {
+      
+        StartCoroutine(ResetRobo());
+
+        Bola.instance.Soltar();
+
+        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
+        rb.isKinematic = false;
+
+        Vector3 direction = (player.transform.position - Bola.instance.transform.position).normalized;
+
+        float passSpeed = 300f;
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    private IEnumerator ResetRobo()
+    {
+        yield return new WaitForSeconds(2f);
+        TriggerHavePlayer.instance.setRobo(false);
     }
 
     public void passBallOwnPlayer()
@@ -204,14 +246,18 @@ public class Pase : MonoBehaviour
         for (int i = 0; i < p.Length; i++)
         {
             int id = p[i].GetComponent<PlayerID>().id;
+
             if (id == characterManager.index)
             {
                 PlayerID playerID = p[i].GetComponent<PlayerID>();
-               // OnCharacterGVPass?.Invoke(playerID);
+
                 Bola.instance.Soltar();
+
                 Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
                 rb.isKinematic = false;
+
                 Vector3 direction = (p[i].transform.position - Bola.instance.transform.position).normalized;
+
                 float passSpeed = 300f;
                 rb.linearVelocity = direction * passSpeed;
                 rb.angularVelocity = Vector3.zero;
@@ -222,7 +268,6 @@ public class Pase : MonoBehaviour
 
     public void PassBallNear(Vector3 positionPlayer, Vector3 porteriaTeam, int teamID, PlayerID playerID)
     {
-
         GameObject bestPlayer = null;
         Vector3 dir = new Vector3(0, 0);
 
@@ -238,13 +283,14 @@ public class Pase : MonoBehaviour
             PlayerID candidatePlayerID = candidate.GetComponent<PlayerID>();
             if (candidatePlayerID == null) continue;
 
-           // if (candidatePlayerID.id == characterManager.index) continue;
+            // if (candidatePlayerID.id == characterManager.index) continue;
             if (candidatePlayerID.id % 2 != teamID) continue;
 
             float candidateDistToGoal = Vector3.Distance(candidate.transform.position, porteriaTeam);
             float candidateDistToCurrent = Vector3.Distance(candidate.transform.position, positionPlayer);
 
             if (candidateDistToGoal >= currentDistToGoal) continue;
+
             float score = candidateDistToGoal + candidateDistToCurrent;
 
             if (score < bestScore)
@@ -252,7 +298,6 @@ public class Pase : MonoBehaviour
                 bestScore = score;
                 bestPlayer = candidate;
             }
-          
         }
 
         Rigidbody rbPlayer = playerID.GetComponent<Rigidbody>();
@@ -260,6 +305,7 @@ public class Pase : MonoBehaviour
         if (bestPlayer == null)
         {
             if (characterManager.index == playerID.id) return;
+
             playerID.tiroPorteria();
             return;
         }
@@ -288,8 +334,6 @@ public class Pase : MonoBehaviour
         rbBall.WakeUp();
     }
 
-
-
     void OrdenarJugadoresPorDistancia()
     {
         jugadoresOrdenadosPorPorteria.Clear();
@@ -308,7 +352,8 @@ public class Pase : MonoBehaviour
         Vector3 ballPosition = Bola.instance.transform.position;
         myPos.y = 0;
         ballPosition.y = 0;
-        return Vector3.Distance(myPos, ballPosition); 
+
+        return Vector3.Distance(myPos, ballPosition);
     }
 
     private GameObject[] GetAllFieldPlayers()

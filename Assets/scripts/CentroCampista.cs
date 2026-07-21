@@ -119,6 +119,7 @@ public class CentroCampista : PlayerID, IResettable
                 float decision = Random.value;
                 bool enAreaChica = areaSmall != -1;
 
+
                 if (enAreaChica && bolaEnOtraArea)
                 {
                     if (Tirar())
@@ -130,25 +131,26 @@ public class CentroCampista : PlayerID, IResettable
                     }
                 }
 
-                
-                    bool hacerPase = Random.value < 0.5f;
-                
+
+                bool hacerPase = Random.value < 0.5f;
+
                 if (hacerPase)
                 {
                     if (decision < 0.05f)
                     {
                         opcionPaseLoco();
                     }
-                    else if (decision < 0.3f )
+                    else if (decision < 0.3f)
                     {
                         if (Pase.instance.calculateDistance(this.transform.position) < 200)
                         {
                             Pase.instance.passBallOwnPlayer();
-                        } else
+                        }
+                        else
                         {
                             PaseConCriterio();
                         }
-                        
+
                     }
                     else if (decision < 0.6f)
                     {
@@ -158,9 +160,6 @@ public class CentroCampista : PlayerID, IResettable
                     {
                         disparoPorteria = true;
                     }
-
-
-
                 }
 
                 if (disparoPorteria && Random.value < 0.1f)

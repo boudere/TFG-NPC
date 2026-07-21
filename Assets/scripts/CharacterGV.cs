@@ -21,10 +21,13 @@ public class CharacterGV : PlayerID
     private Vector3 sprintTargetPosition;
 
     public bool defaultMove = true;
+    public static CharacterGV instance;
 
     private void Start()
     {
+        instance = this;
         characterManager = CharacterManager.instance;
+
     }
 
     private void Update()
@@ -80,7 +83,9 @@ public class CharacterGV : PlayerID
             moveDir = new Vector3(h, 0f, v).normalized;
         }
 
-        float speed = sprint ? sprintSpeed : npcSpeed;
+        //float speed = sprint ? sprintSpeed : npcSpeed;
+
+        float speed = 400f;
 
         Vector3 movement = moveDir * speed;
 

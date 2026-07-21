@@ -122,6 +122,7 @@ public class Delantero : PlayerID, IResettable
 
         if (Bola.instance.transform.IsChildOf(transform))
         {
+
             if (enAreaChica && bolaEnOtraArea)
             {
                 if (Tirar())
@@ -261,8 +262,8 @@ public class Delantero : PlayerID, IResettable
             }
             else if (0.7f < aux && aux < 0.9f) { Pase.instance.passBallOwnPlayer(); }
 
-
         }
+        
     }
 
     void PickNewTarget()
