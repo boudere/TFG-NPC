@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class Recorder : MonoBehaviour
@@ -83,19 +84,27 @@ public class Recorder : MonoBehaviour
         if (myRigidbody   == null) myRigidbody   = GetComponent<Rigidbody>();
         if (myCharacterGV == null) myCharacterGV = GetComponent<CharacterGV>();
 
+        // Buscar porterías automáticamente si no se asignaron en el inspector
         if (rivalGoalTransform == null || ownGoalTransform == null)
         {
             Porteria[] porterias = FindObjectsByType<Porteria>(FindObjectsSortMode.None);
             int myTeam = myPlayer != null ? myPlayer.id % 2 : 0;
+
             foreach (Porteria p in porterias)
             {
-                bool isOwn = (p.team % 2 == myTeam);
-                if (isOwn  && ownGoalTransform   == null) ownGoalTransform   = p.transform;
-                if (!isOwn && rivalGoalTransform  == null) rivalGoalTransform = p.transform;
+                bool isOwnGoal = (p.team % 2 == myTeam);
+                if (isOwnGoal && ownGoalTransform == null)
+                    ownGoalTransform = p.transform;
+                else if (!isOwnGoal && rivalGoalTransform == null)
+                    rivalGoalTransform = p.transform;
             }
+
+            Debug.Log($"[Recorder] Porterías encontradas automáticamente " +
+                      $"| Propia: {(ownGoalTransform != null ? ownGoalTransform.name : "NO ENCONTRADA")} " +
+                      $"| Rival: {(rivalGoalTransform != null ? rivalGoalTransform.name : "NO ENCONTRADA")}");
         }
 
-        // Cabecera CSV (40 features + labels + posiciones absolutas)
+        // Cabecera CSV (40 features + labels)
         string header =
             "RelPorteriaRivalX,RelPorteriaRivalZ," +
             "RelPorteriaPropiaX,RelPorteriaPropiaZ," +
@@ -116,9 +125,7 @@ public class Recorder : MonoBehaviour
             "RelEnemigo2PosX,RelEnemigo2PosZ,Enemigo2DirX,Enemigo2DirZ," +
             "RelEnemigo3PosX,RelEnemigo3PosZ,Enemigo3DirX,Enemigo3DirZ," +
             "InputX,InputZ," +
-            "Disparo,Pase," +
-            "AbsMyPosX,AbsMyPosZ," +
-            "AbsBallPosX,AbsBallPosZ";
+            "Disparo,Pase";
 
         recordedLines.Add(header);
     }
@@ -152,20 +159,7 @@ public class Recorder : MonoBehaviour
         totalTime   += Time.deltaTime;
         timeElapsed += Time.deltaTime;
 
-        bool iHaveBall = Bola.instance != null && Bola.instance.EnPosesion &&
-                         Bola.instance.Owner != null &&
-                         Bola.instance.Owner.GetComponent<PlayerID>() == myPlayer;
-
-        bool forcePase = Input.GetKeyDown(KeyCode.P) && iHaveBall;
-        bool forceTiro = Input.GetKeyDown(KeyCode.O) && iHaveBall;
-
-        if (forcePase || forceTiro)
-        {
-            RecordSnapshot(forcePase, forceTiro);
-            totalFrames++;
-            timeElapsed = 0f;
-        }
-        else if (timeElapsed >= snapshotTime)
+        if (timeElapsed >= snapshotTime)
         {
             timeElapsed -= snapshotTime;
             RecordSnapshot();
@@ -176,10 +170,11 @@ public class Recorder : MonoBehaviour
     // ========================================================================
     // SNAPSHOT
     // ========================================================================
-    private void RecordSnapshot(bool forcePase = false, bool forceTiro = false)
+    private void RecordSnapshot()
     {
         Vector3 myPos = transform.position;
 
+        // ── Porterías Relativas ──
         Vector3 rivalGoalPos = rivalGoalTransform != null ? rivalGoalTransform.position : Vector3.zero;
         Vector3 ownGoalPos   = ownGoalTransform   != null ? ownGoalTransform.position   : Vector3.zero;
 
@@ -188,11 +183,13 @@ public class Recorder : MonoBehaviour
         float relOwnGoalX   = ownGoalPos.x - myPos.x;
         float relOwnGoalZ   = ownGoalPos.z - myPos.z;
 
+        // ── Pelota Relativa ──
         Vector3 ballPos  = Bola.instance != null ? Bola.instance.transform.position : Vector3.zero;
         float relBallX   = ballPos.x - myPos.x;
         float relBallZ   = ballPos.z - myPos.z;
         float distToBall = Vector3.Distance(myPos, ballPos);
 
+        // ── ¿Quién tiene la pelota? ──
         int hasBallTeam = 0, myHasBall = 0;
         if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null)
         {
@@ -205,17 +202,19 @@ public class Recorder : MonoBehaviour
             }
         }
 
-        float distToRivalGoal    = Vector3.Distance(myPos, rivalGoalPos);
-        float distToOwnGoal      = Vector3.Distance(myPos, ownGoalPos);
-        float distBallToOwnGoal  = Vector3.Distance(ballPos, ownGoalPos);
+        // ── Métricas ──
+        float distToRivalGoal   = Vector3.Distance(myPos, rivalGoalPos);
+        float distToOwnGoal     = Vector3.Distance(myPos, ownGoalPos);
+        float distBallToOwnGoal = Vector3.Distance(ballPos, ownGoalPos);
 
         int scoreT1 = 0, scoreT2 = 0;
         int puntuacionPropia    = myPlayer.id % 2 == 0 ? scoreT1 : scoreT2;
         int puntuacionContraria = myPlayer.id % 2 == 0 ? scoreT2 : scoreT1;
 
+        // ── Clasificar jugadores ──
         PlayerID[] allPlayers = FindObjectsByType<PlayerID>(FindObjectsSortMode.None);
-        var allies  = new List<(float, PlayerID)>();
-        var enemies = new List<(float, PlayerID)>();
+        var allies  = new List<(float dist, PlayerID p)>();
+        var enemies = new List<(float dist, PlayerID p)>();
 
         foreach (PlayerID p in allPlayers)
         {
@@ -224,12 +223,13 @@ public class Recorder : MonoBehaviour
             if (p.id % 2 == myPlayer.id % 2) allies.Add((d, p));
             else                              enemies.Add((d, p));
         }
-        allies.Sort((a, b)  => a.Item1.CompareTo(b.Item1));
-        enemies.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+        allies.Sort((a, b)  => a.dist.CompareTo(b.dist));
+        enemies.Sort((a, b) => a.dist.CompareTo(b.dist));
 
-        float distClosestAlly  = allies.Count  > 0 ? allies[0].Item1  : 999f;
-        float distClosestEnemy = enemies.Count > 0 ? enemies[0].Item1 : 999f;
+        float distClosestAlly  = allies.Count  > 0 ? allies[0].dist  : 999f;
+        float distClosestEnemy = enemies.Count > 0 ? enemies[0].dist : 999f;
 
+        // ── Helper para datos de jugador ──
         (float rx, float rz, float dx, float dz) GetPlayerData(List<(float, PlayerID)> list, int i)
         {
             if (i >= list.Count) return (0f, 0f, 0f, 0f);
@@ -248,11 +248,13 @@ public class Recorder : MonoBehaviour
         var (e2px,e2pz,e2dx,e2dz) = GetPlayerData(enemies, 1);
         var (e3px,e3pz,e3dx,e3dz) = GetPlayerData(enemies, 2);
 
+        // ── Labels ──
         float inputX = Input.GetAxisRaw("Horizontal");
         float inputZ = Input.GetAxisRaw("Vertical");
-        int disparo  = (forceTiro || Input.GetKey(KeyCode.O)) ? 1 : 0;
-        int pase     = (forcePase || Input.GetKey(KeyCode.P)) ? 1 : 0;
+        int disparo  = Input.GetKey(KeyCode.O) ? 1 : 0;
+        int pase     = Input.GetKey(KeyCode.P) ? 1 : 0;
 
+        // ── Serializar fila CSV ──
         string F(float v) => v.ToString("F3", Inv);
 
         string row =
@@ -275,22 +277,20 @@ public class Recorder : MonoBehaviour
             $"{F(e2px)},{F(e2pz)},{F(e2dx)},{F(e2dz)}," +
             $"{F(e3px)},{F(e3pz)},{F(e3dx)},{F(e3dz)}," +
             $"{F(inputX)},{F(inputZ)}," +
-            $"{disparo},{pase}," +
-            $"{F(myPos.x)},{F(myPos.z)}," +
-            $"{F(ballPos.x)},{F(ballPos.z)}";
+            $"{disparo},{pase}";
 
         recordedLines.Add(row);
 
-        // ── Actualizar estadísticas ──────────────────────────────────────────
+        // ── Actualizar estadísticas ──
         if (myHasBall == 1) _possessionFrames++;
 
-        if      (inputZ >  0.3f)                          _forwardFrames++;
-        else if (inputZ < -0.3f)                          _backwardFrames++;
-        else if (Mathf.Abs(inputX) > 0.3f)               _lateralFrames++;
-        else                                               _stoppedFrames++;
+        if      (inputZ >  0.3f)                 _forwardFrames++;
+        else if (inputZ < -0.3f)                 _backwardFrames++;
+        else if (Mathf.Abs(inputX) > 0.3f)       _lateralFrames++;
+        else                                      _stoppedFrames++;
 
         if (disparo == 1) _shotCount++;
-        if (pase == 1) _passCount++;
+        if (pase == 1)    _passCount++;
 
         // Zona: comparar distancias a cada portería
         if (rivalGoalTransform != null && ownGoalTransform != null)
@@ -317,7 +317,6 @@ public class Recorder : MonoBehaviour
     {
         if (_statusStyle != null) return;
 
-        // Barra de estado superior
         _statusStyle = new GUIStyle(GUI.skin.box)
             { fontSize = 18, alignment = TextAnchor.MiddleLeft, richText = true };
         _statusStyle.normal.textColor = Color.white;
@@ -326,7 +325,6 @@ public class Recorder : MonoBehaviour
             { fontSize = 13, richText = true };
         _hintStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
 
-        // Panel de estadísticas
         _darkBg = MakeTex(new Color(0.04f, 0.04f, 0.12f, 0.93f));
         _panelStyle = new GUIStyle(GUI.skin.box);
         _panelStyle.normal.background = _darkBg;
@@ -343,7 +341,6 @@ public class Recorder : MonoBehaviour
             { fontSize = 13, richText = true };
         _rowStyle.normal.textColor = Color.white;
 
-        // Barras de progreso
         _barBg     = MakeTex(new Color(0.15f, 0.15f, 0.15f, 0.9f));
         _barGreen  = MakeTex(new Color(0.20f, 0.78f, 0.35f, 1f));
         _barYellow = MakeTex(new Color(1.00f, 0.78f, 0.00f, 1f));
@@ -363,7 +360,7 @@ public class Recorder : MonoBehaviour
     {
         InitStyles();
 
-        // ── Barra de estado ─────────────────────────────────────────────────
+        // ── Barra de estado ──
         string recColor  = isRecording ? "red" : "grey";
         string recSymbol = isRecording ? "● REC" : "■ PARADO";
         string status    = $"<color={recColor}>{recSymbol}</color>   " +
@@ -375,7 +372,7 @@ public class Recorder : MonoBehaviour
 
         if (!_showStats) return;
 
-        // ── Panel de estadísticas ────────────────────────────────────────────
+        // ── Panel de estadísticas ──
         const int W   = 310;
         const int PAD = 8;
         int px = Screen.width - W - PAD;
@@ -388,14 +385,13 @@ public class Recorder : MonoBehaviour
 
         int cy = py + 8;
 
-        // Título
         GUI.Label(new Rect(px, cy, W, 24), "📊  ESTADÍSTICAS DE ENTRENAMIENTO", _titleStyle);
         cy += 26;
         DrawHLine(px, cy, W); cy += 6;
 
         int n = Mathf.Max(totalFrames, 1);
 
-        // ── ACCIONES ────────────────────────────────────────────────────────
+        // ── ACCIONES ──
         GUI.Label(new Rect(px, cy, W, lineH), "🎯  ACCIONES", _sectionStyle); cy += lineH;
 
         DrawActionRow(px, ref cy, W, barH, "Tiros",
@@ -414,7 +410,7 @@ public class Recorder : MonoBehaviour
 
         cy += 4; DrawHLine(px, cy, W); cy += 6;
 
-        // ── POSESIÓN ────────────────────────────────────────────────────────
+        // ── POSESIÓN ──
         float possPct = 100f * _possessionFrames / n;
         GUI.Label(new Rect(px, cy, W, lineH), "⚽  POSESIÓN DE BALÓN", _sectionStyle); cy += lineH;
 
@@ -424,7 +420,7 @@ public class Recorder : MonoBehaviour
 
         cy += 4; DrawHLine(px, cy, W); cy += 6;
 
-        // ── MOVIMIENTO ──────────────────────────────────────────────────────
+        // ── MOVIMIENTO ──
         GUI.Label(new Rect(px, cy, W, lineH), "🏃  MOVIMIENTO", _sectionStyle); cy += lineH;
 
         float fwdPct  = 100f * _forwardFrames  / n;
@@ -442,7 +438,7 @@ public class Recorder : MonoBehaviour
 
         cy += 4; DrawHLine(px, cy, W); cy += 6;
 
-        // ── ZONAS ───────────────────────────────────────────────────────────
+        // ── ZONAS ──
         GUI.Label(new Rect(px, cy, W, lineH), "📍  ZONAS DEL CAMPO", _sectionStyle); cy += lineH;
 
         float ownPct = 100f * _ownZoneFrames   / n;
@@ -469,13 +465,11 @@ public class Recorder : MonoBehaviour
     private void DrawActionRow(int x, ref int cy, int w, int barH,
         string label, int count, int target, Texture2D barTex, string hint)
     {
-        // Texto principal
         string countColor = barTex == _barGreen ? "#55DD66" : barTex == _barYellow ? "#FFCC00" : "#FF5544";
         string line = $"{label,-10}  <color={countColor}><b>{count}</b></color>  / {target}   <color=#AAAAAA>{hint}</color>";
         GUI.Label(new Rect(x, cy, w, 20), line, _rowStyle);
         cy += 20;
 
-        // Barra
         int  barW   = w - 4;
         int  fillW  = Mathf.RoundToInt(barW * Mathf.Clamp01((float)count / target));
         DrawBar(x + 2, cy, barW, barH, fillW, barTex);
@@ -503,6 +497,25 @@ public class Recorder : MonoBehaviour
         GUI.Box(new Rect(x, y, totalW, h), GUIContent.none, bgStyle);
         if (fillW > 0)
             GUI.Box(new Rect(x, y, fillW, h), GUIContent.none, fillStyle);
+    }
+
+    // ========================================================================
+    // ACCESO A DATOS (para TrainingClient)
+    // ========================================================================
+    /// <summary>
+    /// Devuelve todo el CSV grabado (header + filas) como un solo string.
+    /// </summary>
+    public string GetRecordedCSV()
+    {
+        return string.Join("\n", recordedLines);
+    }
+
+    /// <summary>
+    /// Número de filas de datos grabadas (sin contar la cabecera).
+    /// </summary>
+    public int GetRecordedLineCount()
+    {
+        return recordedLines.Count - 1; // -1 por la cabecera
     }
 
     // ========================================================================

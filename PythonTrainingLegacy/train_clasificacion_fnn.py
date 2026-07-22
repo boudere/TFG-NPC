@@ -283,13 +283,24 @@ def binarize(values, threshold=0.5):
 # ============================================================================
 # 5. ENTRENAMIENTO
 # ============================================================================
-def train(timestamp=''):
+def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=None):
+    """
+    Entrena el modelo FNN de clasificación.
+    Si no se pasan parámetros, usa los valores por defecto (constantes globales).
+    """
+    if csv_files is None:
+        csv_files = CSV_FILES
+    if onnx_output_path is None:
+        onnx_output_path = ONNX_OUTPUT_PATH
+    if scaler_output is None:
+        scaler_output = SCALER_OUTPUT
+
     print("=" * 60)
     print("  ENTRENANDO MODELO CLASIFICACION FNN")
     print("=" * 60)
 
     print("\nCargando datasets...")
-    dataset = SoccerDataset(CSV_FILES)
+    dataset = SoccerDataset(csv_files)
 
     # Split 80 / 20
     indices = np.arange(len(dataset))
@@ -299,10 +310,10 @@ def train(timestamp=''):
     print(f"\nSplit: {len(train_idx)} train | {len(test_idx)} test")
 
     # Guardar scaler para Unity
-    with open(SCALER_OUTPUT, "w") as f:
+    with open(scaler_output, "w") as f:
         json.dump({"mean": dataset.mean.squeeze().tolist(),
                    "std":  dataset.std.squeeze().tolist()}, f)
-    print(f"Scaler guardado en {SCALER_OUTPUT}")
+    print(f"Scaler guardado en {scaler_output}")
 
     INPUT_SIZE = 40
     model = SoccerAgentModel(INPUT_SIZE)
@@ -454,7 +465,7 @@ def train(timestamp=''):
     dummy = torch.randn(1, INPUT_SIZE)
     try:
         torch.onnx.export(
-            export_model, dummy, ONNX_OUTPUT_PATH,
+            export_model, dummy, onnx_output_path,
             export_params=True, opset_version=14,
             do_constant_folding=True,
             input_names=['vector_observation'],
@@ -466,15 +477,30 @@ def train(timestamp=''):
             },
             dynamo=False
         )
-        print(f"Modelo ONNX guardado en {ONNX_OUTPUT_PATH}")
+        print(f"Modelo ONNX guardado en {onnx_output_path}")
     except Exception as e:
         print(f"ONNX export fallo ({e}), guardando como .pt...")
         traced = torch.jit.trace(export_model, dummy)
-        pt_path = ONNX_OUTPUT_PATH.replace('.onnx', '.pt')
+        pt_path = onnx_output_path.replace('.onnx', '.pt')
         traced.save(pt_path)
         print(f"Modelo JIT guardado en {pt_path}")
 
     print("\n¡Entrenamiento Clasificacion FNN completado!")
+
+    # Devolver resultados para el servidor
+    return {
+        'onnx_path': onnx_output_path,
+        'scaler_path': scaler_output,
+        'metrics': {
+            'acc_mov': acc_mov, 'prec_mov': prec_mov,
+            'rec_mov': rec_mov, 'f1_mov': f1_mov,
+            'acc_shoot': acc_shoot, 'prec_shoot': prec_shoot,
+            'rec_shoot': rec_shoot, 'f1_shoot': f1_shoot,
+            'acc_pass': acc_pass, 'prec_pass': prec_pass,
+            'rec_pass': rec_pass, 'f1_pass': f1_pass,
+            'loss_final': last_loss,
+        }
+    }
 
 
 if __name__ == "__main__":
