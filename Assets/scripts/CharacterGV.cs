@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 public class CharacterGV : PlayerID
@@ -116,6 +116,8 @@ public class CharacterGV : PlayerID
         }
     }
 
+    public bool debeRobarAlLlegar = false;
+
     public void SetSprint(Vector3 targetPosition)
     {
         // Se guardan una sola vez al pulsar K.
@@ -130,18 +132,36 @@ public class CharacterGV : PlayerID
 
         sprintDirection = direction.normalized;
         sprint = true;
+        debeRobarAlLlegar = false;
+    }
+
+    public void SetSprintYRobar(Vector3 targetPosition, PlayerID playerID)
+    {
+        SetSprint(targetPosition);
+        debeRobarAlLlegar = true;
     }
 
     private void StopSprint()
     {
+        bool intentarRobo = debeRobarAlLlegar;
         sprint = false;
         sprintDirection = Vector3.zero;
+        debeRobarAlLlegar = false;
 
         rb.linearVelocity = new Vector3(
             0f,
             rb.linearVelocity.y,
             0f
         );
+
+        if (intentarRobo && WinTheBall.instance != null)
+        {
+            float distBalon = Vector3.Distance(transform.position, Bola.instance.transform.position);
+            if (distBalon <= WinTheBall.instance.distanciaMaxima + 15f)
+            {
+                WinTheBall.instance.EjecutarRobo(gameObject);
+            }
+        }
     }
 
     public IEnumerator PararJugador(PlayerID target)

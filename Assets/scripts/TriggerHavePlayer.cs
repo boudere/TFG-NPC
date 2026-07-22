@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -83,6 +83,15 @@ public class TriggerHavePlayer : MonoBehaviour
         if (!rb.CompareTag("Ball")) return;
 
         if (!Bola.instance.PuedeSerRecogida(owner)) return;
+
+        // Si la pelota ya la tiene el portero, ningún jugador de campo puede quitársela
+        if (Bola.instance.EnPosesion && Bola.instance.Owner != null)
+        {
+            if (Bola.instance.Owner.CompareTag("Portero") || Bola.instance.Owner is Portero)
+            {
+                return;
+            }
+        }
 
         locked = true;
         Bola.instance.AsignarPosesion(owner);

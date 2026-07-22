@@ -30,30 +30,22 @@ public class WinTheBall : MonoBehaviour
 
     void Update()
     {
-
-
         if (Input.GetKeyDown(KeyCode.L))
         {
-
-   
             for (int i = 0; i < p.Length; i++)
             {
                 int id = p[i].GetComponent<PlayerID>().id;
                 if (id == characterManager.index && ball != null && !Bola.instance.transform.IsChildOf(p[i].transform))
                 {
-                    
+                    if (Bola.instance.EnPosesion && !EsPoseedorValidoParaRobar(Bola.instance.Owner))
+                    {
+                        break;
+                    }
+
                     float distancia = Vector3.Distance(p[i].transform.position, ball.transform.position);
                     if (distancia < distanciaMaxima)
                     {
-                        havePlayer.setRobo(true);
-                        PlayerID playerID = p[i].GetComponent<PlayerID>();
-                        Bola.instance.Soltar();
-                        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
-                        rb.isKinematic = false;
-                        Vector3 direction = (p[i].transform.position - Bola.instance.transform.position).normalized;
-                        float passSpeed = 300f;
-                        rb.linearVelocity = direction * passSpeed;
-                        rb.angularVelocity = Vector3.zero;
+                        EjecutarRobo(p[i]);
                         break;
                     }
                 }
@@ -62,37 +54,46 @@ public class WinTheBall : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.K))
         {
             Transform poseedorBalon = null;
-            int id = -1;
+            PlayerID poseedorPlayerID = null;
 
-            // Buscar quién tiene la pelota.
-            for (int i = 0; i < p.Length; i++)
+            // Buscar quiÃ©n tiene la pelota.
+            if (Bola.instance.EnPosesion && Bola.instance.Owner != null)
             {
-                if (Bola.instance.transform.IsChildOf(p[i].transform))
+                poseedorPlayerID = Bola.instance.Owner;
+                poseedorBalon = poseedorPlayerID.transform;
+            }
+            else
+            {
+                for (int i = 0; i < p.Length; i++)
                 {
-                    poseedorBalon = p[i].transform;
-                    id = p[i].GetComponent<PlayerID>().id;
-                    break;
+                    if (Bola.instance.transform.IsChildOf(p[i].transform))
+                    {
+                        poseedorBalon = p[i].transform;
+                        poseedorPlayerID = p[i].GetComponent<PlayerID>();
+                        break;
+                    }
                 }
             }
 
-            if (poseedorBalon == null)
+            if (poseedorBalon == null || poseedorPlayerID == null)
             {
                 return;
             }
 
-         
+            if (!EsPoseedorValidoParaRobar(poseedorPlayerID))
+            {
+                return;
+            }
+
             for (int i = 0; i < p.Length; i++)
             {
                 PlayerID playerID = p[i].GetComponent<PlayerID>();
 
-
-                if (playerID == null ||
-                    playerID.id != characterManager.index)
+                if (playerID == null || playerID.id != characterManager.index)
                 {
                     continue;
                 }
 
-              
                 if (Bola.instance.transform.IsChildOf(p[i].transform))
                     return;
 
@@ -101,21 +102,50 @@ public class WinTheBall : MonoBehaviour
                     poseedorBalon.position
                 );
 
-
-                if (distancia <= 400f)
+                if (distancia <= distanciaMaxima)
+                {
+                    EjecutarRobo(p[i]);
+                }
+                else if (distancia <= 400f)
                 {
                     GameObject player = playerID.player;
                     CharacterGV character = player.GetComponent<CharacterGV>();
 
-                    if (character != null && id % 2 != characterManager.index % 2)
+                    if (character != null)
                     {
-                        character.SetSprint(poseedorBalon.position);
+                        character.SetSprintYRobar(poseedorBalon.position, playerID);
                     }
                 }
 
                 break;
             }
         }
+    }
+
+    public bool EsPoseedorValidoParaRobar(PlayerID owner)
+    {
+        if (owner == null) return true;
+        if (owner.CompareTag("Portero") || owner is Portero) return false;
+        if (owner.id % 2 == characterManager.index % 2) return false;
+        return true;
+    }
+
+    public void EjecutarRobo(GameObject playerGo)
+    {
+        if (playerGo == null) return;
+        if (Bola.instance.EnPosesion && !EsPoseedorValidoParaRobar(Bola.instance.Owner))
+        {
+            return;
+        }
+
+        havePlayer.setRobo(true);
+        Bola.instance.Soltar();
+        Rigidbody rb = Bola.instance.GetComponent<Rigidbody>();
+        rb.isKinematic = false;
+        Vector3 direction = (playerGo.transform.position - Bola.instance.transform.position).normalized;
+        float passSpeed = 300f;
+        rb.linearVelocity = direction * passSpeed;
+        rb.angularVelocity = Vector3.zero;
     }
 
     private GameObject[] GetAllFieldPlayers()

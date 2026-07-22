@@ -35,11 +35,14 @@ public class Pase : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            Vector3 pos = new Vector3(0f, 0f, 0f);
-            string tagPlayer = "character";
-            this.tagPlayer = tagPlayer;
-            int team = 0;
-            searchPlayersToPass(tagPlayer, pos, team);
+            if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == characterManager.index)
+            {
+                Vector3 pos = new Vector3(0f, 0f, 0f);
+                string tagPlayer = "character";
+                this.tagPlayer = tagPlayer;
+                int team = 0;
+                searchPlayersToPass(tagPlayer, pos, team);
+            }
         }
     }
 
@@ -79,7 +82,7 @@ public class Pase : MonoBehaviour
             for (i = 0; i < p.Length; i++)
             {
                 id = p[i].GetComponent<PlayerID>().id;
-                if (id == team) //El team es el id (lo he llamado así)
+                if (id == team) //El team es el id (lo he llamado asï¿½)
                 {
                     break;
                 }

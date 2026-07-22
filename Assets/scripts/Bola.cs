@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -225,7 +225,7 @@ public class Bola : MonoBehaviour
 
         if (EnPosesion && Owner == newOwner) return;
         
-        if (EnPosesion && Owner.CompareTag("Portero")) return;
+        if (EnPosesion && Owner != null && (Owner.CompareTag("Portero") || Owner is Portero)) return;
         
      
      

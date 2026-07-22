@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Shoot : MonoBehaviour
 {
@@ -14,7 +14,10 @@ public class Shoot : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.O))
         {
-            disparoLibre();
+            if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == CharacterManager.instance.index)
+            {
+                disparoLibre();
+            }
         }
     }
 
