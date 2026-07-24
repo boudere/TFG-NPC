@@ -31,7 +31,7 @@ public class TrainingClient : MonoBehaviour
     [Tooltip("Tecla para abrir/cerrar el panel de entrenamiento")]
     public KeyCode trainKey = KeyCode.T;
 
-    // ─── Estado interno ─────────────────────────────────────────────────────
+    // Estado interno 
     private enum ClientState
     {
         Idle,           // No se muestra nada
@@ -49,7 +49,7 @@ public class TrainingClient : MonoBehaviour
     private TrainResponseData _lastResult;
     private float _messageTimer = 0f;
 
-    // ─── GUI ────────────────────────────────────────────────────────────────
+    // GUI
     private GUIStyle _panelStyle;
     private GUIStyle _titleStyle;
     private GUIStyle _labelStyle;
@@ -69,16 +69,14 @@ public class TrainingClient : MonoBehaviour
     private Texture2D _errorBg;
     private bool _stylesInitialized = false;
 
-    // ─── Constantes ─────────────────────────────────────────────────────────
+    // Constantes
     private const int PANEL_W = 460;
     private const int PANEL_H_INPUT = 210;
     private const int PANEL_H_STATUS = 150;
     private const int PANEL_H_RESULT = 380;
     private const float MESSAGE_DURATION = 8f;
 
-    // ========================================================================
     // UNITY LIFECYCLE
-    // ========================================================================
     private void Start()
     {
         if (recorder == null)
@@ -121,9 +119,7 @@ public class TrainingClient : MonoBehaviour
         }
     }
 
-    // ========================================================================
     // GUI
-    // ========================================================================
     private void InitStyles()
     {
         if (_stylesInitialized) return;
@@ -350,9 +346,7 @@ public class TrainingClient : MonoBehaviour
         cy += 20;
     }
 
-    // ========================================================================
-    // LÓGICA DE ENTRENAMIENTO
-    // ========================================================================
+    // LOGICA DE ENTRENAMIENTO
     private void StartTraining()
     {
         _state = ClientState.Sending;
@@ -470,9 +464,7 @@ public class TrainingClient : MonoBehaviour
         Debug.Log($"[TrainingClient] Scaler guardado: {scalerPath}");
     }
 
-    // ========================================================================
     // UTILIDADES
-    // ========================================================================
     private static Texture2D MakeTex(Color col)
     {
         var t = new Texture2D(1, 1);
@@ -487,9 +479,7 @@ public class TrainingClient : MonoBehaviour
         return s.Length <= maxLen ? s : s.Substring(0, maxLen) + "...";
     }
 
-    // ========================================================================
     // CLASES DE DATOS (para JSON serialización)
-    // ========================================================================
     [Serializable]
     private class TrainRequestData
     {

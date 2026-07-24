@@ -5,13 +5,13 @@ using UnityEngine;
 public class Portero : PlayerID, IResettable
 {
 
-    public float minX, maxX, minZ, maxZ, y;
+    public float minZ, maxZ, y;
     public float lineaGolMax, lineaGolMin, hx;
 
 
     [SerializeField] private float turnSpeedDeg = 540f;     // velocidad de giro
     [SerializeField] private float directionLerp = 12f;     // suaviza cambios bruscos
-    private Vector3 smoothDir = Vector3.forward;           // dirección suavizada
+    private Vector3 smoothDir = Vector3.forward;           // direcciï¿½n suavizada
     private float speed = 150;
 
     public int index;

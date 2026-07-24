@@ -365,6 +365,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 202939608}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -496,6 +498,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 283558380}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -623,6 +627,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 292062941}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -1685,6 +1691,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 980140374}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2059,6 +2067,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1490026766}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2194,6 +2204,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1528111959}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -2896,6 +2908,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 1026487310500677388}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3039,6 +3053,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 3345642324323717115}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3117,7 +3133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
@@ -3201,6 +3217,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 3625312987260654813}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3212,7 +3230,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
   m_Name: 
@@ -3344,21 +3362,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 5022602860645237092, guid: 158a50b2278ca064389d2bfdfa7dc7a5, type: 3}
   scalerJson: {fileID: 4900000, guid: ba9a935446a4347468e884d4938fe029, type: 3}
-  actionThreshold: 0.505
+  actionThreshold: 0.606
   actionCooldown: 0.1
   shootSpreadDeg: 8
   moveSpeed: 100
   maxSteeringForce: 8
   turnSpeedDeg: 540
   movementSmoothing: 10
-  explorationNoise: 0
+  explorationNoise: 0.144
   myPlayer: {fileID: 0}
   myRigidbody: {fileID: 0}
   characterGV: {fileID: 0}
@@ -3618,6 +3636,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 6738770865320173678}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3745,6 +3765,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 7727232850989682732}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12
@@ -3872,6 +3894,8 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 8757151642796768869}
+  minX: 0
+  maxX: 0
   pase: 0
   turnSpeedDeg: 540
   directionLerp: 12

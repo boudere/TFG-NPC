@@ -180,10 +180,6 @@ public class AIControllerFNNClasi : MonoBehaviour
         float targetInputX = (bestClass / 3) - 1f;
         float targetInputZ = (bestClass % 3) - 1f;
 
-        // Procesar salida de acciones
-        float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
-        float passProb  = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
-
         // 4. Ruido de exploración (opcional) sobre el target
         if (explorationNoise > 0f)
         {
@@ -194,6 +190,19 @@ public class AIControllerFNNClasi : MonoBehaviour
         // 5. Suavizado de Inputs (Mathf.Lerp)
         currentInputX = Mathf.Lerp(currentInputX, targetInputX, Time.deltaTime * movementSmoothing);
         currentInputZ = Mathf.Lerp(currentInputZ, targetInputZ, Time.deltaTime * movementSmoothing);
+
+        // Procesar salida de acciones
+        float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
+        float passProb  = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
+        float roboKProb = prediction.actions.Length > 2 ? prediction.actions[2] : 0f;
+        float roboLProb = prediction.actions.Length > 3 ? prediction.actions[3] : 0f;
+
+        // 7. Aplicar movimiento
+        Vector3 moveDir = new Vector3(currentInputX, 0f, currentInputZ).normalized;
+        ApplyMovement(moveDir);
+
+        // 8. Intentar acciones y obtener la acción realizada
+        string actionExecuted = TryApplyAction(shootProb, passProb, roboKProb, roboLProb);
 
         // 6. Log periódico con diagnóstico completo
         if (enableDebugLogs && Time.time >= nextLogTime)
@@ -214,19 +223,15 @@ public class AIControllerFNNClasi : MonoBehaviour
             bool hasBall = HasBallControl();
             string ballStatus = hasBall ? "CON PELOTA" : "sin pelota";
             string shootStatus = shootProb >= actionThreshold ? "ACTIVAR" : $"bajo ({shootProb:F3})";
-            string passStatus = passProb >= actionThreshold ? "ACTIVAR" : $"bajo ({passProb:F3})";
+            string passStatus  = passProb  >= actionThreshold ? "ACTIVAR" : $"bajo ({passProb:F3})";
+            string roboKStatus = roboKProb >= actionThreshold ? "ACTIVAR" : $"bajo ({roboKProb:F3})";
+            string roboLStatus = roboLProb >= actionThreshold ? "ACTIVAR" : $"bajo ({roboLProb:F3})";
             
             Debug.Log($"[FNNClasi] ClaseMov={bestClass} ({maxProb*100:F0}%) | DirLerp=({currentInputX:F2},{currentInputZ:F2})\n" +
                       $"           Probs: {probsLog}\n" +
-                      $"           {ballStatus} | Shoot={shootProb:F3} [{shootStatus}] | Pass={passProb:F3} [{passStatus}]");
+                      $"           {ballStatus} | Shoot={shootProb:F3} [{shootStatus}] | Pass={passProb:F3} [{passStatus}] | RoboK={roboKProb:F3} [{roboKStatus}] | RoboL={roboLProb:F3} [{roboLStatus}]\n" +
+                      $"           ⚡ ACCIÓN REALIZADA: {actionExecuted}");
         }
-
-        // 7. Aplicar movimiento
-        Vector3 moveDir = new Vector3(currentInputX, 0f, currentInputZ).normalized;
-        ApplyMovement(moveDir);
-
-        // 8. Intentar acciones
-        TryApplyAction(shootProb, passProb);
 
         // 9. Desactivar CharacterGV
         if (characterGV != null) characterGV.enabled = false;
@@ -320,51 +325,75 @@ public class AIControllerFNNClasi : MonoBehaviour
 
         // movement_probs → [9 clases]
         using var movementTensor = worker.PeekOutput("movement_probs") as Unity.InferenceEngine.Tensor<float>;
-        // action_probs → [Shoot, Pass]
+        // action_probs → [Shoot, Pass, RoboK, RoboL]
         using var actionsTensor = worker.PeekOutput("action_probs") as Unity.InferenceEngine.Tensor<float>;
 
         if (movementTensor == null)
         {
             Debug.LogError("[AIControllerFNNClasi] No se pudo leer output 'movement_probs'.");
-            return (new float[9], new float[2]);
+            return (new float[9], new float[4]);
         }
 
         float[] movement = movementTensor.DownloadToArray();
-        float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
+        float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[4];
 
         return (movement, actions);
     }
 
     // ── ACCIONES ──
-    private void TryApplyAction(float shootProb, float passProb)
+    private string TryApplyAction(float shootProb, float passProb, float roboKProb, float roboLProb)
     {
-        if (Time.time < nextActionTime) return;
-        if (!HasBallControl()) return;
+        if (Time.time < nextActionTime) return "EN_COOLDOWN";
 
-        bool doShoot = shootProb >= actionThreshold;
-        bool doPass  = passProb  >= actionThreshold;
-
-        // Si ambas activan, prioriza la de mayor probabilidad
-        if (doShoot && doPass)
-            doShoot = shootProb >= passProb;
-
-        if (doShoot && Shoot.instance != null)
+        if (HasBallControl())
         {
-            AimAtGoal();
-            Shoot.instance.disparoLibre();
-            nextActionTime = Time.time + actionCooldown;
-            if (enableDebugLogs)
-                Debug.Log($"[AIControllerFNNClasi] DISPARO ejecutado (prob={shootProb:F2})");
-            return;
+            bool doShoot = shootProb >= actionThreshold;
+            bool doPass  = passProb  >= actionThreshold;
+
+            if (doShoot && doPass)
+                doShoot = shootProb >= passProb;
+
+            if (doShoot && Shoot.instance != null)
+            {
+                AimAtGoal();
+                Shoot.instance.disparoLibre();
+                nextActionTime = Time.time + actionCooldown;
+                string actionStr = $"DISPARO (prob={shootProb:F2})";
+                Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
+                return actionStr;
+            }
+
+            if (doPass && Pase.instance != null)
+            {
+                Pase.instance.searchPlayersToPass("npc", transform.position, myPlayer.id);
+                nextActionTime = Time.time + actionCooldown;
+                string actionStr = $"PASE (prob={passProb:F2})";
+                Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
+                return actionStr;
+            }
+        }
+        else
+        {
+            bool doRoboK = roboKProb >= actionThreshold;
+            bool doRoboL = roboLProb >= actionThreshold;
+
+            if ((doRoboK || doRoboL) && WinTheBall.instance != null && Bola.instance != null)
+            {
+                PlayerID owner = Bola.instance.Owner;
+                if (Bola.instance.EnPosesion && owner != null && WinTheBall.instance.EsPoseedorValidoParaRobar(owner))
+                {
+                    WinTheBall.instance.EjecutarRobo(gameObject);
+                    nextActionTime = Time.time + actionCooldown;
+                    string tipoRobo = doRoboK && doRoboL ? (roboKProb >= roboLProb ? "RoboK" : "RoboL") : (doRoboK ? "RoboK" : "RoboL");
+                    float probMax = Mathf.Max(roboKProb, roboLProb);
+                    string actionStr = $"ROBO [{tipoRobo}] (prob={probMax:F2})";
+                    Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
+                    return actionStr;
+                }
+            }
         }
 
-        if (doPass && Pase.instance != null)
-        {
-            Pase.instance.searchPlayersToPass("npc", transform.position, myPlayer.id);
-            nextActionTime = Time.time + actionCooldown;
-            if (enableDebugLogs)
-                Debug.Log($"[AIControllerFNNClasi] ⚽ PASE ejecutado (prob={passProb:F2})");
-        }
+        return "NINGUNA";
     }
 
     private bool HasBallControl()

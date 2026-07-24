@@ -73,16 +73,16 @@ class SoccerAgentModel(nn.Module):
         self.movement_head = nn.Sequential(
             nn.Linear(64, 9)
         )
-        # Acciones binarias (shoot, pass) — SIN Sigmoid aqui,
+        # Acciones binarias (shoot, pass, robok, robol) ── SIN Sigmoid aqui,
         # porque BCEWithLogitsLoss lo aplica internamente
         self.action_head = nn.Sequential(
-            nn.Linear(64, 2),
+            nn.Linear(64, 4),
         )
 
     def forward(self, x):
         shared   = self.backbone(x)
         movement = self.movement_head(shared)   # [B, 9] (LOGITS)
-        actions  = self.action_head(shared)     # [B, 2]  Shoot, Pass (LOGITS)
+        actions  = self.action_head(shared)     # [B, 4]  Shoot, Pass, RoboK, RoboL (LOGITS)
         return movement, actions
 
 
@@ -107,8 +107,15 @@ class SoccerDataset(Dataset):
             tmp = tmp[~spawn_mask]
             despues = len(tmp)
 
+            # -- Asegurar presencia de columnas RoboK y RoboL --
+            if 'RoboK' not in tmp.columns:
+                tmp['RoboK'] = 0
+            if 'RoboL' not in tmp.columns:
+                tmp['RoboL'] = 0
+
             print(f"  {os.path.basename(path)}: {antes} -> {despues} tras filtro  "
-                  f"(Disparo={int(tmp['Disparo'].sum())}, Pase={int(tmp['Pase'].sum())})")
+                  f"(Disparo={int(tmp['Disparo'].sum())}, Pase={int(tmp['Pase'].sum())}, "
+                  f"RoboK={int(tmp['RoboK'].sum())}, RoboL={int(tmp['RoboL'].sum())})")
             frames.append(tmp)
 
         if not frames:
@@ -118,6 +125,8 @@ class SoccerDataset(Dataset):
         print(f"\n  TOTAL combinado: {len(raw)} filas")
         print(f"  Disparo=1 en total: {int(raw['Disparo'].sum())}")
         print(f"  Pase=1    en total: {int(raw['Pase'].sum())}")
+        print(f"  RoboK=1   en total: {int(raw['RoboK'].sum())}")
+        print(f"  RoboL=1   en total: {int(raw['RoboL'].sum())}")
 
         feature_cols = [
             'RelPorteriaRivalX', 'RelPorteriaRivalZ',
@@ -141,7 +150,7 @@ class SoccerDataset(Dataset):
         ]  # 40 features exactas
         assert len(feature_cols) == 40, f"Se esperaban 40 features, hay {len(feature_cols)}"
         movement_cols = ['InputX', 'InputZ']
-        action_cols   = ['Disparo', 'Pase']
+        action_cols   = ['Disparo', 'Pase', 'RoboK', 'RoboL']
 
         # -- CORRECCION DE TIMING: propagar Disparo/Pase al frame anterior --
         LOOKBACK = 5  # Maximo de frames hacia atras donde buscar
@@ -178,6 +187,8 @@ class SoccerDataset(Dataset):
 
         # -- SMOTE: Synthetic Minority Oversampling Technique --
         raw['_smote_class'] = 0
+        raw.loc[raw['RoboL'] == 1, '_smote_class'] = 4
+        raw.loc[raw['RoboK'] == 1, '_smote_class'] = 3
         raw.loc[raw['Pase'] == 1, '_smote_class'] = 2
         raw.loc[raw['Disparo'] == 1, '_smote_class'] = 1  # prioridad si ambos
 
@@ -185,16 +196,16 @@ class SoccerDataset(Dataset):
 
         class_counts = raw['_smote_class'].value_counts().sort_index()
         print(f"\n  Distribución de clases antes de SMOTE:")
-        for cls, name in [(0, 'Sin acción'), (1, 'Disparo'), (2, 'Pase')]:
+        for cls, name in [(0, 'Sin acción'), (1, 'Disparo'), (2, 'Pase'), (3, 'RoboK'), (4, 'RoboL')]:
             print(f"    {name} ({cls}): {class_counts.get(cls, 0)}")
 
-        n_minority = sum(class_counts.get(c, 0) for c in [1, 2])
+        n_minority = sum(class_counts.get(c, 0) for c in [1, 2, 3, 4])
         if n_minority > 0:
             X_sm = raw[smote_cols].values
             y_sm = raw['_smote_class'].values
 
             min_minority_count = min(
-                class_counts.get(c, 0) for c in [1, 2] if class_counts.get(c, 0) > 0
+                class_counts.get(c, 0) for c in [1, 2, 3, 4] if class_counts.get(c, 0) > 0
             )
             k = min(5, min_minority_count - 1)
             k = max(k, 1)
@@ -203,7 +214,7 @@ class SoccerDataset(Dataset):
             target = max(int(majority_n * 0.15), min_minority_count)
 
             sampling_strategy = {}
-            for c in [1, 2]:
+            for c in [1, 2, 3, 4]:
                 if class_counts.get(c, 0) > 0:
                     sampling_strategy[c] = max(target, class_counts.get(c, 0))
 
@@ -217,7 +228,6 @@ class SoccerDataset(Dataset):
             df_res = pd.DataFrame(X_res, columns=smote_cols)
 
             # Discretizar InputX/InputZ sintéticos al valor original más cercano {-1, 0, 1}
-            # Mantenemos los inputs de movimiento originales sin oversampling extra de movimiento
             for col in movement_cols:
                 df_res[col] = df_res[col].apply(
                     lambda v: 1.0 if v > 0.5 else (-1.0 if v < -0.5 else 0.0)
@@ -225,12 +235,16 @@ class SoccerDataset(Dataset):
 
             df_res['Disparo'] = (y_res == 1).astype(int)
             df_res['Pase']    = (y_res == 2).astype(int)
+            df_res['RoboK']   = (y_res == 3).astype(int)
+            df_res['RoboL']   = (y_res == 4).astype(int)
 
             raw = df_res
             print(f"\n  SMOTE aplicado (k_neighbors={k}, target={target}):")
             print(f"  Dataset total tras SMOTE: {len(raw)}")
             print(f"  Disparo=1: {int(raw['Disparo'].sum())} ({raw['Disparo'].mean()*100:.1f}%)")
             print(f"  Pase=1:    {int(raw['Pase'].sum())} ({raw['Pase'].mean()*100:.1f}%)")
+            print(f"  RoboK=1:   {int(raw['RoboK'].sum())} ({raw['RoboK'].mean()*100:.1f}%)")
+            print(f"  RoboL=1:   {int(raw['RoboL'].sum())} ({raw['RoboL'].mean()*100:.1f}%)")
         else:
             print("\n  WARNING: No hay frames de Disparo/Pase con pelota en los datos!")
 
@@ -321,11 +335,11 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
     # Loss para movimiento (9 clases)
     ce_crit = nn.CrossEntropyLoss()
 
-    # Calcular pos_weight para compensar el desbalance extremo de Disparo/Pase
-    action_counts = dataset.Ya.sum(dim=0)  # [shoot_count, pass_count]
+    # Calcular pos_weight para compensar el desbalance extremo de acciones
+    action_counts = dataset.Ya.sum(dim=0)  # [shoot_count, pass_count, robok_count, robol_count]
     total_samples = len(dataset)
-    pos_weight = torch.zeros(2)
-    for i, name in enumerate(['Disparo', 'Pase']):
+    pos_weight = torch.zeros(4)
+    for i, name in enumerate(['Disparo', 'Pase', 'RoboK', 'RoboL']):
         pos = max(action_counts[i].item(), 1.0)
         neg = total_samples - pos
         pw = neg / pos
@@ -362,7 +376,7 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
             print(f"  Epoch [{epoch+1:3d}/{EPOCHS}] "
                   f"Loss={total_loss/n:.4f}  "
                   f"CE(mov)={total_ce/n:.4f}  "
-                  f"BCE(shoot+pass)={total_bce/n:.4f}")
+                  f"BCE(actions)={total_bce/n:.4f}")
 
     n_batches = len(train_loader)
     last_loss = total_loss / n_batches if n_batches > 0 else 0.0
@@ -411,6 +425,8 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
     # -- Acciones binarias --
     pred_shoot = binarize(pred_act[:, 0]);  true_shoot = true_act[:, 0].astype(int)
     pred_pass  = binarize(pred_act[:, 1]);  true_pass  = true_act[:, 1].astype(int)
+    pred_robok = binarize(pred_act[:, 2]);  true_robok = true_act[:, 2].astype(int)
+    pred_robol = binarize(pred_act[:, 3]);  true_robol = true_act[:, 3].astype(int)
 
     print("\n[Disparo]")
     print(classification_report(true_shoot, pred_shoot, labels=[0,1],
@@ -422,6 +438,16 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
                                 target_names=["No pasa","Pasa"],
                                 zero_division=0))
 
+    print("[RoboK]")
+    print(classification_report(true_robok, pred_robok, labels=[0,1],
+                                target_names=["No robaK","RobaK"],
+                                zero_division=0))
+
+    print("[RoboL]")
+    print(classification_report(true_robol, pred_robol, labels=[0,1],
+                                target_names=["No robaL","RobaL"],
+                                zero_division=0))
+
     # -- Metricas escalares para METRICS_BLOCK --
     acc_shoot  = accuracy_score(true_shoot, pred_shoot)
     prec_shoot = precision_score(true_shoot, pred_shoot, average='binary', zero_division=0)
@@ -431,6 +457,14 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
     prec_pass  = precision_score(true_pass, pred_pass, average='binary', zero_division=0)
     rec_pass   = recall_score(true_pass, pred_pass, average='binary', zero_division=0)
     f1_pass    = f1_score(true_pass, pred_pass, average='binary', zero_division=0)
+    acc_robok  = accuracy_score(true_robok, pred_robok)
+    prec_robok = precision_score(true_robok, pred_robok, average='binary', zero_division=0)
+    rec_robok  = recall_score(true_robok, pred_robok, average='binary', zero_division=0)
+    f1_robok   = f1_score(true_robok, pred_robok, average='binary', zero_division=0)
+    acc_robol  = accuracy_score(true_robol, pred_robol)
+    prec_robol = precision_score(true_robol, pred_robol, average='binary', zero_division=0)
+    rec_robol  = recall_score(true_robol, pred_robol, average='binary', zero_division=0)
+    f1_robol   = f1_score(true_robol, pred_robol, average='binary', zero_division=0)
 
     print("[METRICS_START]")
     print(f"MODEL=ClasificacionFNN")
@@ -447,6 +481,14 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
     print(f"PREC_PASS={prec_pass*100:.2f}")
     print(f"REC_PASS={rec_pass*100:.2f}")
     print(f"F1_PASS={f1_pass*100:.2f}")
+    print(f"ACC_ROBOK={acc_robok*100:.2f}")
+    print(f"PREC_ROBOK={prec_robok*100:.2f}")
+    print(f"REC_ROBOK={rec_robok*100:.2f}")
+    print(f"F1_ROBOK={f1_robok*100:.2f}")
+    print(f"ACC_ROBOL={acc_robol*100:.2f}")
+    print(f"PREC_ROBOL={prec_robol*100:.2f}")
+    print(f"REC_ROBOL={rec_robol*100:.2f}")
+    print(f"F1_ROBOL={f1_robol*100:.2f}")
     print(f"LOSS_FINAL={last_loss:.4f}")
     print("[METRICS_END]")
 
@@ -498,6 +540,10 @@ def train(timestamp='', csv_files=None, onnx_output_path=None, scaler_output=Non
             'rec_shoot': rec_shoot, 'f1_shoot': f1_shoot,
             'acc_pass': acc_pass, 'prec_pass': prec_pass,
             'rec_pass': rec_pass, 'f1_pass': f1_pass,
+            'acc_robok': acc_robok, 'prec_robok': prec_robok,
+            'rec_robok': rec_robok, 'f1_robok': f1_robok,
+            'acc_robol': acc_robol, 'prec_robol': prec_robol,
+            'rec_robol': rec_robol, 'f1_robol': f1_robol,
             'loss_final': last_loss,
         }
     }

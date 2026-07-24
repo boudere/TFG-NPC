@@ -30,7 +30,7 @@ public class PlayerID : MonoBehaviour
     float renaudarMove = 1f;
 
     protected string targetTag = "";
-    protected float maxX, minX;
+    public float minX, maxX;
     protected bool isOutside = false;
 
     protected virtual void Awake()
@@ -190,7 +190,7 @@ public class PlayerID : MonoBehaviour
         {
             AreaPeligro area = a.GetComponent<AreaPeligro>();
 
-            if (area != null && area.TEAM != this.id % 2) // área contraria
+            if (area != null && area.TEAM != this.id % 2) // ï¿½rea contraria
             {
                 x = Random.Range(area.minX, area.maxX);
                 z = Random.Range(area.minZ, area.maxZ);

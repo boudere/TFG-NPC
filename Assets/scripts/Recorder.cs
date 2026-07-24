@@ -48,12 +48,16 @@ public class Recorder : MonoBehaviour
     private int  _rivalZoneFrames  = 0;
     private int  _shotCount        = 0;
     private int  _passCount        = 0;
+    private int  _roboKCount       = 0;
+    private int  _roboLCount       = 0;
 
     // ─── Umbrales ───────────────────────────────────────────────────────────
     private const int   SHOT_OK    = 30;
     private const int   SHOT_WARN  = 15;
     private const int   PASS_OK    = 35;
     private const int   PASS_WARN  = 15;
+    private const int   ROBO_OK    = 20;
+    private const int   ROBO_WARN  = 10;
     private const float POSS_OK    = 25f;
     private const float POSS_WARN  = 12f;
     private const float STOP_WARN  = 30f;
@@ -125,7 +129,7 @@ public class Recorder : MonoBehaviour
             "RelEnemigo2PosX,RelEnemigo2PosZ,Enemigo2DirX,Enemigo2DirZ," +
             "RelEnemigo3PosX,RelEnemigo3PosZ,Enemigo3DirX,Enemigo3DirZ," +
             "InputX,InputZ," +
-            "Disparo,Pase";
+            "Disparo,Pase,RoboK,RoboL";
 
         recordedLines.Add(header);
     }
@@ -253,6 +257,8 @@ public class Recorder : MonoBehaviour
         float inputZ = Input.GetAxisRaw("Vertical");
         int disparo  = Input.GetKey(KeyCode.O) ? 1 : 0;
         int pase     = Input.GetKey(KeyCode.P) ? 1 : 0;
+        int roboK    = Input.GetKey(KeyCode.K) ? 1 : 0;
+        int roboL    = Input.GetKey(KeyCode.L) ? 1 : 0;
 
         // ── Serializar fila CSV ──
         string F(float v) => v.ToString("F3", Inv);
@@ -277,7 +283,7 @@ public class Recorder : MonoBehaviour
             $"{F(e2px)},{F(e2pz)},{F(e2dx)},{F(e2dz)}," +
             $"{F(e3px)},{F(e3pz)},{F(e3dx)},{F(e3dz)}," +
             $"{F(inputX)},{F(inputZ)}," +
-            $"{disparo},{pase}";
+            $"{disparo},{pase},{roboK},{roboL}";
 
         recordedLines.Add(row);
 
@@ -291,6 +297,8 @@ public class Recorder : MonoBehaviour
 
         if (disparo == 1) _shotCount++;
         if (pase == 1)    _passCount++;
+        if (roboK == 1)   _roboKCount++;
+        if (roboL == 1)   _roboLCount++;
 
         // Zona: comparar distancias a cada portería
         if (rivalGoalTransform != null && ownGoalTransform != null)
@@ -379,7 +387,7 @@ public class Recorder : MonoBehaviour
         int py = 10;
         int lineH   = 22;
         int barH    = 12;
-        int panelH  = 420;
+        int panelH  = 510;
 
         GUI.Box(new Rect(px - PAD, py, W + PAD * 2, panelH), "", _panelStyle);
 
@@ -392,21 +400,35 @@ public class Recorder : MonoBehaviour
         int n = Mathf.Max(totalFrames, 1);
 
         // ── ACCIONES ──
-        GUI.Label(new Rect(px, cy, W, lineH), "🎯  ACCIONES", _sectionStyle); cy += lineH;
+        GUI.Label(new Rect(px, cy, W, lineH), "⚡  ACCIONES", _sectionStyle); cy += lineH;
 
         DrawActionRow(px, ref cy, W, barH, "Tiros",
             _shotCount, SHOT_OK,
             _shotCount >= SHOT_OK   ? _barGreen :
             _shotCount >= SHOT_WARN ? _barYellow : _barRed,
-            _shotCount >= SHOT_OK   ? "✓ Bien" :
-            _shotCount >= SHOT_WARN ? "⚠ Sube un poco" : "✗ Necesitas más tiros");
+            _shotCount >= SHOT_OK   ? "Bien" :
+            _shotCount >= SHOT_WARN ? "Sube un poco" : "Necesitas mas tiros");
 
         DrawActionRow(px, ref cy, W, barH, "Pases",
             _passCount, PASS_OK,
             _passCount >= PASS_OK   ? _barGreen :
             _passCount >= PASS_WARN ? _barYellow : _barRed,
-            _passCount >= PASS_OK   ? "✓ Bien" :
-            _passCount >= PASS_WARN ? "⚠ Sube un poco" : "✗ Necesitas más pases");
+            _passCount >= PASS_OK   ? "Bien" :
+            _passCount >= PASS_WARN ? "Sube un poco" : "Necesitas mas pases");
+
+        DrawActionRow(px, ref cy, W, barH, "Robo (K)",
+            _roboKCount, ROBO_OK,
+            _roboKCount >= ROBO_OK   ? _barGreen :
+            _roboKCount >= ROBO_WARN ? _barYellow : _barRed,
+            _roboKCount >= ROBO_OK   ? "Bien" :
+            _roboKCount >= ROBO_WARN ? "Sube un poco" : "Intenta robar mas");
+
+        DrawActionRow(px, ref cy, W, barH, "Robo (L)",
+            _roboLCount, ROBO_OK,
+            _roboLCount >= ROBO_OK   ? _barGreen :
+            _roboLCount >= ROBO_WARN ? _barYellow : _barRed,
+            _roboLCount >= ROBO_OK   ? "Bien" :
+            _roboLCount >= ROBO_WARN ? "Sube un poco" : "Intenta robar mas");
 
         cy += 4; DrawHLine(px, cy, W); cy += 6;
 
