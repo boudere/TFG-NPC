@@ -83,9 +83,9 @@ public class CharacterGV : PlayerID
             moveDir = new Vector3(h, 0f, v).normalized;
         }
 
-        //float speed = sprint ? sprintSpeed : npcSpeed;
+        float speed = sprint ? sprintSpeed : npcSpeed;
 
-        float speed = 400f;
+        //float speed = 400f;
 
         Vector3 movement = moveDir * speed;
 

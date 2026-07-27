@@ -7184,6 +7184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jugadores: []
   jugadoresOrdenadosPorPorteria: []
+  playerID: {fileID: 0}
 --- !u!114 &1031457102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16655,7 +16656,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8034690329055699690, guid: 0679df49c2f858a40913e25a15f5fdc2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 267.15753
+      value: 267
       objectReference: {fileID: 0}
     - target: {fileID: 8034690329055699690, guid: 0679df49c2f858a40913e25a15f5fdc2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -16663,7 +16664,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8034690329055699690, guid: 0679df49c2f858a40913e25a15f5fdc2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1365.4343
+      value: -1618
       objectReference: {fileID: 0}
     - target: {fileID: 8034690329055699690, guid: 0679df49c2f858a40913e25a15f5fdc2, type: 3}
       propertyPath: m_LocalRotation.w
