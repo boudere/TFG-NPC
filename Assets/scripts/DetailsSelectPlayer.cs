@@ -1,9 +1,16 @@
+
+using System.Diagnostics;
+using System.IO;
 using System;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using SFB;
+
+
+
 
 
 public class DetailsSelectPlayer : MonoBehaviour
@@ -27,7 +34,7 @@ public class DetailsSelectPlayer : MonoBehaviour
     public Button aplicarModelo;
     public GameObject panelEntrenamiento;
 
-
+    public string rutaModeloONNX;
 
     public void Awake()
     {
@@ -85,18 +92,60 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void SeleccionarJugador()
     {
-        Data.instance.jugadorSeleccionado = true;
+        if (characterManager.indexModel != characterManager.select)
+        {
+            characterManager.index = characterManager.select;
+        } else
+        {
+            UnityEngine.Debug.Log("Jugador ya asociado");
+        }
+            Data.instance.jugadorSeleccionado = true;
+        Data.instance.jugadorSeleccionadoEntrenamiento = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 
     public void SeleccionarModelo()
     {
-       // Data.instance.jugadorSeleccionado = false;
+        if (characterManager.index != characterManager.select)
+        {
+            characterManager.indexModel = characterManager.select;
+        }
+        else
+        {
+            UnityEngine.Debug.Log("Jugador ya asociado");
+            return;
+        }
+
+        var paths = StandaloneFileBrowser.OpenFilePanel(
+            "Selecciona un modelo ONNX",
+            "",
+            new[] { new ExtensionFilter("Modelo ONNX", "onnx") },
+            false);
+
+        if (paths.Length == 0)
+        {
+            UnityEngine.Debug.Log("No se seleccionó ningún modelo.");
+            return;
+        }
+
+        rutaModeloONNX = paths[0];
+
+        UnityEngine.Debug.Log("Modelo seleccionado: " + rutaModeloONNX);
+
+        Data.instance.rutaModeloONNX = rutaModeloONNX; // Si quieres usarla en otra escena
+
+        Data.instance.jugadorAplicarModelo = true;
+        Data.instance.jugadorSeleccionadoEntrenamiento = false;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 
     public void SeleccionarEntrenamiento()
     {
-
+        Data.instance.jugadorSeleccionadoEntrenamiento = true;
+        Data.instance.jugadorAplicarModelo = false;
+        Data.instance.jugadorSeleccionado = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 
     public void Atras()

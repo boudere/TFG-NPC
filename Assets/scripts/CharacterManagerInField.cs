@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Diagnostics;
+using System.IO;
 
 public class CharacterManagerInField : MonoBehaviour
 {
@@ -12,8 +14,7 @@ public class CharacterManagerInField : MonoBehaviour
 
     void Start()
     {
-        
-        characterManager = CharacterManager.instance;
+    characterManager = CharacterManager.instance;
         GameObject[] p = GetAllFieldPlayers();
 
         foreach (GameObject player in p) {
@@ -35,6 +36,106 @@ public class CharacterManagerInField : MonoBehaviour
             }
         }
         cameraConfiguration(characterManager.index);
+
+
+        for (int i = 0; i < p.Length; i++)
+        {
+            Recorder recorder = p[i].GetComponent<Recorder>();
+            CharacterGV characterGV = p[i].GetComponent<CharacterGV>();
+            TrainingClient trainingClient = p[i].GetComponent<TrainingClient>();
+            AIControllerFNNClasi aiControllerFNNClasi = p[i].GetComponent<AIControllerFNNClasi>();
+            AIRecorder aiRecorder = p[i].GetComponent<AIRecorder>();
+
+            if (recorder != null)
+                recorder.enabled = false;
+
+            if (characterGV != null)
+                characterGV.enabled = false;
+
+            if (trainingClient != null)
+                trainingClient.enabled = false;
+
+            if (aiControllerFNNClasi != null)
+                aiControllerFNNClasi.enabled = false;
+
+            if (aiRecorder != null) 
+                aiRecorder.enabled = false;
+        }
+
+        if (Data.instance.jugadorSeleccionadoEntrenamiento)
+        {
+            for (int i = 0; i < p.Length; i++)
+            {
+                PlayerID playerID = p[i].GetComponent<PlayerID>();
+
+                if (playerID != null && playerID.id == characterManager.index)
+                {
+                    Recorder recorder = p[i].GetComponent<Recorder>();
+                    CharacterGV characterGV = p[i].GetComponent<CharacterGV>();
+                    TrainingClient trainingClient = p[i].GetComponent<TrainingClient>();
+
+                    if (recorder != null)
+                        recorder.enabled = true;
+
+                    if (characterGV != null)
+                        characterGV.enabled = true;
+
+                    if (trainingClient != null)
+                        trainingClient.enabled = true;
+
+                    break; 
+                }
+            }
+        }
+
+        if (Data.instance.jugadorSeleccionado)
+        {
+            for (int i = 0; i < p.Length; i++)
+            {
+                PlayerID playerID = p[i].GetComponent<PlayerID>();
+
+                if (playerID != null && playerID.id == characterManager.index)
+                {
+                    CharacterGV characterGV = p[i].GetComponent<CharacterGV>();
+                  
+                    if (characterGV != null)
+                        characterGV.enabled = true;
+
+                  
+
+                    break;
+                }
+            }
+        }
+
+
+        if (Data.instance.jugadorAplicarModelo)
+        {
+            for (int i = 0; i < p.Length; i++)
+            {
+                PlayerID playerID = p[i].GetComponent<PlayerID>();
+
+                if (playerID != null && playerID.id == characterManager.indexModel)
+                {
+                    
+                    AIControllerFNNClasi aiControllerFNNClasi = p[i].GetComponent<AIControllerFNNClasi>();
+                    AIRecorder aiRecorder = p[i].GetComponent<AIRecorder>();
+
+                    if (aiControllerFNNClasi != null)
+                        aiControllerFNNClasi.enabled = true;
+
+
+                    if (aiRecorder != null)
+                        aiRecorder.enabled = true;
+
+                    break;
+                }
+            }
+        }
+
+
+
+
     }
 
     private void Update()

@@ -336,6 +336,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
       insertIndex: -1
       addedObject: {fileID: 202939609}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202939610}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202939611}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202939612}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 202939613}
   m_SourcePrefab: {fileID: 100100000, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
 --- !u!4 &202939607 stripped
 Transform:
@@ -375,6 +387,92 @@ MonoBehaviour:
     defensa: {fileID: 0}
   defaultMove: 1
   defender: 0
+--- !u!114 &202939610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202939608}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &202939611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202939608}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &202939612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202939608}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &202939613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202939608}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &283558378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -469,6 +567,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
       insertIndex: -1
       addedObject: {fileID: 283558381}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 283558382}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 283558383}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 283558384}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 283558385}
   m_SourcePrefab: {fileID: 100100000, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
 --- !u!4 &283558379 stripped
 Transform:
@@ -504,6 +614,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &283558382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283558380}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &283558383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283558380}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &283558384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283558380}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &283558385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283558380}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &292062939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -598,6 +794,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
       insertIndex: -1
       addedObject: {fileID: 292062942}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 292062943}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 292062944}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 292062945}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 292062946}
   m_SourcePrefab: {fileID: 100100000, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
 --- !u!4 &292062940 stripped
 Transform:
@@ -633,6 +841,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &292062943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292062941}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &292062944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292062941}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &292062945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292062941}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &292062946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292062941}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &297937649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1662,6 +1956,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 980140375}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980140376}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980140377}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980140378}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980140379}
   m_SourcePrefab: {fileID: 100100000, guid: 3aa0f0106721c154196a1906f288677a, type: 3}
 --- !u!4 &980140373 stripped
 Transform:
@@ -1697,6 +2003,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &980140376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980140374}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &980140377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980140374}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &980140378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980140374}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
+--- !u!114 &980140379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980140374}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
 --- !u!1 &1010783935
 GameObject:
   m_ObjectHideFlags: 0
@@ -2038,6 +2430,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1490026767}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026768}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026769}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026770}
+    - targetCorrespondingSourceObject: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1490026771}
   m_SourcePrefab: {fileID: 100100000, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
 --- !u!4 &1490026765 stripped
 Transform:
@@ -2073,6 +2477,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &1490026768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &1490026769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &1490026770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
+--- !u!114 &1490026771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490026766}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
 --- !u!1001 &1528111957
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2175,6 +2665,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1528111960}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1528111961}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1528111962}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1528111963}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1528111964}
   m_SourcePrefab: {fileID: 100100000, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
 --- !u!4 &1528111958 stripped
 Transform:
@@ -2214,6 +2716,92 @@ MonoBehaviour:
     defensa: {fileID: 0}
   defaultMove: 1
   defender: 0
+--- !u!114 &1528111961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528111959}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &1528111962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528111959}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &1528111963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528111959}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &1528111964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528111959}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1 &1741050838
 GameObject:
   m_ObjectHideFlags: 0
@@ -2879,6 +3467,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1026487310500677389}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1026487310500677390}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1026487310500677391}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1026487310500677392}
+    - targetCorrespondingSourceObject: {fileID: 4319541743082888750, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1026487310500677393}
   m_SourcePrefab: {fileID: 100100000, guid: 993c3aafeb5b5d5408886fc4a0979fae, type: 3}
 --- !u!4 &1026487310500677387 stripped
 Transform:
@@ -2918,6 +3518,92 @@ MonoBehaviour:
     defensa: {fileID: 0}
   defaultMove: 1
   defender: 0
+--- !u!114 &1026487310500677390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026487310500677388}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &1026487310500677391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026487310500677388}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &1026487310500677392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026487310500677388}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &1026487310500677393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026487310500677388}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &3345642324323717113
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3024,6 +3710,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3345642324323717116}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3345642324323717117}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3345642324323717118}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3345642324323717119}
+    - targetCorrespondingSourceObject: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3345642324323717120}
   m_SourcePrefab: {fileID: 100100000, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
 --- !u!4 &3345642324323717114 stripped
 Transform:
@@ -3063,6 +3761,92 @@ MonoBehaviour:
     defensa: {fileID: 0}
   defaultMove: 1
   defender: 0
+--- !u!114 &3345642324323717117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3345642324323717115}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &3345642324323717118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3345642324323717115}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &3345642324323717119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3345642324323717115}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &3345642324323717120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3345642324323717115}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &3625312987260654811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3133,7 +3917,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5398021544228664392, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6682102666419540453, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       propertyPath: id
@@ -3188,6 +3972,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3625312987260654836}
+    - targetCorrespondingSourceObject: {fileID: 4302736966775426911, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3625312987260654840}
   m_SourcePrefab: {fileID: 100100000, guid: e4a1ffca8e6d05549a4c27561c1cdaae, type: 3}
 --- !u!4 &3625312987260654812 stripped
 Transform:
@@ -3230,7 +4017,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
   m_Name: 
@@ -3362,7 +4149,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3625312987260654813}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
   m_Name: 
@@ -3513,6 +4300,21 @@ MonoBehaviour:
   boundaryMargin: 30
   enableDebugLogs: 1
   logInterval: 1
+--- !u!114 &3625312987260654840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3625312987260654813}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
 --- !u!1001 &6738770865320173676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3607,6 +4409,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6738770865320173679}
+    - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6738770865320173680}
+    - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6738770865320173681}
+    - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6738770865320173682}
+    - targetCorrespondingSourceObject: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6738770865320173683}
   m_SourcePrefab: {fileID: 100100000, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
 --- !u!4 &6738770865320173677 stripped
 Transform:
@@ -3642,6 +4456,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &6738770865320173680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6738770865320173678}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &6738770865320173681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6738770865320173678}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &6738770865320173682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6738770865320173678}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
+--- !u!114 &6738770865320173683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6738770865320173678}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
 --- !u!1001 &7727232850989682730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3736,6 +4636,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7727232850989682733}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7727232850989682734}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7727232850989682735}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7727232850989682736}
+    - targetCorrespondingSourceObject: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7727232850989682737}
   m_SourcePrefab: {fileID: 100100000, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
 --- !u!4 &7727232850989682731 stripped
 Transform:
@@ -3771,6 +4683,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &7727232850989682734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727232850989682732}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &7727232850989682735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727232850989682732}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &7727232850989682736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727232850989682732}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &7727232850989682737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7727232850989682732}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1001 &8757151642796768867
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3865,6 +4863,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8757151642796768870}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8757151642796768871}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8757151642796768872}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8757151642796768873}
+    - targetCorrespondingSourceObject: {fileID: 8921528458524076488, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8757151642796768874}
   m_SourcePrefab: {fileID: 100100000, guid: b5bd1882e00cb9f458db9632013434cd, type: 3}
 --- !u!4 &8757151642796768868 stripped
 Transform:
@@ -3900,6 +4910,92 @@ MonoBehaviour:
   turnSpeedDeg: 540
   directionLerp: 12
   defaultMove: 1
+--- !u!114 &8757151642796768871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8757151642796768869}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4817f34dbd3f86f4da9ac3b09a0e1c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recordToggleKey: 114
+  statsToggleKey: 109
+  snapshotTime: 0.1
+  csvOutputName: SoccerData
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  myCharacterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+--- !u!114 &8757151642796768872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8757151642796768869}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfb10f9627899446bac47c288316945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:8000
+  recorder: {fileID: 0}
+  trainKey: 116
+--- !u!114 &8757151642796768873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8757151642796768869}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed8205132db32664f9f2ef255eb4f3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snapshotInterval: 0.1
+  csvOutputName: AIData
+  recordingEnabled: 1
+  myPlayer: {fileID: 0}
+--- !u!114 &8757151642796768874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8757151642796768869}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acc0e4c3f13ea449995dadeef4b7304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onnxModelAsset: {fileID: 0}
+  scalerJson: {fileID: 0}
+  actionThreshold: 0.35
+  actionCooldown: 1
+  shootSpreadDeg: 8
+  moveSpeed: 150
+  maxSteeringForce: 8
+  turnSpeedDeg: 540
+  movementSmoothing: 10
+  explorationNoise: 0
+  myPlayer: {fileID: 0}
+  myRigidbody: {fileID: 0}
+  characterGV: {fileID: 0}
+  rivalGoalTransform: {fileID: 0}
+  ownGoalTransform: {fileID: 0}
+  constrainToField: 1
+  fieldLimitX: 600
+  fieldLimitZ: 500
+  boundaryMargin: 30
+  enableDebugLogs: 0
+  logInputFeatures: 0
+  logInterval: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

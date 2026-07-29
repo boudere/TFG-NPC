@@ -12,7 +12,10 @@ public class CharacterManager : MonoBehaviour
     public static CharacterManager instance;
     public bool selected;
     public List<Character> characterList;
-    public int index = 0;
+    public int index = -1;
+    public int indexModel = -1;
+    public int select = -1;
+   
     public CharacterGV[] characters;
     private void Awake()
     {
@@ -25,5 +28,5 @@ public class CharacterManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
+    }   
 }

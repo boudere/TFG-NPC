@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
+
 
 /// <summary>
 /// Controlador IA para el modelo FNN de Clasificación.

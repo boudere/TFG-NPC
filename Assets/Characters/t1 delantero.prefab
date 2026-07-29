@@ -520,7 +520,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4302736966775426911}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a60dede8a568ae4f8a8990100ced1f5, type: 3}
   m_Name: 
@@ -531,11 +531,16 @@ MonoBehaviour:
   holdPoint: {fileID: 0}
   probabilidadAciertoPase: 0
   player: {fileID: 0}
-  chasingBallFree: 0
+  minX: 0
+  maxX: 0
   turnSpeedDeg: 720
   directionLerp: 12
+  sprintSpeed: 300
+  sprintMaxDistance: 400
   index: 0
+  sprint: 0
   defaultMove: 1
+  debeRobarAlLlegar: 0
 --- !u!54 &1827199058330523307
 Rigidbody:
   m_ObjectHideFlags: 0

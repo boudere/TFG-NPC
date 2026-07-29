@@ -8,6 +8,7 @@ public class Data : MonoBehaviour
     public bool jugadorSeleccionado = false;
     public bool jugadorSeleccionadoEntrenamiento = false;
     public bool jugadorAplicarModelo = false;
+    public string rutaModeloONNX;
 
     public static Data instance;
 

@@ -18,6 +18,7 @@ public class InfoCharacter : MonoBehaviour
 
     private CharacterManager characterManager;
     public int index;
+    public int indexModel;
     public static InfoCharacter instance;
 
 
@@ -39,8 +40,9 @@ public class InfoCharacter : MonoBehaviour
         
         characterManager = CharacterManager.instance;
         index = characterManager.index;
+        indexModel = characterManager.indexModel;
         ActualizarInterfaz();
-        if (index > characterManager.characterList.Count - 1) { index = 0; }
+        if (index > characterManager.characterList.Count - 1) { index = -1; }
     }
 
 
@@ -74,10 +76,9 @@ public class InfoCharacter : MonoBehaviour
     public void detailsPlayer(GameObject boton)
     {
       
-            characterManager.index = boton.GetComponent<BotonPosicion>().id;
-            Debug.Log(characterManager.index);
-            index = boton.GetComponent<BotonPosicion>().id;
+            characterManager.select = boton.GetComponent<BotonPosicion>().id;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+
         
 
 
@@ -86,13 +87,13 @@ public class InfoCharacter : MonoBehaviour
 
     public void PlayStart()
     {
-        Debug.Log(Data.instance.jugadorSeleccionado);
 
-        if (!Data.instance.jugadorSeleccionado)
+        if (Data.instance.esJuego && !Data.instance.jugadorSeleccionado )
             return;
 
+        if (!Data.instance.esJuego && !Data.instance.jugadorSeleccionadoEntrenamiento)
+            return;
 
-        Debug.Log(Data.instance.jugadorSeleccionado);
         for (int i = 0; i < characterManager.characterList.Count; i++)
         {
 
@@ -109,8 +110,6 @@ public class InfoCharacter : MonoBehaviour
     SceneManager.GetActiveScene().buildIndex + 3,
     LoadSceneMode.Additive
 );
-        Destroy(InfoCharacter.instance.gameObject);
-
-
+  
     }
 }

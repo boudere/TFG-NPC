@@ -31,11 +31,8 @@ public class ChooseOption : MonoBehaviour
 
     public void ModoJuego()
     {
-        Debug.Log("Se ha pulsado ModoJuego");
 
         Data.instance.esJuego = true;
-
-        Debug.Log("esJuego ahora vale: " + Data.instance.esJuego);
 
         SceneManager.LoadScene(
             SceneManager.GetActiveScene().buildIndex + 1
@@ -44,11 +41,9 @@ public class ChooseOption : MonoBehaviour
 
     public void ModoEntrenamiento()
     {
-        Debug.Log("Se ha pulsado ModoEntrenamiento");
 
         Data.instance.esJuego = false;
 
-        Debug.Log("esJuego ahora vale: " + Data.instance.esJuego);
 
         SceneManager.LoadScene(
             SceneManager.GetActiveScene().buildIndex + 1
