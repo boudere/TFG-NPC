@@ -26,6 +26,8 @@ public class DetailsSelectPlayer : MonoBehaviour
     [SerializeField] private TextMeshProUGUI feature;
     [SerializeField] private TextMeshProUGUI function;
     [SerializeField] private int id;
+    [SerializeField] private GameObject infoPanel;
+    [SerializeField] private TMP_InputField inputField;
     private CharacterManager characterManager;
     private int index;
 
@@ -69,6 +71,7 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void ActualizarInterfaz()
     {
+        infoPanel.SetActive(false);
         seleccionarJugador.gameObject.SetActive(false);
         seleccionarEntrenamiento.gameObject.SetActive(false);
         aplicarModelo.gameObject.SetActive(false);
@@ -142,10 +145,23 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void SeleccionarEntrenamiento()
     {
+        infoPanel.SetActive(true);
+       
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+    }
+
+    public void aceptar()
+    {
+        Data.instance.textoPanel = inputField.text;
         Data.instance.jugadorSeleccionadoEntrenamiento = true;
         Data.instance.jugadorAplicarModelo = false;
         Data.instance.jugadorSeleccionado = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+    }
+
+    public void cancelar()
+    {
+        infoPanel.SetActive(false);
     }
 
     public void Atras()
