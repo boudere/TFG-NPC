@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 
 public class ChooseOption : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     public bool juego = false;
     public static ChooseOption instance;
@@ -18,7 +17,6 @@ public class ChooseOption : MonoBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         

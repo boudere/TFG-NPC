@@ -1,21 +1,34 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 
 
 /// <summary>
 /// Controlador IA para el modelo FNN de Clasificación.
 /// Usa el ONNX entrenado con PythonTrainingLegacy/train_clasificacion_fnn.py.
 /// Salidas: movement_probs (9 clases) + action_probs (Shoot, Pass).
+///
+/// Inferencia con ONNX Runtime (asus4/onnxruntime-unity) en vez de Sentis:
+/// el .onnx se carga directamente desde disco (bytes/ruta), sin pasar por el
+/// pipeline de assets de Unity. Esto permite recargar el modelo en caliente
+/// (ReloadModel) tanto en el Editor como en una build ya compilada, algo que
+/// Sentis no soporta fuera del Editor.
 /// </summary>
 public class AIControllerFNNClasi : MonoBehaviour
 {
-    [Header("AI Model (Clasificación FNN)")]
-    [Tooltip("Modelo ONNX único exportado por train_clasificacion_fnn.py")]
-    public Unity.InferenceEngine.ModelAsset onnxModelAsset;
+    [Header("AI Model (ONNX Runtime)")]
+    [Tooltip("Nombre del archivo .onnx activo (el que descarga TrainingClient tras entrenar)")]
+    public string activeModelFileName = "SoccerModel_Active.onnx";
+    [Tooltip("Nombre del archivo scaler.json activo")]
+    public string activeScalerFileName = "scaler_Active.json";
 
-    [Tooltip("El archivo scaler_clasificacion_fnn.json exportado en Python para normalizar los inputs")]
-    public TextAsset scalerJson;
+    [Tooltip("Modelo .onnx que se incluye en la build como valor por defecto (Assets/StreamingAssets)")]
+    public string defaultModelFileName = "SoccerModel_ClasificacionFNN.onnx";
+    [Tooltip("Scaler.json que se incluye en la build como valor por defecto (Assets/StreamingAssets)")]
+    public string defaultScalerFileName = "scaler_clasificacion_fnn.json";
 
     [Header("Action Inference")]
     [Tooltip("Umbral para activar Disparo/Pase desde la salida sigmoide [0,1]")]
@@ -64,7 +77,8 @@ public class AIControllerFNNClasi : MonoBehaviour
     public float logInterval = 1.0f;
 
     // ── Internals ──
-    private Unity.InferenceEngine.Worker worker;
+    private InferenceSession session;
+    private const string OnnxInputName = "vector_observation";
     private const int ExpectedInputSize = 40;
     private float nextActionTime = 0f;
     private bool scalerWarningShown = false;
@@ -104,37 +118,77 @@ public class AIControllerFNNClasi : MonoBehaviour
             }
         }
 
-        // Inicializar modelo
-        if (onnxModelAsset != null)
+        // Inicializar modelo: primero busca un modelo YA ENTRENADO en tiempo de ejecución
+        // (persistentDataPath, lo escribe TrainingClient), y si no existe usa el que
+        // viene empaquetado con la build (Assets/StreamingAssets).
+        string onnxPath = Path.Combine(Application.persistentDataPath, activeModelFileName);
+        string scalerPath = Path.Combine(Application.persistentDataPath, activeScalerFileName);
+
+        if (!File.Exists(onnxPath))
         {
-            var runtimeModel = Unity.InferenceEngine.ModelLoader.Load(onnxModelAsset);
-            worker = new Unity.InferenceEngine.Worker(runtimeModel, Unity.InferenceEngine.BackendType.GPUCompute);
-            Debug.Log("[AIControllerFNNClasi] Modelo de clasificación cargado OK.");
+            onnxPath = Path.Combine(Application.streamingAssetsPath, defaultModelFileName);
+            scalerPath = Path.Combine(Application.streamingAssetsPath, defaultScalerFileName);
+        }
+
+        if (File.Exists(onnxPath))
+        {
+            ReloadModel(onnxPath, scalerPath);
         }
         else
         {
-            Debug.LogError("[AIControllerFNNClasi] ¡Falta asignar el modelo ONNX en el inspector!");
+            Debug.LogError($"[AIControllerFNNClasi] No se encontró ningún modelo ONNX. Buscado en:\n{onnxPath}");
+        }
+    }
+
+    /// <summary>
+    /// Recarga el modelo y el scaler en caliente (Editor o build, sin reiniciar la escena).
+    /// TrainingClient llama a este método en todos los AIControllerFNNClasi activos
+    /// justo después de descargar un modelo recién entrenado.
+    /// </summary>
+    public void ReloadModel(string onnxPath, string scalerPath)
+    {
+        InferenceSession newSession;
+        try
+        {
+            byte[] modelBytes = File.ReadAllBytes(onnxPath);
+            var options = new SessionOptions();
+            newSession = new InferenceSession(modelBytes, options);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[AIControllerFNNClasi] Error cargando el modelo ONNX ({onnxPath}): {e.Message}");
+            return;
         }
 
-        // Cargar scaler
-        if (scalerJson != null)
+        var newScaler = new ScalerData();
+        if (File.Exists(scalerPath))
         {
-            try {
-                JsonUtility.FromJsonOverwrite(scalerJson.text, scaler);
-                Debug.Log("[AIControllerFNNClasi] Variables de normalización leídas desde scaler json.");
-            } catch (System.Exception e) {
-                Debug.LogWarning("[AIControllerFNNClasi] Fallo al parsear scaler JSON: " + e.Message);
+            try
+            {
+                JsonUtility.FromJsonOverwrite(File.ReadAllText(scalerPath), newScaler);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[AIControllerFNNClasi] Fallo al parsear scaler JSON ({scalerPath}): {e.Message}");
             }
         }
         else
         {
-            Debug.LogWarning("[AIControllerFNNClasi] Falta scaler JSON. Se usará input sin normalizar.");
+            Debug.LogWarning($"[AIControllerFNNClasi] Falta scaler JSON en {scalerPath}. Se usará input sin normalizar.");
         }
+
+        // Sustituir de forma segura: primero preparar lo nuevo, luego liberar lo viejo.
+        session?.Dispose();
+        session = newSession;
+        scaler = newScaler;
+        scalerWarningShown = false;
+
+        Debug.Log($"[AIControllerFNNClasi] Modelo recargado desde {onnxPath}");
     }
 
     private void Update()
     {
-        if (myPlayer == null || worker == null) return;
+        if (myPlayer == null || session == null) return;
 
         // 1. Recopilar las 40 features
         float[] inputs = RecopilarVariablesDelEntorno();
@@ -320,24 +374,28 @@ public class AIControllerFNNClasi : MonoBehaviour
     // ── INFERENCIA ──
     private (float[] movement, float[] actions) Predecir(float[] inputFeatures)
     {
-        using var inputTensor = new Unity.InferenceEngine.Tensor<float>(
-            new Unity.InferenceEngine.TensorShape(1, inputFeatures.Length), inputFeatures);
-
-        worker.Schedule(inputTensor);
-
-        // movement_probs → [9 clases]
-        using var movementTensor = worker.PeekOutput("movement_probs") as Unity.InferenceEngine.Tensor<float>;
-        // action_probs → [Shoot, Pass, RoboK, RoboL]
-        using var actionsTensor = worker.PeekOutput("action_probs") as Unity.InferenceEngine.Tensor<float>;
-
-        if (movementTensor == null)
+        var inputTensor = new DenseTensor<float>(inputFeatures, new[] { 1, inputFeatures.Length });
+        var inputs = new List<NamedOnnxValue>
         {
-            Debug.LogError("[AIControllerFNNClasi] No se pudo leer output 'movement_probs'.");
-            return (new float[9], new float[4]);
+            NamedOnnxValue.CreateFromTensor(OnnxInputName, inputTensor)
+        };
+
+        float[] movement = new float[9];
+        float[] actions = new float[4];
+
+        using (var results = session.Run(inputs))
+        {
+            foreach (var result in results)
+            {
+                if (result.Name == "movement_probs")
+                    movement = result.AsEnumerable<float>().ToArray();
+                else if (result.Name == "action_probs")
+                    actions = result.AsEnumerable<float>().ToArray();
+            }
         }
 
-        float[] movement = movementTensor.DownloadToArray();
-        float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[4];
+        if (movement.Length != 9)
+            Debug.LogError("[AIControllerFNNClasi] No se pudo leer output 'movement_probs'.");
 
         return (movement, actions);
     }
@@ -566,6 +624,6 @@ public class AIControllerFNNClasi : MonoBehaviour
 
     private void OnDestroy()
     {
-        worker?.Dispose();
+        session?.Dispose();
     }
 }

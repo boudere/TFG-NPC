@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.github.asus4.onnxruntime": {
+      "version": "0.4.8",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.com"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

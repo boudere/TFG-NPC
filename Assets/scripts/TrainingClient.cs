@@ -450,18 +450,36 @@ public class TrainingClient : MonoBehaviour
 
     private void SaveTrainingResults(TrainResponseData response)
     {
-        string assetsPath = Application.dataPath;
-
-        // 1. Guardar ONNX
+        // persistentDataPath (no Assets/) porque es la única ruta que existe igual
+        // en el Editor y en una build ya compilada, y no pasa por el pipeline de
+        // assets de Unity (por eso no hace falta reimportar nada).
+        string saveDir = Application.persistentDataPath;
         byte[] onnxBytes = Convert.FromBase64String(response.onnx_base64);
-        string onnxPath = Path.Combine(assetsPath, $"SoccerModel_{_modelName}.onnx");
-        File.WriteAllBytes(onnxPath, onnxBytes);
-        Debug.Log($"[TrainingClient] ONNX guardado: {onnxPath} ({onnxBytes.Length} bytes)");
 
-        // 2. Guardar scaler (raw JSON string del servidor)
-        string scalerPath = Path.Combine(assetsPath, $"scaler_{_modelName}.json");
-        File.WriteAllText(scalerPath, response.scaler_json);
-        Debug.Log($"[TrainingClient] Scaler guardado: {scalerPath}");
+        // 1. Copia con el nombre elegido por el usuario (histórico, por si se
+        //    quiere volver a un modelo entrenado anteriormente).
+        string namedOnnxPath = Path.Combine(saveDir, $"SoccerModel_{_modelName}.onnx");
+        File.WriteAllBytes(namedOnnxPath, onnxBytes);
+        string namedScalerPath = Path.Combine(saveDir, $"scaler_{_modelName}.json");
+        File.WriteAllText(namedScalerPath, response.scaler_json);
+        Debug.Log($"[TrainingClient] Modelo guardado: {namedOnnxPath} ({onnxBytes.Length} bytes)");
+
+        // 2. Copia "activa": la que cargan (y recargan en caliente) los
+        //    AIControllerFNNClasi. Sobrescribirla es lo que hace que el último
+        //    modelo entrenado sea el que se usa por defecto la próxima vez.
+        string activeOnnxPath = Path.Combine(saveDir, "SoccerModel_Active.onnx");
+        File.WriteAllBytes(activeOnnxPath, onnxBytes);
+        string activeScalerPath = Path.Combine(saveDir, "scaler_Active.json");
+        File.WriteAllText(activeScalerPath, response.scaler_json);
+
+        // 3. Hot-swap: avisar a todos los NPCs con AIControllerFNNClasi ya en
+        //    escena para que carguen el modelo nuevo sin reiniciar nada.
+        var controllers = FindObjectsByType<AIControllerFNNClasi>(FindObjectsSortMode.None);
+        foreach (var controller in controllers)
+        {
+            controller.ReloadModel(activeOnnxPath, activeScalerPath);
+        }
+        Debug.Log($"[TrainingClient] {controllers.Length} NPC(s) recargados con el modelo '{_modelName}'.");
     }
 
     // UTILIDADES
