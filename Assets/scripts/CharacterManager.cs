@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,9 +13,9 @@ public class CharacterManager : MonoBehaviour
     public static CharacterManager instance;
     public bool selected;
     public List<Character> characterList;
-    public int index = -1;
-    public int indexModel = -1;
-    public int select = -1;
+    public int index;
+    public int indexModel;
+    public int select;
    
     public CharacterGV[] characters;
     private void Awake()
@@ -28,5 +29,12 @@ public class CharacterManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }   
+    }
+
+    private void Start()
+    {
+        index = -1;
+        indexModel = -1;
+        select = -1;
+    }
 }

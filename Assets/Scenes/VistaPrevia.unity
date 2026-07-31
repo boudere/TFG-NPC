@@ -659,7 +659,7 @@ RectTransform:
   m_GameObject: {fileID: 402096473}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.17277, y: 0.17277, z: 0.17277}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1993373003}
@@ -667,8 +667,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 362, y: -196}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 362, y: -207}
+  m_SizeDelta: {x: 1536, y: 1024}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &402096475
 MonoBehaviour:
@@ -746,8 +746,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: d29bfaee60a33b14b9f12ef41d4e9b81, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1077,6 +1077,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   esJuego: 0
+  jugadorSeleccionado: 0
+  jugadorSeleccionadoEntrenamiento: 0
+  jugadorAplicarModelo: 0
+  rutaModeloONNX: 
+  textoPanel: 
 --- !u!4 &497918721
 Transform:
   m_ObjectHideFlags: 0
@@ -4431,6 +4436,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e2803e606fefb749ac21b1336cc0cf3, type: 2}
   - {fileID: 11400000, guid: d67d603cf21945744b16137e1f18293d, type: 2}
   index: 0
+  indexModel: -1
+  select: -1
   characters: []
 --- !u!4 &1865448640
 Transform:
@@ -4923,7 +4930,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Play
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5181,7 +5188,8 @@ MonoBehaviour:
   imagenesEntrenamiento: {fileID: 780328738}
   imagenesJugador: {fileID: 939992524}
   imagenesModelo: {fileID: 273061654}
-  index: 0
+  index: -1
+  indexModel: -1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

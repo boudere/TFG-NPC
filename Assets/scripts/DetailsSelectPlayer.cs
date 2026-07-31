@@ -109,6 +109,7 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void SeleccionarModelo()
     {
+        UnityEngine.Debug.Log(characterManager.index);
         if (characterManager.index != characterManager.select)
         {
             characterManager.indexModel = characterManager.select;
@@ -145,6 +146,7 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void SeleccionarEntrenamiento()
     {
+        characterManager.index = characterManager.select;
         infoPanel.SetActive(true);
        
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
@@ -166,6 +168,9 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void Atras()
     {
+        Data.instance.jugadorSeleccionadoEntrenamiento = false;
+        Data.instance.jugadorAplicarModelo = false;
+        Data.instance.jugadorSeleccionado = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 }
