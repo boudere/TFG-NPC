@@ -19,16 +19,16 @@ public class Timer : MonoBehaviour
 
         if (timer >= 1f)
         {
-            //timer -= 1f;
-            //matchSeconds--;
+            timer -= 1f;
+            matchSeconds--;
 
             if (ShowTime.instance != null)
                 ShowTime.instance.SetTime(matchSeconds);
 
-            /*if (matchSeconds <= 0)
+            if (matchSeconds <= 0)
             {
                 EndMatch();
-            }*/
+            }
         }
     }
 
@@ -36,7 +36,7 @@ public class Timer : MonoBehaviour
     {
         Debug.Log("Fin del partido");
         Time.timeScale = 0f;
-        //matchEnded = true;
+        matchEnded = true;
 
         //SceneManager.LoadScene(5);
     }

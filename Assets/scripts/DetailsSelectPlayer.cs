@@ -21,19 +21,22 @@ public class DetailsSelectPlayer : MonoBehaviour
   
    // public DetailsSelectPlayer instance;
 
-   // [SerializeField] private TextMeshProUGUI nombre;
+   
     [SerializeField] private Image imagen;
     [SerializeField] private Image imagenCromo;
     [SerializeField] private Image imagenLabel;
-    //[SerializeField] private TextMeshProUGUI task;
-    //[SerializeField] private TextMeshProUGUI feature;
-    //[SerializeField] private TextMeshProUGUI function;
+    //[SerializeField] private TextMeshProUGUI nombre;
+    [SerializeField] private TextMeshProUGUI task;
+    [SerializeField] private TextMeshProUGUI feature;
+    [SerializeField] private TextMeshProUGUI function;
     [SerializeField] private int id;
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_InputField inputField;
     private CharacterManager characterManager;
     private int index;
 
+
+    [SerializeField] private GameObject panelInfoPlayer;
 
     private Image fondo;
     //private Image fondoCromo;
@@ -60,6 +63,7 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void Start()
     {
+        panelInfoPlayer.SetActive(false);
         fondo = GetComponent<Image>();
         characterManager = CharacterManager.instance;
         // index = characterManager.index;
@@ -81,13 +85,11 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     private void Apply(int index)
     {
-        UnityEngine.Debug.Log(index);
         imagen.sprite = characterManager.characterList[index].imagen;
         imagenLabel.sprite = characterManager.characterList[index].label;
-        //nombre.text = characterManager.characterList[index].nombre;
-        //task.text = characterManager.characterList[index].task;
-        //feature.text = characterManager.characterList[index].feature;
-        //function.text = characterManager.characterList[index].function;
+        task.text = characterManager.characterList[index].task;
+        feature.text = characterManager.characterList[index].feature;
+        function.text = characterManager.characterList[index].function;
     }
 
 
@@ -178,6 +180,16 @@ public class DetailsSelectPlayer : MonoBehaviour
         infoPanel.SetActive(true);
        
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+    }
+
+    public void showInfo()
+    {
+        panelInfoPlayer.SetActive(true);
+    }
+
+    public void dismissInfo()
+    {
+        panelInfoPlayer.SetActive(false);
     }
 
     public void aceptar()
