@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Co T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 8646835087511739427, guid: 015e932024f8abd4faa3039141c929b6, type: 3}
-  imagen: {fileID: 21300000, guid: 0e16c78db2c34f54d88c36c1da41b9f0, type: 3}
+  imagen: {fileID: 21300000, guid: 8821de94d1172ef45ba78493e5b2fc44, type: 3}
+  selectImagen: {fileID: 21300000, guid: 034d485d7ea61e54c9800bd2f545bc01, type: 3}
   nombre: Centro ofensivo 1
   function: Crear juego y asistir.
   task: "Filtrar pases a los delanteros.  Llegar desde atr\xE1s para rematar.  Organizar

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Cd T2
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 8921528458524076488, guid: ee6fdaaa2570ede468ae0fa220605a19, type: 3}
-  imagen: {fileID: 21300000, guid: 302426f6758f1334891f9790431997f1, type: 3}
+  imagen: {fileID: 21300000, guid: 7d210ef252e0db7479fcf6a1801c5fcc, type: 3}
+  selectImagen: {fileID: 21300000, guid: e0971989931c477408fd7926c134b9b2, type: 3}
   nombre: Centro defensivo 2
   function: Proteger la defensa y recuperar balones.
   task: "Cortar ataques rivales.  Cubrir a los defensas cuando suben.  Iniciar la

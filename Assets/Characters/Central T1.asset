@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Central T1
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 5986280078125783648, guid: 6d344aed7278c694cbc7de6b6f7e2b96, type: 3}
-  imagen: {fileID: 21300000, guid: dab3da820e13634419f6f607e0541feb, type: 3}
+  imagen: {fileID: 21300000, guid: 707c7f800d8f5ab4fae02d26300d83d8, type: 3}
+  selectImagen: {fileID: 21300000, guid: 0150e3295aa15a14d8219e357446380e, type: 3}
   nombre: Central 1
   function: "Defender el \xE1rea y detener ataques."
   task: "Marcar a los delanteros.  Despejar centros y balones largos.  Sacar el bal\xF3n

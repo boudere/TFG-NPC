@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Delantero T2
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 9149605146382587271, guid: 0a828326fdaff7f4384762b52a48c5a5, type: 3}
-  imagen: {fileID: 21300000, guid: fba356115098b1e4b90930280ef4cd61, type: 3}
+  imagen: {fileID: 21300000, guid: 29cc88f8987bc9644893ba6b3e898bc5, type: 3}
+  selectImagen: {fileID: 21300000, guid: 9238529d91c29b8439ea6299130e6a9d, type: 3}
   nombre: Delantero Centro 2
   function: Marcar goles.
   task: Buscar espacios entre los defensas. Rematar centros y pases. Presionar la

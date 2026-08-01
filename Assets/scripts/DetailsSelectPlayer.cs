@@ -1,13 +1,14 @@
 
+using SFB;
+using System;
 using System.Diagnostics;
 using System.IO;
-using System;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using SFB;
 
 
 
@@ -18,44 +19,58 @@ public class DetailsSelectPlayer : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
   
-    public DetailsSelectPlayer instance;
+   // public DetailsSelectPlayer instance;
 
-    [SerializeField] private TextMeshProUGUI nombre;
+   // [SerializeField] private TextMeshProUGUI nombre;
     [SerializeField] private Image imagen;
-    [SerializeField] private TextMeshProUGUI task;
-    [SerializeField] private TextMeshProUGUI feature;
-    [SerializeField] private TextMeshProUGUI function;
+    //[SerializeField] private TextMeshProUGUI task;
+    //[SerializeField] private TextMeshProUGUI feature;
+    //[SerializeField] private TextMeshProUGUI function;
     [SerializeField] private int id;
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_InputField inputField;
     private CharacterManager characterManager;
     private int index;
 
+
+    private Image fondo;
+
+    public Sprite fondoAzul;
+    public Sprite fondoRojo;
+
+
     public Button seleccionarJugador;
     public Button seleccionarEntrenamiento;
     public Button aplicarModelo;
-    public GameObject panelEntrenamiento;
 
     public string rutaModeloONNX;
 
     public void Awake()
     {
-        instance = this;
+       // instance = this;
     }
 
 
     public void Start()
     {
+        fondo = GetComponent<Image>();
         characterManager = CharacterManager.instance;
-        index = characterManager.index;
-        Apply();
+        // index = characterManager.index;
+        Apply(characterManager.select);
+
+        if (characterManager.select % 2 == 0)
+            fondo.sprite = fondoAzul;
+        else
+            fondo.sprite = fondoRojo;
+
         ActualizarInterfaz();
 
     }
 
-    private void Apply()
+    private void Apply(int index)
     {
-        //imagen.sprite = characterManager.characterList[index].imagen;
+        UnityEngine.Debug.Log(index);
+        imagen.sprite = characterManager.characterList[index].imagen;
         //nombre.text = characterManager.characterList[index].nombre;
         //task.text = characterManager.characterList[index].task;
         //feature.text = characterManager.characterList[index].feature;
@@ -75,7 +90,7 @@ public class DetailsSelectPlayer : MonoBehaviour
         seleccionarJugador.gameObject.SetActive(false);
         seleccionarEntrenamiento.gameObject.SetActive(false);
         aplicarModelo.gameObject.SetActive(false);
-        panelEntrenamiento.SetActive(false);
+     
 
         switch (Data.instance.esJuego)
         {
@@ -88,7 +103,6 @@ public class DetailsSelectPlayer : MonoBehaviour
 
             case false:
                 seleccionarEntrenamiento.gameObject.SetActive(true);
-                panelEntrenamiento.SetActive(true);
                 break;
         }
     }
@@ -102,6 +116,7 @@ public class DetailsSelectPlayer : MonoBehaviour
         {
             UnityEngine.Debug.Log("Jugador ya asociado");
         }
+
             Data.instance.jugadorSeleccionado = true;
         Data.instance.jugadorSeleccionadoEntrenamiento = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Central T2
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 5986280078125783648, guid: e7d514f192fcfc44ab4a456055461a10, type: 3}
-  imagen: {fileID: 21300000, guid: b911080a85542f34f8aa44c2b5fb37b1, type: 3}
+  imagen: {fileID: 21300000, guid: 3b4abc7e9bcdfab4aba38ff881b38c4d, type: 3}
+  selectImagen: {fileID: 21300000, guid: 22a096f8dda337d418b65164c9a8dff6, type: 3}
   nombre: Central 2
   function: "Defender el \xE1rea y detener ataques."
   task: "Marcar a los delanteros.  Despejar centros y balones largos.  Sacar el bal\xF3n

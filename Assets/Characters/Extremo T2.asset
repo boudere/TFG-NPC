@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Extremo T2
   m_EditorClassIdentifier: 
   personajeJugable: {fileID: 2746126376170194217, guid: b7d74dcad5a7d164e9f0f5ff6939e0a1, type: 3}
-  imagen: {fileID: 21300000, guid: 97ea1b0f71033484ea26425599954d51, type: 3}
+  imagen: {fileID: 21300000, guid: e786e1bea6cf78346b0e8105fe4a064a, type: 3}
+  selectImagen: {fileID: 21300000, guid: c3cd460f9b3c96c48937b97ff5813ac6, type: 3}
   nombre: Extremo 2
   function: desbordar por las bandas y generar ocasiones.
   task: Abrir el campo y estirar la defensa rival.  Encarar y superar defensas. 

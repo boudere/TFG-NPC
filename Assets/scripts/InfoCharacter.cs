@@ -16,6 +16,12 @@ public class InfoCharacter : MonoBehaviour
     public Image imagenesJugador;
     public Image imagenesModelo;
 
+    public Image ImageSeleccionadoJuego;
+    public Image ImageSeleccionadoEntreno;
+    public Image ImageModeloAplicado;
+
+    [SerializeField] private Sprite fichaNoSeleccionado;
+
     private CharacterManager characterManager;
     public int index;
     public int indexModel;
@@ -41,8 +47,12 @@ public class InfoCharacter : MonoBehaviour
         characterManager = CharacterManager.instance;
         index = characterManager.index;
         indexModel = characterManager.indexModel;
-        ActualizarInterfaz();
+   
         if (index > characterManager.characterList.Count - 1) { index = -1; }
+
+        ValidarIndices();
+        ActualizarInterfaz();
+        ActualizarFichas();
     }
 
 
@@ -51,20 +61,87 @@ public class InfoCharacter : MonoBehaviour
         imagenesEntrenamiento.enabled = false;
         imagenesJugador.enabled = false;
         imagenesModelo.enabled = false;
+        ImageSeleccionadoJuego.enabled = false;
+        ImageSeleccionadoEntreno.enabled = false;
+        ImageModeloAplicado.enabled = false;
 
         switch (Data.instance.esJuego)
         {
             case true:
                 imagenesJugador.enabled = true;
                 imagenesModelo.enabled = true;
+                ImageSeleccionadoJuego.enabled = true;
+                ImageModeloAplicado.enabled = true;
 
                 break;
 
             case false:
                 imagenesEntrenamiento.enabled = true;
+                ImageSeleccionadoEntreno.enabled = true;
                 break;
         }
     }
+
+    private void ActualizarFichas()
+    {
+        // Primero dejamos todas las imágenes con la ficha por defecto.
+        ImageSeleccionadoJuego.sprite = fichaNoSeleccionado;
+        ImageSeleccionadoEntreno.sprite = fichaNoSeleccionado;
+        ImageModeloAplicado.sprite = fichaNoSeleccionado;
+
+        /*
+         * characterManager.index:
+         * - Si esJuego es true, se coloca en imagenesJugador.
+         * - Si esJuego es false, se coloca en imagenesEntrenamiento.
+         * - Si index es -1, se mantiene fichaNoSeleccionado.
+         */
+        if (index >= 0 && index < characterManager.characterList.Count)
+        {
+            Sprite fichaJugador =
+                characterManager.characterList[index].selectImagen;
+
+            if (Data.instance.esJuego)
+            {
+                ImageSeleccionadoJuego.sprite = fichaJugador;
+            }
+            else
+            {
+                ImageSeleccionadoEntreno.sprite = fichaJugador;
+            }
+        }
+
+        /*
+         * characterManager.indexModel:
+         * - Si es válido, se muestra la ficha del modelo.
+         * - Si es -1, se mantiene fichaNoSeleccionado.
+         */
+        if (indexModel >= 0 &&
+            indexModel < characterManager.characterList.Count)
+        {
+            ImageModeloAplicado.sprite =
+                characterManager.characterList[indexModel].selectImagen;
+        }
+    }
+
+
+    private void ValidarIndices()
+    {
+        // Índice del jugador
+        if (index < 0 || index >= characterManager.characterList.Count)
+        {
+            index = -1;
+            characterManager.index = -1;
+        }
+
+        // Índice del modelo
+        if (indexModel < 0 ||
+            indexModel >= characterManager.characterList.Count)
+        {
+            indexModel = -1;
+            characterManager.indexModel = -1;
+        }
+    }
+
 
     public void Atras()
     {
