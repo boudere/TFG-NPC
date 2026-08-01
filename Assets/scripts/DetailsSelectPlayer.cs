@@ -23,6 +23,8 @@ public class DetailsSelectPlayer : MonoBehaviour
 
    // [SerializeField] private TextMeshProUGUI nombre;
     [SerializeField] private Image imagen;
+    [SerializeField] private Image imagenCromo;
+    [SerializeField] private Image imagenLabel;
     //[SerializeField] private TextMeshProUGUI task;
     //[SerializeField] private TextMeshProUGUI feature;
     //[SerializeField] private TextMeshProUGUI function;
@@ -34,9 +36,14 @@ public class DetailsSelectPlayer : MonoBehaviour
 
 
     private Image fondo;
+    //private Image fondoCromo;
 
     public Sprite fondoAzul;
     public Sprite fondoRojo;
+
+
+    public Sprite fondoCromoAzul;
+    public Sprite fondoCromoRojo;
 
 
     public Button seleccionarJugador;
@@ -59,10 +66,15 @@ public class DetailsSelectPlayer : MonoBehaviour
         Apply(characterManager.select);
 
         if (characterManager.select % 2 == 0)
+        {
             fondo.sprite = fondoAzul;
+            imagenCromo.sprite = fondoCromoAzul;
+        }
         else
+        {
             fondo.sprite = fondoRojo;
-
+            imagenCromo.sprite = fondoCromoRojo;
+        }
         ActualizarInterfaz();
 
     }
@@ -71,6 +83,7 @@ public class DetailsSelectPlayer : MonoBehaviour
     {
         UnityEngine.Debug.Log(index);
         imagen.sprite = characterManager.characterList[index].imagen;
+        imagenLabel.sprite = characterManager.characterList[index].label;
         //nombre.text = characterManager.characterList[index].nombre;
         //task.text = characterManager.characterList[index].task;
         //feature.text = characterManager.characterList[index].feature;

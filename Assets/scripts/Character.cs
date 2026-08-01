@@ -7,6 +7,7 @@ public class Character : ScriptableObject
     public GameObject personajeJugable;
     public Sprite imagen;
     public Sprite selectImagen;
+    public Sprite label;
     public string nombre;
     public string function;
     public string task;

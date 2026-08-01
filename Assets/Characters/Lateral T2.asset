@@ -15,6 +15,7 @@ MonoBehaviour:
   personajeJugable: {fileID: 4319541743082888750, guid: ad2602641fb46874f96a0c221a416f51, type: 3}
   imagen: {fileID: 21300000, guid: eaca3780195b7d843a1c3801297098a8, type: 3}
   selectImagen: {fileID: 21300000, guid: dd3393f81e72c364499c14cef912ef46, type: 3}
+  label: {fileID: 21300000, guid: 10f58121da8b51b408904b7360835db7, type: 3}
   nombre: Lateral 2
   function: Defender la banda y apoyar en ataque.
   task: "Evitar centros y cubrir su zona.  Subir al ataque para apoyar al extremo. 

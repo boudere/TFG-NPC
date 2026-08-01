@@ -146,6 +146,9 @@ public class InfoCharacter : MonoBehaviour
     public void Atras()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+        characterManager.indexModel = -1;
+        characterManager.index = -1;
+        
     }
 
 

@@ -15,6 +15,7 @@ MonoBehaviour:
   personajeJugable: {fileID: 8646835087511739427, guid: 321bbc47fbd9efc4c9b3d98326268790, type: 3}
   imagen: {fileID: 21300000, guid: c66d8b07dd1bdec419cd3208574d4c00, type: 3}
   selectImagen: {fileID: 21300000, guid: d46279b2d5522e44faf474a98dd4a4ea, type: 3}
+  label: {fileID: 21300000, guid: 870bc9351a9e816448bd905f25866a6e, type: 3}
   nombre: Centro ofensivo 2
   function: Crear juego y asistir.
   task: "Filtrar pases a los delanteros.  Llegar desde atr\xE1s para rematar.  Organizar
