@@ -25,6 +25,7 @@ public class Goal : MonoBehaviour
         {
             modal.SetActive(false);
         }
+
     }
 
     public void openModalGoal()

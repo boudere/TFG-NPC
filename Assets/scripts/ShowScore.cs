@@ -98,4 +98,6 @@ public class ShowScore : MonoBehaviour
         if (scoreTeam11Image != null)
             scoreTeam11Image.sprite = digits[unidades];
     }
+
+
 }

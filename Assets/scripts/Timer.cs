@@ -38,7 +38,14 @@ public class Timer : MonoBehaviour
         Time.timeScale = 0f;
         matchEnded = true;
 
-        //SceneManager.LoadScene(5);
+        if (Data.instance.esJuego)
+        {
+            SceneManager.LoadScene(5);
+        } else
+        {
+            SceneManager.LoadScene(3);
+        }
+           
     }
 
     public bool IsMatchEnded()
