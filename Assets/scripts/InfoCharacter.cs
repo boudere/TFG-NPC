@@ -84,17 +84,12 @@ public class InfoCharacter : MonoBehaviour
 
     private void ActualizarFichas()
     {
-        // Primero dejamos todas las imágenes con la ficha por defecto.
+      
         ImageSeleccionadoJuego.sprite = fichaNoSeleccionado;
         ImageSeleccionadoEntreno.sprite = fichaNoSeleccionado;
         ImageModeloAplicado.sprite = fichaNoSeleccionado;
 
-        /*
-         * characterManager.index:
-         * - Si esJuego es true, se coloca en imagenesJugador.
-         * - Si esJuego es false, se coloca en imagenesEntrenamiento.
-         * - Si index es -1, se mantiene fichaNoSeleccionado.
-         */
+       
         if (index >= 0 && index < characterManager.characterList.Count)
         {
             Sprite fichaJugador =
@@ -110,11 +105,7 @@ public class InfoCharacter : MonoBehaviour
             }
         }
 
-        /*
-         * characterManager.indexModel:
-         * - Si es válido, se muestra la ficha del modelo.
-         * - Si es -1, se mantiene fichaNoSeleccionado.
-         */
+    
         if (indexModel >= 0 &&
             indexModel < characterManager.characterList.Count)
         {

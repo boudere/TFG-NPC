@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ShowScore : MonoBehaviour
@@ -18,6 +19,8 @@ public class ShowScore : MonoBehaviour
 
     private int leftScore = 0;
     private int rightScore = 0;
+
+    
 
     private void Awake()
     {
@@ -58,6 +61,8 @@ public class ShowScore : MonoBehaviour
     {
         rightScore = Mathf.Clamp(value, 0, 99);
         UpdateRightScore();
+        Data.instance.redTeam = rightScore;
+        Debug.Log($"{rightScore} red");
     }
 
     // team1 se muestra cruzado en el marcador izquierdo
@@ -65,12 +70,16 @@ public class ShowScore : MonoBehaviour
     {
         leftScore = Mathf.Clamp(value, 0, 99);
         UpdateLeftScore();
+        Data.instance.blueTeam = leftScore;
+        Debug.Log($"{leftScore} blue");
     }
 
     private void UpdateLeftScore()
     {
         int decenas = leftScore / 10;
         int unidades = leftScore % 10;
+
+
 
         if (scoreTeam0Image != null)
         {
@@ -81,6 +90,8 @@ public class ShowScore : MonoBehaviour
 
         if (scoreTeam00Image != null)
             scoreTeam00Image.sprite = digits[unidades];
+
+
     }
 
     private void UpdateRightScore()

@@ -40,10 +40,10 @@ public class Timer : MonoBehaviour
 
         if (Data.instance.esJuego)
         {
-            SceneManager.LoadScene(5);
+            SceneManager.LoadScene(6);
         } else
         {
-            SceneManager.LoadScene(3);
+            SceneManager.LoadScene(1);
         }
            
     }

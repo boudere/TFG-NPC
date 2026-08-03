@@ -10,6 +10,8 @@ public class Data : MonoBehaviour
     public bool jugadorAplicarModelo = false;
     public string rutaModeloONNX;
     public string textoPanel;
+    public int blueTeam = 0;
+public int redTeam = 0;
 
     public static Data instance;
 
