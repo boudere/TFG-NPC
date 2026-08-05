@@ -11,6 +11,7 @@ public class Data : MonoBehaviour
     public string rutaModeloONNX;
     public string textoPanel;
     public int blueTeam = 0;
+    public int matchSeconds = 300;
 public int redTeam = 0;
 
     public static Data instance;

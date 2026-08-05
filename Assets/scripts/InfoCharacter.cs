@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.SceneManagement;
@@ -21,6 +22,16 @@ public class InfoCharacter : MonoBehaviour
     public Image ImageModeloAplicado;
 
     [SerializeField] private Sprite fichaNoSeleccionado;
+
+    [SerializeField] private GameObject ajustes;
+    [SerializeField] private GameObject ajustesTiempo;
+
+
+    public TMP_InputField inputTime;
+
+    private int timeValue;
+
+
 
     private CharacterManager characterManager;
     public int index;
@@ -155,6 +166,43 @@ public class InfoCharacter : MonoBehaviour
 
     }
 
+    public void openMenu()
+    {
+        ajustes.SetActive(true);
+    }
+
+
+    public void cerrarMenu()
+    {
+        ajustes.SetActive(false);
+    }
+
+    public void openSetTime()
+    {
+        ajustesTiempo.SetActive(true);
+    }
+
+
+    public void cerrarSetTime()
+    {
+        ajustesTiempo.SetActive(false);
+    }
+
+    public void AceptarSetTime()
+    {
+        if (int.TryParse(inputTime.text, out int valor))
+        {
+            Debug.Log(valor);
+            timeValue = valor;
+            Data.instance.matchSeconds = timeValue;
+            ajustesTiempo.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Introduce un valor numérico válido.");
+        }
+
+    }
 
     public void PlayStart()
     {

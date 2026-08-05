@@ -32,6 +32,8 @@ public class DetailsSelectPlayer : MonoBehaviour
     [SerializeField] private int id;
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_InputField inputField;
+
+    
     private CharacterManager characterManager;
     private int index;
 

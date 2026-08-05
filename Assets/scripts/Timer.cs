@@ -3,14 +3,16 @@ using UnityEngine.SceneManagement;
 
 public class Timer : MonoBehaviour
 {
-    public int matchSeconds = 300000;
+   
     private float timer = 0f;
     private bool matchEnded = false;
+    private int matchSeconds;
 
     void Start()
     {
         matchEnded = false;
-        ShowTime.instance.SetTime(matchSeconds);
+        matchSeconds = Data.instance.matchSeconds;
+        ShowTime.instance.SetTime(Data.instance.matchSeconds);
     }
 
     void Update()
