@@ -17,7 +17,11 @@ public class LastMenu : MonoBehaviour
 
     public void volverJugar()
     {
-
+        CharacterManager.instance.index = -1;
+        CharacterManager.instance.indexModel = -1;
+        Data.instance.jugadorSeleccionado = false;
+        Data.instance.jugadorAplicarModelo = false;
+        Data.instance.jugadorSeleccionadoEntrenamiento = false;
         SceneManager.LoadScene(1);
     }
 

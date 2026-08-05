@@ -29,6 +29,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LastMenu.unity
     guid: 336349014a579b3439b06d60a8a7ac51
+  - enabled: 1
+    path: Assets/Scenes/AddTrain.unity
+    guid: 166a2c9f2c9f2524e823437706a245be
   - enabled: 0
     path: Assets/Scenes/FPS.unity
     guid: ef5e08cfe8671874db83e4afc0dda960
@@ -41,10 +44,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Entrenamiento.unity
     guid: 70e469b69cec7df449fc58bcd7c0331d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/InfoMenu.unity
     guid: e5f5ecdf507298f4ca57de6b611c9f6c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Menu.unity
     guid: 324d1a4ad4f76d44595e843e85d52985
   m_configObjects:

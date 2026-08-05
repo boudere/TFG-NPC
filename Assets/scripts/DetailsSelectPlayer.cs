@@ -177,9 +177,12 @@ public class DetailsSelectPlayer : MonoBehaviour
     public void SeleccionarEntrenamiento()
     {
         characterManager.index = characterManager.select;
-        infoPanel.SetActive(true);
-       
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+        //infoPanel.SetActive(true);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+        Data.instance.jugadorSeleccionadoEntrenamiento = true;
+        Data.instance.jugadorAplicarModelo = false;
+        Data.instance.jugadorSeleccionado = false;
     }
 
     public void showInfo()
