@@ -54,8 +54,8 @@ public class InfoCharacter : MonoBehaviour
 
     void Start()
     {
-        
-        characterManager = CharacterManager.instance;
+        Data.instance.matchSeconds = 300;
+      characterManager = CharacterManager.instance;
         index = characterManager.index;
         indexModel = characterManager.indexModel;
    
@@ -190,18 +190,24 @@ public class InfoCharacter : MonoBehaviour
 
     public void AceptarSetTime()
     {
-        if (int.TryParse(inputTime.text, out int valor))
+        if (string.IsNullOrWhiteSpace(inputTime.text))
         {
-            Debug.Log(valor);
+            timeValue = 300;
+            Debug.Log("Sin valor. Se asigna el tiempo por defecto: 300");
+        }
+        else if (int.TryParse(inputTime.text, out int valor))
+        {
             timeValue = valor;
-            Data.instance.matchSeconds = timeValue;
-            ajustesTiempo.SetActive(false);
+            Debug.Log(timeValue);
         }
         else
         {
             Debug.LogWarning("Introduce un valor numérico válido.");
+            return;
         }
 
+        Data.instance.matchSeconds = timeValue;
+        ajustesTiempo.SetActive(false);
     }
 
     public void PlayStart()

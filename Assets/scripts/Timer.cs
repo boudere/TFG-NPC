@@ -12,6 +12,7 @@ public class Timer : MonoBehaviour
     {
         matchEnded = false;
         matchSeconds = Data.instance.matchSeconds;
+        Debug.Log(matchSeconds);
         ShowTime.instance.SetTime(Data.instance.matchSeconds);
     }
 
