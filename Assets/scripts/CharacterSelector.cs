@@ -1,16 +1,7 @@
-﻿
-
-using NUnit.Framework.Internal.Commands;
-using System;
-using System.Collections;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Build.Content;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
-
 
 public class CharacterSelector : MonoBehaviour
 {

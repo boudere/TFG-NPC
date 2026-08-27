@@ -1,17 +1,8 @@
-
 using SFB;
-using System;
-using System.Diagnostics;
-using System.IO;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
-
-
 
 
 public class DetailsSelectPlayer : MonoBehaviour
@@ -35,7 +26,6 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     
     private CharacterManager characterManager;
-    private int index;
 
 
     [SerializeField] private GameObject panelInfoPlayer;

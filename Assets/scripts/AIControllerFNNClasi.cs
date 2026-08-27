@@ -147,6 +147,18 @@ public class AIControllerFNNClasi : MonoBehaviour
     /// </summary>
     public void ReloadModel(string onnxPath, string scalerPath)
     {
+        // Red de seguridad: si el ONNX Runtime que hay en el proceso no es el
+        // que trae el juego, crear la sesion mata el proceso entero con una
+        // violacion de acceso, que NO es una excepcion capturable. Mejor un NPC
+        // quieto y un error claro en el log que un cierre en seco.
+        if (!OnnxRuntimePreload.Verificado)
+        {
+            Debug.LogError("[AIControllerFNNClasi] ONNX Runtime no esta en condiciones " +
+                           "(mira las lineas de [OnnxRuntimePreload] mas arriba). " +
+                           "No se carga el modelo para no cerrar el juego.");
+            return;
+        }
+
         InferenceSession newSession;
         try
         {

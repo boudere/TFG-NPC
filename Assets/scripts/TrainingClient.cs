@@ -1,531 +1,343 @@
-using System;
-using System.Collections;
-using System.IO;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Networking;
 
 /// <summary>
-/// Cliente de entrenamiento para conectar Unity con el servidor FastAPI.
-/// Envía los datos CSV grabados por el Recorder al servidor,
-/// recibe el modelo ONNX entrenado + scaler, y los guarda en Assets/.
+/// Panel del nombre del modelo durante el partido (tecla T).
 ///
 /// Flujo:
-///   1. El jugador graba datos con el Recorder (tecla R)
-///   2. Al pulsar la tecla de entrenamiento aparece un campo para el nombre del modelo
-///   3. Al confirmar, se envían los datos al servidor FastAPI
-///   4. Se recibe el ONNX + scaler + métricas y se guardan en Assets/
+///   1. El jugador graba datos con el Recorder (tecla R).
+///   2. Pulsa T: se abre el campo del nombre y se BLOQUEA el teclado de juego
+///      (InputLock) para que escribir no mueva al jugador ni dispare acciones.
+///   3. Al pulsar ENTRENAR el trabajo pasa a TrainingRunner, que sobrevive a
+///      los cambios de escena, se libera el teclado y el panel se cierra.
+///      A partir de ahi se sigue jugando con normalidad; el progreso se ve en
+///      el indicador discreto de abajo a la derecha.
+///
+/// Este script ya no espera al servidor ni guarda archivos: de eso se encargan
+/// TrainingRunner y TrainingUploader.
 /// </summary>
 public class TrainingClient : MonoBehaviour
 {
-    // ─── Inspector ──────────────────────────────────────────────────────────
     [Header("Server Configuration")]
     [Tooltip("URL del servidor FastAPI de entrenamiento")]
-    public string serverUrl = "http://localhost:8000";
+    public string serverUrl = TrainingUploader.DefaultServerUrl;
 
     [Header("References")]
     [Tooltip("Referencia al Recorder que contiene los datos grabados")]
     public Recorder recorder;
 
     [Header("Controls")]
-    [Tooltip("Tecla para abrir/cerrar el panel de entrenamiento")]
+    [Tooltip("Tecla para abrir el panel de entrenamiento")]
     public KeyCode trainKey = KeyCode.T;
 
-    // Estado interno 
     private enum ClientState
     {
-        Idle,           // No se muestra nada
-        InputName,      // Mostrando campo de texto para el nombre
-        Sending,        // Enviando datos al servidor
-        Training,       // Esperando respuesta del servidor
-        Success,        // Entrenamiento completado
-        Error           // Error en el proceso
+        Idle,       // nada en pantalla
+        InputName,  // escribiendo el nombre (teclado bloqueado)
+        Aviso       // mensaje corto que se auto-oculta
     }
 
     private ClientState _state = ClientState.Idle;
     private string _modelName = "";
-    private string _statusMessage = "";
-    private string _errorMessage = "";
-    private TrainResponseData _lastResult;
-    private float _messageTimer = 0f;
+    private string _avisoTexto = "";
+    private bool _avisoEsError;
+    private float _avisoTimer;
 
     // GUI
-    private GUIStyle _panelStyle;
-    private GUIStyle _titleStyle;
-    private GUIStyle _labelStyle;
-    private GUIStyle _inputStyle;
-    private GUIStyle _buttonStyle;
-    private GUIStyle _buttonDisabledStyle;
-    private GUIStyle _metricsStyle;
-    private GUIStyle _successStyle;
-    private GUIStyle _errorStyle;
-    private GUIStyle _hintStyle;
-    private Texture2D _panelBg;
-    private Texture2D _buttonBg;
-    private Texture2D _buttonHoverBg;
-    private Texture2D _buttonDisabledBg;
-    private Texture2D _inputBg;
-    private Texture2D _successBg;
-    private Texture2D _errorBg;
-    private bool _stylesInitialized = false;
+    private GUIStyle _panelStyle, _avisoStyle, _avisoErrorStyle;
+    private GUIStyle _titleStyle, _labelStyle, _inputStyle;
+    private GUIStyle _buttonStyle, _buttonDisabledStyle, _hintStyle;
+    private Texture2D _panelBg, _buttonBg, _buttonHoverBg, _buttonDisabledBg;
+    private Texture2D _inputBg, _avisoBg, _avisoErrorBg;
+    private bool _stylesInitialized;
 
-    // Constantes
     private const int PANEL_W = 460;
     private const int PANEL_H_INPUT = 210;
-    private const int PANEL_H_STATUS = 150;
-    private const int PANEL_H_RESULT = 380;
-    private const float MESSAGE_DURATION = 8f;
+    private const int PANEL_H_AVISO = 130;
+    private const float AVISO_DURACION = 6f;
 
-    // UNITY LIFECYCLE
+    // ======================================================================
+    // CICLO DE VIDA
+    // ======================================================================
     private void Start()
     {
+        // El Recorder de ESTE jugador. En la escena hay 12 (uno por jugador) y
+        // el campo del inspector viene a null en los 12, asi que el antiguo
+        // FindFirstObjectByType devolvia uno cualquiera: normalmente uno
+        // deshabilitado con cero frames, y el panel decia "no hay datos"
+        // mientras el HUD del Recorder real marcaba cientos.
         if (recorder == null)
-            recorder = FindFirstObjectByType<Recorder>();
+            recorder = GetComponent<Recorder>();
+    }
+
+    /// <summary>
+    /// Devuelve el Recorder que realmente tiene datos.
+    /// Se resuelve al pulsar T y no en Start, porque en Start todos tienen cero
+    /// frames y no hay forma de distinguirlos.
+    /// </summary>
+    private Recorder ResolverRecorder()
+    {
+        Recorder propio = recorder != null ? recorder : GetComponent<Recorder>();
+        if (propio != null && propio.GetRecordedLineCount() > 0)
+            return propio;
+
+        // Ultimo recurso: el jugador controlado puede haber cambiado, asi que
+        // nos quedamos con el Recorder que mas frames lleve grabados.
+        Recorder[] todos = FindObjectsByType<Recorder>(FindObjectsSortMode.None);
+        Recorder mejor = null;
+        int max = 0;
+
+        foreach (Recorder r in todos)
+        {
+            if (r == null) continue;
+            int n = r.GetRecordedLineCount();
+            if (n > max)
+            {
+                max = n;
+                mejor = r;
+            }
+        }
+
+        return mejor != null ? mejor : propio;
+    }
+
+    private void OnDisable()
+    {
+        // Red de seguridad: si este componente se desactiva o la escena se
+        // descarga con el panel abierto, el teclado no puede quedarse mudo.
+        if (_state == ClientState.InputName)
+            InputLock.Liberar();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(trainKey))
-        {
-            if (_state == ClientState.Idle)
-            {
-                // Verificar que hay datos grabados
-                if (recorder == null || recorder.GetRecordedLineCount() <= 0)
-                {
-                    _state = ClientState.Error;
-                    _errorMessage = "No hay datos grabados. Usa el Recorder primero.";
-                    _messageTimer = MESSAGE_DURATION;
-                    return;
-                }
-                _state = ClientState.InputName;
-                _modelName = "";
-            }
-            else if (_state == ClientState.InputName)
-            {
-                _state = ClientState.Idle;
-            }
-            else if (_state == ClientState.Success || _state == ClientState.Error)
-            {
-                _state = ClientState.Idle;
-            }
-        }
+        // Ojo: aqui se usa Input y no InputLock a proposito. La T tiene que
+        // seguir funcionando... pero solo para ABRIR. Mientras se escribe, la
+        // 't' es una letra mas del nombre y el panel se cierra con Esc.
+        if (_state == ClientState.Idle && Input.GetKeyDown(trainKey))
+            AbrirPanel();
 
-        // Auto-hide mensajes
-        if ((_state == ClientState.Success || _state == ClientState.Error) && _messageTimer > 0f)
+        if (_state == ClientState.Aviso && _avisoTimer > 0f)
         {
-            _messageTimer -= Time.unscaledDeltaTime;
-            if (_messageTimer <= 0f)
-                _state = ClientState.Idle;
+            _avisoTimer -= Time.unscaledDeltaTime;
+            if (_avisoTimer <= 0f) _state = ClientState.Idle;
         }
     }
 
+    private void AbrirPanel()
+    {
+        if (TrainingRunner.HayEntrenamientoEnCurso)
+        {
+            MostrarAviso("Ya hay un entrenamiento en curso ('" +
+                         TrainingRunner.ModeloEnCurso + "').\n" +
+                         "Espera a que termine para lanzar otro.", true);
+            return;
+        }
+
+        recorder = ResolverRecorder();
+
+        if (recorder == null || recorder.GetRecordedLineCount() <= 0)
+        {
+            MostrarAviso("No hay datos grabados todavia.\n" +
+                         "Pulsa R para empezar a grabar y juega un rato antes de entrenar.", true);
+            return;
+        }
+
+        _modelName = "";
+        _state = ClientState.InputName;
+        InputLock.Capturar();
+    }
+
+    private void CerrarPanel()
+    {
+        _state = ClientState.Idle;
+        InputLock.Liberar();
+    }
+
+    private void MostrarAviso(string texto, bool esError)
+    {
+        _avisoTexto = texto;
+        _avisoEsError = esError;
+        _avisoTimer = AVISO_DURACION;
+        _state = ClientState.Aviso;
+    }
+
+    /// <summary>
+    /// Entrega el dataset al runner y devuelve el control al jugador de
+    /// inmediato. No se espera al servidor aqui.
+    /// </summary>
+    private void LanzarEntrenamiento()
+    {
+        string nombre = _modelName.Trim();
+        string csv = recorder.GetRecordedCSV();
+        int frames = recorder.GetRecordedLineCount();
+
+        bool lanzado = TrainingRunner.Get().Lanzar(serverUrl, csv, nombre);
+
+        InputLock.Liberar();
+
+        if (lanzado)
+            MostrarAviso("Entrenando '" + nombre + "' con " + frames + " frames.\n" +
+                         "Puedes seguir jugando: te aviso al terminar.", false);
+        else
+            MostrarAviso("No se pudo lanzar: ya hay un entrenamiento en curso.", true);
+    }
+
+    // ======================================================================
     // GUI
+    // ======================================================================
+    private void OnGUI()
+    {
+        if (_state == ClientState.Idle) return;
+
+        InitStyles();
+        int px = (Screen.width - PANEL_W) / 2;
+
+        if (_state == ClientState.InputName) DrawInputPanel(px);
+        else DrawAvisoPanel(px);
+    }
+
+    private void DrawInputPanel(int px)
+    {
+        // Teclas de control ANTES de dibujar el campo, para que Esc no acabe
+        // metiendose en el texto.
+        Event e = Event.current;
+        bool nombreValido = !string.IsNullOrWhiteSpace(_modelName) && _modelName.Trim().Length >= 2;
+
+        if (e.type == EventType.KeyDown)
+        {
+            if (e.keyCode == KeyCode.Escape)
+            {
+                CerrarPanel();
+                e.Use();
+                return;
+            }
+
+            if ((e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter) && nombreValido)
+            {
+                LanzarEntrenamiento();
+                e.Use();
+                return;
+            }
+        }
+
+        int py = (Screen.height - PANEL_H_INPUT) / 2;
+        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, PANEL_H_INPUT), "", _panelStyle);
+
+        int cy = py + 12;
+
+        GUI.Label(new Rect(px, cy, PANEL_W, 28), "ENTRENAR MODELO", _titleStyle);
+        cy += 32;
+
+        int lineCount = recorder != null ? recorder.GetRecordedLineCount() : 0;
+        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
+            "Datos grabados: " + lineCount + " frames", _labelStyle);
+        cy += 24;
+
+        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20), "Nombre del modelo:", _labelStyle);
+        cy += 22;
+
+        GUI.SetNextControlName("ModelNameField");
+        _modelName = GUI.TextField(new Rect(px + 10, cy, PANEL_W - 20, 28), _modelName, 64, _inputStyle);
+        GUI.FocusControl("ModelNameField");
+        cy += 36;
+
+        GUIStyle btnStyle = nombreValido ? _buttonStyle : _buttonDisabledStyle;
+        if (GUI.Button(new Rect(px + 10, cy, PANEL_W - 20, 32), "ENTRENAR", btnStyle) && nombreValido)
+        {
+            LanzarEntrenamiento();
+            return;
+        }
+        cy += 38;
+
+        GUI.Label(new Rect(px, cy, PANEL_W, 18),
+            "Enter para entrenar   |   Esc para cancelar", _hintStyle);
+    }
+
+    private void DrawAvisoPanel(int px)
+    {
+        int py = (Screen.height - PANEL_H_AVISO) / 2;
+        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, PANEL_H_AVISO), "",
+                _avisoEsError ? _avisoErrorStyle : _avisoStyle);
+
+        int cy = py + 18;
+
+        GUI.Label(new Rect(px, cy, PANEL_W, 26),
+            _avisoEsError ? "NO SE PUEDE ENTRENAR" : "ENTRENAMIENTO LANZADO", _titleStyle);
+        cy += 32;
+
+        GUI.Label(new Rect(px + 12, cy, PANEL_W - 24, 60), _avisoTexto, _labelStyle);
+    }
+
     private void InitStyles()
     {
         if (_stylesInitialized) return;
 
-        // Backgrounds
-        _panelBg         = MakeTex(new Color(0.06f, 0.06f, 0.15f, 0.95f));
-        _buttonBg        = MakeTex(new Color(0.15f, 0.45f, 0.85f, 1f));
-        _buttonHoverBg   = MakeTex(new Color(0.20f, 0.55f, 0.95f, 1f));
+        _panelBg = MakeTex(new Color(0.06f, 0.06f, 0.15f, 0.95f));
+        _buttonBg = MakeTex(new Color(0.15f, 0.45f, 0.85f, 1f));
+        _buttonHoverBg = MakeTex(new Color(0.20f, 0.55f, 0.95f, 1f));
         _buttonDisabledBg = MakeTex(new Color(0.3f, 0.3f, 0.3f, 0.7f));
-        _inputBg         = MakeTex(new Color(0.12f, 0.12f, 0.22f, 1f));
-        _successBg       = MakeTex(new Color(0.08f, 0.20f, 0.08f, 0.95f));
-        _errorBg         = MakeTex(new Color(0.25f, 0.06f, 0.06f, 0.95f));
+        _inputBg = MakeTex(new Color(0.12f, 0.12f, 0.22f, 1f));
+        _avisoBg = MakeTex(new Color(0.07f, 0.20f, 0.09f, 0.95f));
+        _avisoErrorBg = MakeTex(new Color(0.25f, 0.06f, 0.06f, 0.95f));
 
-        // Panel
         _panelStyle = new GUIStyle(GUI.skin.box);
         _panelStyle.normal.background = _panelBg;
 
-        // Título
-        _titleStyle = new GUIStyle(GUI.skin.label)
-            { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, richText = true };
+        _avisoStyle = new GUIStyle(GUI.skin.box);
+        _avisoStyle.normal.background = _avisoBg;
+
+        _avisoErrorStyle = new GUIStyle(GUI.skin.box);
+        _avisoErrorStyle.normal.background = _avisoErrorBg;
+
+        _titleStyle = new GUIStyle(GUI.skin.label);
+        _titleStyle.fontSize = 16;
+        _titleStyle.fontStyle = FontStyle.Bold;
+        _titleStyle.alignment = TextAnchor.MiddleCenter;
         _titleStyle.normal.textColor = Color.white;
 
-        // Label
-        _labelStyle = new GUIStyle(GUI.skin.label)
-            { fontSize = 13, richText = true };
+        _labelStyle = new GUIStyle(GUI.skin.label);
+        _labelStyle.fontSize = 13;
+        _labelStyle.wordWrap = true;
         _labelStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
 
-        // Input
-        _inputStyle = new GUIStyle(GUI.skin.textField)
-            { fontSize = 15, alignment = TextAnchor.MiddleLeft };
+        _inputStyle = new GUIStyle(GUI.skin.textField);
+        _inputStyle.fontSize = 15;
+        _inputStyle.alignment = TextAnchor.MiddleLeft;
         _inputStyle.normal.background = _inputBg;
         _inputStyle.focused.background = _inputBg;
         _inputStyle.normal.textColor = Color.white;
         _inputStyle.focused.textColor = Color.white;
         _inputStyle.padding = new RectOffset(8, 8, 4, 4);
 
-        // Botón
-        _buttonStyle = new GUIStyle(GUI.skin.button)
-            { fontSize = 14, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
+        _buttonStyle = new GUIStyle(GUI.skin.button);
+        _buttonStyle.fontSize = 14;
+        _buttonStyle.fontStyle = FontStyle.Bold;
+        _buttonStyle.alignment = TextAnchor.MiddleCenter;
         _buttonStyle.normal.background = _buttonBg;
-        _buttonStyle.hover.background  = _buttonHoverBg;
+        _buttonStyle.hover.background = _buttonHoverBg;
         _buttonStyle.active.background = _buttonHoverBg;
-        _buttonStyle.normal.textColor  = Color.white;
-        _buttonStyle.hover.textColor   = Color.white;
-        _buttonStyle.active.textColor  = Color.white;
+        _buttonStyle.normal.textColor = Color.white;
+        _buttonStyle.hover.textColor = Color.white;
+        _buttonStyle.active.textColor = Color.white;
 
-        // Botón deshabilitado
         _buttonDisabledStyle = new GUIStyle(_buttonStyle);
         _buttonDisabledStyle.normal.background = _buttonDisabledBg;
-        _buttonDisabledStyle.hover.background  = _buttonDisabledBg;
-        _buttonDisabledStyle.normal.textColor  = new Color(0.6f, 0.6f, 0.6f);
+        _buttonDisabledStyle.hover.background = _buttonDisabledBg;
+        _buttonDisabledStyle.normal.textColor = new Color(0.6f, 0.6f, 0.6f);
 
-        // Métricas
-        _metricsStyle = new GUIStyle(GUI.skin.label)
-            { fontSize = 12, richText = true };
-        _metricsStyle.normal.textColor = new Color(0.7f, 0.85f, 1f);
-
-        // Success
-        _successStyle = new GUIStyle(GUI.skin.box);
-        _successStyle.normal.background = _successBg;
-
-        // Error
-        _errorStyle = new GUIStyle(GUI.skin.box);
-        _errorStyle.normal.background = _errorBg;
-
-        // Hint
-        _hintStyle = new GUIStyle(GUI.skin.label)
-            { fontSize = 11, richText = true, alignment = TextAnchor.MiddleCenter };
+        _hintStyle = new GUIStyle(GUI.skin.label);
+        _hintStyle.fontSize = 11;
+        _hintStyle.alignment = TextAnchor.MiddleCenter;
         _hintStyle.normal.textColor = new Color(0.6f, 0.6f, 0.6f);
 
         _stylesInitialized = true;
     }
 
-    private void OnGUI()
-    {
-        if (_state == ClientState.Idle) return;
-        InitStyles();
-
-        int px = (Screen.width - PANEL_W) / 2;
-
-        switch (_state)
-        {
-            case ClientState.InputName:
-                DrawInputPanel(px);
-                break;
-            case ClientState.Sending:
-            case ClientState.Training:
-                DrawStatusPanel(px);
-                break;
-            case ClientState.Success:
-                DrawSuccessPanel(px);
-                break;
-            case ClientState.Error:
-                DrawErrorPanel(px);
-                break;
-        }
-    }
-
-    private void DrawInputPanel(int px)
-    {
-        int py = (Screen.height - PANEL_H_INPUT) / 2;
-        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, PANEL_H_INPUT), "", _panelStyle);
-
-        int cy = py + 12;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 28), "🧠  ENTRENAR MODELO", _titleStyle);
-        cy += 32;
-
-        int lineCount = recorder != null ? recorder.GetRecordedLineCount() : 0;
-        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
-            $"<color=#AAAAAA>Datos grabados: <b>{lineCount}</b> frames</color>", _labelStyle);
-        cy += 24;
-
-        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
-            "Nombre del modelo:", _labelStyle);
-        cy += 22;
-
-        // Campo de texto — forzar foco
-        GUI.SetNextControlName("ModelNameField");
-        _modelName = GUI.TextField(new Rect(px + 10, cy, PANEL_W - 20, 28), _modelName, 64, _inputStyle);
-        GUI.FocusControl("ModelNameField");
-        cy += 36;
-
-        // Botón de enviar
-        bool validName = !string.IsNullOrWhiteSpace(_modelName) && _modelName.Trim().Length >= 2;
-        GUIStyle btnStyle = validName ? _buttonStyle : _buttonDisabledStyle;
-
-        if (GUI.Button(new Rect(px + 10, cy, PANEL_W - 20, 32), "▶  ENTRENAR", btnStyle) && validName)
-        {
-            StartTraining();
-        }
-        cy += 38;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 18),
-            $"<color=#666666>[{trainKey}] Cancelar</color>", _hintStyle);
-    }
-
-    private void DrawStatusPanel(int px)
-    {
-        int py = (Screen.height - PANEL_H_STATUS) / 2;
-        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, PANEL_H_STATUS), "", _panelStyle);
-
-        int cy = py + 20;
-
-        string dots = new string('.', (int)(Time.unscaledTime * 2f) % 4);
-        GUI.Label(new Rect(px, cy, PANEL_W, 28),
-            $"⏳  ENTRENANDO '{_modelName}'{dots}", _titleStyle);
-        cy += 36;
-
-        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
-            $"<color=#AABBDD>{_statusMessage}</color>", _labelStyle);
-        cy += 24;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 18),
-            "<color=#888888>Esto puede tardar unos minutos...</color>", _hintStyle);
-    }
-
-    private void DrawSuccessPanel(int px)
-    {
-        int panelH = _lastResult != null ? PANEL_H_RESULT : PANEL_H_STATUS;
-        int py = (Screen.height - panelH) / 2;
-        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, panelH), "", _successStyle);
-
-        int cy = py + 12;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 28),
-            $"<color=#55DD66>✓  MODELO '{_modelName}' ENTRENADO</color>", _titleStyle);
-        cy += 32;
-
-        if (_lastResult != null)
-        {
-            GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
-                "📊  MÉTRICAS:", _labelStyle);
-            cy += 24;
-
-            DrawMetricRow(px + 20, ref cy, "Movimiento",
-                $"Acc={_lastResult.acc_mov:F2}%  F1={_lastResult.f1_mov:F2}%");
-            DrawMetricRow(px + 20, ref cy, "Disparo",
-                $"Acc={_lastResult.acc_shoot:F2}%  F1={_lastResult.f1_shoot:F2}%");
-            DrawMetricRow(px + 20, ref cy, "Pase",
-                $"Acc={_lastResult.acc_pass:F2}%  F1={_lastResult.f1_pass:F2}%");
-            DrawMetricRow(px + 20, ref cy, "Loss Final",
-                $"{_lastResult.loss_final:F4}");
-
-            cy += 10;
-            GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 20),
-                "📁  ARCHIVOS GUARDADOS:", _labelStyle);
-            cy += 22;
-            GUI.Label(new Rect(px + 20, cy, PANEL_W - 40, 18),
-                $"<color=#AABBDD>• SoccerModel_{_modelName}.onnx</color>", _metricsStyle);
-            cy += 20;
-            GUI.Label(new Rect(px + 20, cy, PANEL_W - 40, 18),
-                $"<color=#AABBDD>• scaler_{_modelName}.json</color>", _metricsStyle);
-            cy += 28;
-        }
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 18),
-            $"<color=#666666>[{trainKey}] Cerrar</color>", _hintStyle);
-    }
-
-    private void DrawErrorPanel(int px)
-    {
-        int py = (Screen.height - PANEL_H_STATUS) / 2;
-        GUI.Box(new Rect(px - 10, py, PANEL_W + 20, PANEL_H_STATUS), "", _errorStyle);
-
-        int cy = py + 20;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 28),
-            "<color=#FF5544>✗  ERROR</color>", _titleStyle);
-        cy += 32;
-
-        GUI.Label(new Rect(px + 10, cy, PANEL_W - 20, 40),
-            $"<color=#FFAAAA>{_errorMessage}</color>", _labelStyle);
-        cy += 44;
-
-        GUI.Label(new Rect(px, cy, PANEL_W, 18),
-            $"<color=#666666>[{trainKey}] Cerrar</color>", _hintStyle);
-    }
-
-    private void DrawMetricRow(int x, ref int cy, string label, string value)
-    {
-        GUI.Label(new Rect(x, cy, PANEL_W - 40, 18),
-            $"<color=#CCDDFF>{label}:</color>  <color=#FFFFFF><b>{value}</b></color>", _metricsStyle);
-        cy += 20;
-    }
-
-    // LOGICA DE ENTRENAMIENTO
-    private void StartTraining()
-    {
-        _state = ClientState.Sending;
-        _statusMessage = "Preparando datos...";
-        StartCoroutine(SendTrainingRequest());
-    }
-
-    private IEnumerator SendTrainingRequest()
-    {
-        // Obtener CSV del Recorder
-        string csvData = recorder.GetRecordedCSV();
-        _statusMessage = $"Enviando {recorder.GetRecordedLineCount()} frames al servidor...";
-        yield return null;  // Un frame para que se actualice la GUI
-
-        // Construir el JSON del request
-        string jsonBody = JsonUtility.ToJson(new TrainRequestData
-        {
-            csv_data = csvData,
-            model_name = _modelName.Trim()
-        });
-
-        // Crear la petición HTTP
-        string url = $"{serverUrl.TrimEnd('/')}/train";
-        Debug.Log($"[TrainingClient] POST {url} — modelo: {_modelName}");
-
-        using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
-        {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-            www.timeout = 600;  // 10 minutos máximo para el entrenamiento
-
-            _state = ClientState.Training;
-            _statusMessage = "Entrenando modelo en el servidor...";
-
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.ConnectionError)
-            {
-                _state = ClientState.Error;
-                _errorMessage = $"No se pudo conectar al servidor.\n¿Está corriendo 'python training_server.py'?\n\n{www.error}";
-                _messageTimer = MESSAGE_DURATION;
-                Debug.LogError($"[TrainingClient] Error de conexión: {www.error}");
-                yield break;
-            }
-
-            if (www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                string errorBody = www.downloadHandler.text;
-                _state = ClientState.Error;
-                _errorMessage = $"Error del servidor ({www.responseCode}):\n{TruncateString(errorBody, 200)}";
-                _messageTimer = MESSAGE_DURATION;
-                Debug.LogError($"[TrainingClient] Error HTTP {www.responseCode}: {errorBody}");
-                yield break;
-            }
-
-            // Parsear respuesta
-            string responseText = www.downloadHandler.text;
-            Debug.Log($"[TrainingClient] Respuesta recibida: {TruncateString(responseText, 200)}");
-
-            TrainResponseData response;
-            try
-            {
-                response = JsonUtility.FromJson<TrainResponseData>(responseText);
-            }
-            catch (Exception e)
-            {
-                _state = ClientState.Error;
-                _errorMessage = $"Error parseando respuesta: {e.Message}";
-                _messageTimer = MESSAGE_DURATION;
-                yield break;
-            }
-
-            if (!response.success)
-            {
-                _state = ClientState.Error;
-                _errorMessage = $"Entrenamiento fallido: {response.message}";
-                _messageTimer = MESSAGE_DURATION;
-                yield break;
-            }
-
-            // Guardar archivos
-            try
-            {
-                SaveTrainingResults(response);
-                _lastResult = response;
-                _state = ClientState.Success;
-                _messageTimer = MESSAGE_DURATION;
-                Debug.Log($"[TrainingClient] ✓ Modelo '{_modelName}' guardado exitosamente");
-            }
-            catch (Exception e)
-            {
-                _state = ClientState.Error;
-                _errorMessage = $"Error guardando archivos: {e.Message}";
-                _messageTimer = MESSAGE_DURATION;
-                Debug.LogError($"[TrainingClient] Error guardando: {e}");
-            }
-        }
-    }
-
-    private void SaveTrainingResults(TrainResponseData response)
-    {
-        // persistentDataPath (no Assets/) porque es la única ruta que existe igual
-        // en el Editor y en una build ya compilada, y no pasa por el pipeline de
-        // assets de Unity (por eso no hace falta reimportar nada).
-        string saveDir = Application.persistentDataPath;
-        byte[] onnxBytes = Convert.FromBase64String(response.onnx_base64);
-
-        // 1. Copia con el nombre elegido por el usuario (histórico, por si se
-        //    quiere volver a un modelo entrenado anteriormente).
-        string namedOnnxPath = Path.Combine(saveDir, $"SoccerModel_{_modelName}.onnx");
-        File.WriteAllBytes(namedOnnxPath, onnxBytes);
-        string namedScalerPath = Path.Combine(saveDir, $"scaler_{_modelName}.json");
-        File.WriteAllText(namedScalerPath, response.scaler_json);
-        Debug.Log($"[TrainingClient] Modelo guardado: {namedOnnxPath} ({onnxBytes.Length} bytes)");
-
-        // 2. Copia "activa": la que cargan (y recargan en caliente) los
-        //    AIControllerFNNClasi. Sobrescribirla es lo que hace que el último
-        //    modelo entrenado sea el que se usa por defecto la próxima vez.
-        string activeOnnxPath = Path.Combine(saveDir, "SoccerModel_Active.onnx");
-        File.WriteAllBytes(activeOnnxPath, onnxBytes);
-        string activeScalerPath = Path.Combine(saveDir, "scaler_Active.json");
-        File.WriteAllText(activeScalerPath, response.scaler_json);
-
-        // 3. Hot-swap: avisar a todos los NPCs con AIControllerFNNClasi ya en
-        //    escena para que carguen el modelo nuevo sin reiniciar nada.
-        var controllers = FindObjectsByType<AIControllerFNNClasi>(FindObjectsSortMode.None);
-        foreach (var controller in controllers)
-        {
-            controller.ReloadModel(activeOnnxPath, activeScalerPath);
-        }
-        Debug.Log($"[TrainingClient] {controllers.Length} NPC(s) recargados con el modelo '{_modelName}'.");
-    }
-
-    // UTILIDADES
     private static Texture2D MakeTex(Color col)
     {
-        var t = new Texture2D(1, 1);
+        Texture2D t = new Texture2D(1, 1);
         t.SetPixel(0, 0, col);
         t.Apply();
         return t;
-    }
-
-    private static string TruncateString(string s, int maxLen)
-    {
-        if (string.IsNullOrEmpty(s)) return "";
-        return s.Length <= maxLen ? s : s.Substring(0, maxLen) + "...";
-    }
-
-    // CLASES DE DATOS (para JSON serialización)
-    [Serializable]
-    private class TrainRequestData
-    {
-        public string csv_data;
-        public string model_name;
-    }
-
-    [Serializable]
-    public class TrainResponseData
-    {
-        public bool success;
-        public string model_name;
-        public string onnx_base64;
-        public string scaler_json;  // JSON raw del scaler, se guarda tal cual
-        // Métricas planas (mismo nivel, no anidadas)
-        public float acc_mov;
-        public float prec_mov;
-        public float rec_mov;
-        public float f1_mov;
-        public float acc_shoot;
-        public float prec_shoot;
-        public float rec_shoot;
-        public float f1_shoot;
-        public float acc_pass;
-        public float prec_pass;
-        public float rec_pass;
-        public float f1_pass;
-        public float loss_final;
-        public string message;
     }
 }

@@ -140,7 +140,7 @@ public class Recorder : MonoBehaviour
     private void Update()
     {
         // Toggle grabación
-        if (Input.GetKeyDown(recordToggleKey))
+        if (InputLock.GetKeyDown(recordToggleKey))
         {
             isRecording = !isRecording;
             if (isRecording)
@@ -155,10 +155,15 @@ public class Recorder : MonoBehaviour
         }
 
         // Toggle panel de estadísticas
-        if (Input.GetKeyDown(statsToggleKey))
+        if (InputLock.GetKeyDown(statsToggleKey))
             _showStats = !_showStats;
 
         if (!isRecording) return;
+
+        // Mientras la UI captura el teclado el jugador esta congelado a la
+        // fuerza. Grabar esos frames meteria decenas de muestras falsas de
+        // "Quieto, sin accion" en el dataset, asi que se salta el segmento.
+        if (InputLock.Capturando) return;
 
         totalTime   += Time.deltaTime;
         timeElapsed += Time.deltaTime;
@@ -253,12 +258,14 @@ public class Recorder : MonoBehaviour
         var (e3px,e3pz,e3dx,e3dz) = GetPlayerData(enemies, 2);
 
         // ── Labels ──
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        int disparo  = Input.GetKey(KeyCode.O) ? 1 : 0;
-        int pase     = Input.GetKey(KeyCode.P) ? 1 : 0;
-        int roboK    = Input.GetKey(KeyCode.K) ? 1 : 0;
-        int roboL    = Input.GetKey(KeyCode.L) ? 1 : 0;
+        // Via InputLock: mientras la UI captura el teclado se graban
+        // ceros en vez de acciones fantasma que ensucien el dataset.
+        float inputX = InputLock.GetAxisRaw("Horizontal");
+        float inputZ = InputLock.GetAxisRaw("Vertical");
+        int disparo  = InputLock.GetKey(KeyCode.O) ? 1 : 0;
+        int pase     = InputLock.GetKey(KeyCode.P) ? 1 : 0;
+        int roboK    = InputLock.GetKey(KeyCode.K) ? 1 : 0;
+        int roboL    = InputLock.GetKey(KeyCode.L) ? 1 : 0;
 
         // ── Serializar fila CSV ──
         string F(float v) => v.ToString("F3", Inv);

@@ -14,6 +14,19 @@ public class Data : MonoBehaviour
     public int matchSeconds = 300;
 public int redTeam = 0;
 
+    // ------------------------------------------------------------------
+    // Dataset rescatado al terminar un entrenamiento.
+    // Lo rellena Timer.EndMatch() ANTES de cambiar de escena, porque el
+    // Recorder guarda las filas en memoria y muere al descargarse la escena
+    // de jugadores. Lo consume AddTrain en la pantalla del nombre.
+    //
+    // NonSerialized a proposito: el CSV puede pesar megas y no queremos que
+    // Unity intente serializarlo en la escena ni pintarlo en el inspector.
+    // ------------------------------------------------------------------
+    [System.NonSerialized] public string csvEntrenamiento;
+    [System.NonSerialized] public int framesEntrenamiento;
+    [System.NonSerialized] public string rutaCsvBackup;
+
     public static Data instance;
 
     private void Awake()

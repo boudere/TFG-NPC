@@ -156,15 +156,21 @@ public class PlayerID : MonoBehaviour
         stop = true;
     }
 
+    [Header("Velocidad de carrera")]
+    [Tooltip("Velocidad al correr sin llevar el balon controlado.")]
+    [SerializeField] protected float velocidadSinBalon = 100f;
+    [Tooltip("Velocidad al correr llevando el balon controlado.")]
+    [SerializeField] protected float velocidadConBalon = 100f;
+
     public void changeSpeed() {
-    
-        if (Bola.instance.transform.IsChildOf(transform))
+
+        if (Bola.instance != null && Bola.instance.transform.IsChildOf(transform))
         {
-            npcSpeed = 50f;
+            npcSpeed = velocidadConBalon;
         }
         else
         {
-            npcSpeed = 100f;
+            npcSpeed = velocidadSinBalon;
         }
     }
 

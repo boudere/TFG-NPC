@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class Pase : MonoBehaviour
 {
@@ -33,7 +30,7 @@ public class Pase : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (InputLock.GetKeyDown(KeyCode.P))
         {
             if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == characterManager.index)
             {
@@ -335,19 +332,6 @@ public class Pase : MonoBehaviour
         rbBall.linearVelocity = direction * passSpeed;
         rbBall.angularVelocity = Vector3.zero;
         rbBall.WakeUp();
-    }
-
-    void OrdenarJugadoresPorDistancia()
-    {
-        jugadoresOrdenadosPorPorteria.Clear();
-        jugadoresOrdenadosPorPorteria.AddRange(jugadores);
-
-        jugadoresOrdenadosPorPorteria.Sort((a, b) =>
-        {
-            float da = (a.transform.position - transform.position).sqrMagnitude;
-            float db = (b.transform.position - transform.position).sqrMagnitude;
-            return da.CompareTo(db);
-        });
     }
 
     public float calculateDistance(Vector3 myPos)

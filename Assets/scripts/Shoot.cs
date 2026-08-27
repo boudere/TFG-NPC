@@ -12,7 +12,7 @@ public class Shoot : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.O))
+        if (InputLock.GetKeyDown(KeyCode.O))
         {
             if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == CharacterManager.instance.index)
             {

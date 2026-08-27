@@ -199,24 +199,34 @@ class SoccerDataset(Dataset):
         for cls, name in [(0, 'Sin acción'), (1, 'Disparo'), (2, 'Pase'), (3, 'RoboK'), (4, 'RoboL')]:
             print(f"    {name} ({cls}): {class_counts.get(cls, 0)}")
 
-        n_minority = sum(class_counts.get(c, 0) for c in [1, 2, 3, 4])
-        if n_minority > 0:
+        # SMOTE necesita como minimo 2 muestras por clase: internamente pide
+        # k+1 vecinos y descarta el primero (el propio punto). Con una clase de
+        # una sola muestra reventaba con
+        #     ValueError: Expected n_neighbors <= n_samples_fit
+        # Se excluyen esas clases del remuestreo. Sus muestras reales siguen en
+        # el dataset; simplemente no se les sintetizan vecinos, que con un unico
+        # punto no aportaria informacion nueva de todas formas.
+        NOMBRE_CLASE = {1: 'Disparo', 2: 'Pase', 3: 'RoboK', 4: 'RoboL'}
+        clases_smote = [c for c in [1, 2, 3, 4] if class_counts.get(c, 0) >= 2]
+        clases_excluidas = [c for c in [1, 2, 3, 4] if 0 < class_counts.get(c, 0) < 2]
+
+        for c in clases_excluidas:
+            print(f"\n  AVISO: '{NOMBRE_CLASE[c]}' tiene solo {class_counts.get(c, 0)} muestra(s) "
+                  f"tras la correccion de timing: se excluye de SMOTE (minimo 2).")
+
+        if clases_smote:
             X_sm = raw[smote_cols].values
             y_sm = raw['_smote_class'].values
 
-            min_minority_count = min(
-                class_counts.get(c, 0) for c in [1, 2, 3, 4] if class_counts.get(c, 0) > 0
-            )
-            k = min(5, min_minority_count - 1)
-            k = max(k, 1)
+            min_minority_count = min(class_counts[c] for c in clases_smote)
+            k = max(1, min(5, min_minority_count - 1))
 
             majority_n = class_counts.get(0, 1)
             target = max(int(majority_n * 0.15), min_minority_count)
 
-            sampling_strategy = {}
-            for c in [1, 2, 3, 4]:
-                if class_counts.get(c, 0) > 0:
-                    sampling_strategy[c] = max(target, class_counts.get(c, 0))
+            sampling_strategy = {
+                c: max(target, class_counts[c]) for c in clases_smote
+            }
 
             smote = SMOTE(
                 sampling_strategy=sampling_strategy,
@@ -246,7 +256,9 @@ class SoccerDataset(Dataset):
             print(f"  RoboK=1:   {int(raw['RoboK'].sum())} ({raw['RoboK'].mean()*100:.1f}%)")
             print(f"  RoboL=1:   {int(raw['RoboL'].sum())} ({raw['RoboL'].mean()*100:.1f}%)")
         else:
-            print("\n  WARNING: No hay frames de Disparo/Pase con pelota en los datos!")
+            print("\n  WARNING: ninguna clase de accion llega a 2 muestras tras la correccion "
+                  "de timing. Se salta SMOTE y se entrena con los datos tal cual; "
+                  "graba mas partida si quieres que las acciones esten representadas.")
 
         if '_smote_class' in raw.columns:
             raw.drop('_smote_class', axis=1, inplace=True)
