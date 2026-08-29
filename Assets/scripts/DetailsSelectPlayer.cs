@@ -1,4 +1,3 @@
-using SFB;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,6 +45,8 @@ public class DetailsSelectPlayer : MonoBehaviour
     public Button aplicarModelo;
 
     public string rutaModeloONNX;
+
+    private SelectorDeModelo selector;
 
     public void Awake()
     {
@@ -131,34 +132,33 @@ public class DetailsSelectPlayer : MonoBehaviour
 
     public void SeleccionarModelo()
     {
-        UnityEngine.Debug.Log(characterManager.index);
-        if (characterManager.index != characterManager.select)
-        {
-            characterManager.indexModel = characterManager.select;
-        }
-        else
+        if (characterManager.index == characterManager.select)
         {
             UnityEngine.Debug.Log("Jugador ya asociado");
             return;
         }
 
-        var paths = StandaloneFileBrowser.OpenFilePanel(
-            "Selecciona un modelo ONNX",
-            "",
-            new[] { new ExtensionFilter("Modelo ONNX", "onnx") },
-            false);
+        // Antes esto abria el explorador de archivos de Windows. Ese dialogo
+        // arrastraba el shell al proceso y con el un onnxruntime.dll
+        // incompatible que cerraba el juego, ademas de dejar elegir modelos de
+        // otra arquitectura o con el scaler descuadrado. Ahora se elige de una
+        // lista con los modelos que el propio juego ha entrenado.
+        if (selector == null) selector = gameObject.AddComponent<SelectorDeModelo>();
 
-        if (paths.Length == 0)
-        {
-            UnityEngine.Debug.Log("No se seleccionó ningún modelo.");
-            return;
-        }
+        selector.Abrir(AplicarModeloElegido, null);
+    }
 
-        rutaModeloONNX = paths[0];
+    private void AplicarModeloElegido(ModeloInfo modelo)
+    {
+        if (modelo == null) return;
 
-        UnityEngine.Debug.Log("Modelo seleccionado: " + rutaModeloONNX);
+        characterManager.indexModel = characterManager.select;
 
-        Data.instance.rutaModeloONNX = rutaModeloONNX; // Si quieres usarla en otra escena
+        Data.instance.rutaModeloONNX = modelo.rutaOnnx;
+        Data.instance.rutaScalerModelo = modelo.rutaScaler;
+        Data.instance.nombreModeloAplicado = modelo.nombre;
+
+        UnityEngine.Debug.Log("Modelo elegido: " + modelo.nombre + " -> " + modelo.rutaOnnx);
 
         Data.instance.jugadorAplicarModelo = true;
         Data.instance.jugadorSeleccionadoEntrenamiento = false;

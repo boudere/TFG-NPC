@@ -118,11 +118,36 @@ public class AIControllerFNNClasi : MonoBehaviour
             }
         }
 
-        // Inicializar modelo: primero busca un modelo YA ENTRENADO en tiempo de ejecución
-        // (persistentDataPath, lo escribe TrainingClient), y si no existe usa el que
-        // viene empaquetado con la build (Assets/StreamingAssets).
-        string onnxPath = Path.Combine(Application.persistentDataPath, activeModelFileName);
-        string scalerPath = Path.Combine(Application.persistentDataPath, activeScalerFileName);
+        // Orden de preferencia:
+        //   1. El modelo que el jugador eligio en la lista (AsignarModelo).
+        //   2. El ultimo entrenado (SoccerModel_Active.onnx en persistentDataPath).
+        //   3. El que viene empaquetado con la build (StreamingAssets).
+        //
+        // El paso 1 tiene que estar AQUI y no fuera: cuando
+        // CharacterManagerInField habilita este componente, su Start todavia no
+        // se ha ejecutado, asi que correria despues y machacaria la eleccion
+        // cargando Active. Guardando la eleccion como "pendiente" da igual el
+        // orden en que Unity llame a los Start.
+        string onnxPath;
+        string scalerPath;
+
+        if (!string.IsNullOrEmpty(_onnxPendiente) && File.Exists(_onnxPendiente))
+        {
+            onnxPath = _onnxPendiente;
+            scalerPath = _scalerPendiente;
+            Debug.Log("[AIControllerFNNClasi] Usando el modelo elegido: " + onnxPath);
+            ReloadModel(onnxPath, scalerPath);
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(_onnxPendiente))
+        {
+            Debug.LogWarning("[AIControllerFNNClasi] El modelo elegido ya no existe (" +
+                             _onnxPendiente + "). Se usa el ultimo entrenado.");
+        }
+
+        onnxPath = Path.Combine(Application.persistentDataPath, activeModelFileName);
+        scalerPath = Path.Combine(Application.persistentDataPath, activeScalerFileName);
 
         if (!File.Exists(onnxPath))
         {
@@ -145,6 +170,24 @@ public class AIControllerFNNClasi : MonoBehaviour
     /// TrainingClient llama a este método en todos los AIControllerFNNClasi activos
     /// justo después de descargar un modelo recién entrenado.
     /// </summary>
+    private string _onnxPendiente;
+    private string _scalerPendiente;
+
+    /// <summary>
+    /// Fija el modelo que debe usar este NPC. Puede llamarse ANTES de que corra
+    /// su Start (por ejemplo justo al habilitar el componente): la eleccion se
+    /// guarda y Start la respeta. Si ya estaba arrancado, recarga en caliente.
+    /// </summary>
+    public void AsignarModelo(string onnxPath, string scalerPath)
+    {
+        _onnxPendiente = onnxPath;
+        _scalerPendiente = scalerPath;
+
+        // session != null significa que Start ya paso: hay que recargar ahora.
+        if (session != null && !string.IsNullOrEmpty(onnxPath) && File.Exists(onnxPath))
+            ReloadModel(onnxPath, scalerPath);
+    }
+
     public void ReloadModel(string onnxPath, string scalerPath)
     {
         // Red de seguridad: si el ONNX Runtime que hay en el proceso no es el

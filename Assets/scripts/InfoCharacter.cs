@@ -212,16 +212,40 @@ public class InfoCharacter : MonoBehaviour
 
     public void PlayStart()
     {
+        // Antes esto miraba los flags de Data (jugadorSeleccionado /
+        // jugadorSeleccionadoEntrenamiento) y hacia un return mudo si estaban a
+        // false. El problema: esos flags y los indices que pintan las fichas en
+        // pantalla eran dos memorias distintas que nadie mantenia
+        // sincronizadas, asi que veias los jugadores puestos y el boton no
+        // hacia nada, sin decir por que.
+        //
+        // Ahora se lee EL MISMO dato que dibuja la interfaz, y los flags se
+        // derivan aqui, en el unico momento en que importan. No pueden
+        // discrepar porque ya no son una fuente de verdad aparte.
+        if (characterManager == null) characterManager = CharacterManager.instance;
 
-        if (Data.instance.esJuego && !Data.instance.jugadorSeleccionado )
+        if (characterManager == null)
+        {
+            MostrarAviso("No se puede iniciar la partida: falta el gestor de personajes.");
             return;
+        }
 
-        if (!Data.instance.esJuego && !Data.instance.jugadorSeleccionadoEntrenamiento)
+        if (characterManager.index < 0 ||
+            characterManager.index >= characterManager.characterList.Count)
+        {
+            MostrarAviso(Data.instance.esJuego
+                ? "Elige primero el jugador que vas a controlar."
+                : "Elige primero el jugador con el que vas a entrenar.");
             return;
+        }
+
+        Data.instance.jugadorSeleccionado = Data.instance.esJuego;
+        Data.instance.jugadorSeleccionadoEntrenamiento = !Data.instance.esJuego;
+        Data.instance.jugadorAplicarModelo =
+            Data.instance.esJuego && characterManager.indexModel >= 0;
 
         for (int i = 0; i < characterManager.characterList.Count; i++)
         {
-
             if (characterManager.characterList[i].id == index)
             {
                 characterManager.characterList[i].selected = true;
@@ -229,12 +253,70 @@ public class InfoCharacter : MonoBehaviour
             }
         }
 
-        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
         SceneManager.LoadScene(
-    SceneManager.GetActiveScene().buildIndex + 3,
-    LoadSceneMode.Additive
-);
-  
+            SceneManager.GetActiveScene().buildIndex + 3,
+            LoadSceneMode.Additive
+        );
+    }
+
+    // ======================================================================
+    // Aviso en pantalla. Un boton que no responde y no explica nada es el
+    // peor error posible en una demostracion: parece que el juego esta roto.
+    // IMGUI para no depender de montar nada en la escena.
+    // ======================================================================
+    private string _aviso = "";
+    private float _avisoTimer;
+    private GUIStyle _avisoCaja, _avisoTexto;
+    private Texture2D _avisoBg;
+    private bool _avisoEstilos;
+
+    private const float AVISO_DURACION = 4f;
+
+    private void MostrarAviso(string texto)
+    {
+        _aviso = texto;
+        _avisoTimer = AVISO_DURACION;
+        UnityEngine.Debug.LogWarning("[InfoCharacter] " + texto);
+    }
+
+    private void Update()
+    {
+        if (_avisoTimer > 0f)
+        {
+            _avisoTimer -= Time.unscaledDeltaTime;
+            if (_avisoTimer <= 0f) _aviso = "";
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (string.IsNullOrEmpty(_aviso)) return;
+
+        if (!_avisoEstilos)
+        {
+            _avisoBg = new Texture2D(1, 1);
+            _avisoBg.SetPixel(0, 0, new Color(0.28f, 0.07f, 0.07f, 0.95f));
+            _avisoBg.Apply();
+
+            _avisoCaja = new GUIStyle(GUI.skin.box);
+            _avisoCaja.normal.background = _avisoBg;
+
+            _avisoTexto = new GUIStyle(GUI.skin.label);
+            _avisoTexto.fontSize = 15;
+            _avisoTexto.wordWrap = true;
+            _avisoTexto.alignment = TextAnchor.MiddleCenter;
+            _avisoTexto.normal.textColor = Color.white;
+
+            _avisoEstilos = true;
+        }
+
+        int w = 560;
+        int h = 70;
+        int x = (Screen.width - w) / 2;
+        int y = Screen.height - h - 40;
+
+        GUI.Box(new Rect(x, y, w, h), "", _avisoCaja);
+        GUI.Label(new Rect(x + 16, y + 10, w - 32, h - 20), _aviso, _avisoTexto);
     }
 }

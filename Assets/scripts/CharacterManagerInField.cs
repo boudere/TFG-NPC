@@ -122,7 +122,18 @@ public class CharacterManagerInField : MonoBehaviour
                     AIRecorder aiRecorder = p[i].GetComponent<AIRecorder>();
 
                     if (aiControllerFNNClasi != null)
+                    {
+                        // Antes de habilitarlo, para que su Start ya encuentre
+                        // la eleccion hecha y no cargue el modelo por defecto.
+                        if (!string.IsNullOrEmpty(Data.instance.rutaModeloONNX))
+                        {
+                            aiControllerFNNClasi.AsignarModelo(
+                                Data.instance.rutaModeloONNX,
+                                Data.instance.rutaScalerModelo);
+                        }
+
                         aiControllerFNNClasi.enabled = true;
+                    }
 
 
                     if (aiRecorder != null)

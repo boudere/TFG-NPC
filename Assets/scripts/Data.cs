@@ -9,6 +9,10 @@ public class Data : MonoBehaviour
     public bool jugadorSeleccionadoEntrenamiento = false;
     public bool jugadorAplicarModelo = false;
     public string rutaModeloONNX;
+    // Scaler emparejado con rutaModeloONNX y nombre que le puso el usuario.
+    // Los rellena el selector de modelos; los lee CharacterManagerInField.
+    public string rutaScalerModelo;
+    public string nombreModeloAplicado;
     public string textoPanel;
     public int blueTeam = 0;
     public int matchSeconds = 300;

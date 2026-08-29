@@ -157,7 +157,7 @@ public static class TrainingUploader
 
             try
             {
-                GuardarResultados(respuesta, modelName);
+                GuardarResultados(respuesta, modelName, ContarFilas(csvData));
                 resultado.ok = true;
                 resultado.datos = respuesta;
                 Debug.Log("[TrainingUploader] Modelo '" + modelName + "' guardado correctamente");
@@ -178,7 +178,15 @@ public static class TrainingUploader
     /// existe igual en el Editor y en una build, y que no pasa por el pipeline
     /// de assets de Unity) y recarga en caliente los NPCs que haya en escena.
     /// </summary>
-    private static void GuardarResultados(TrainResponseData respuesta, string modelName)
+    private static int ContarFilas(string csv)
+    {
+        if (string.IsNullOrEmpty(csv)) return 0;
+        int saltos = 0;
+        for (int i = 0; i < csv.Length; i++) if (csv[i] == '\n') saltos++;
+        return Mathf.Max(0, saltos);   // -1 cabecera, +1 ultima linea sin salto
+    }
+
+    private static void GuardarResultados(TrainResponseData respuesta, string modelName, int frames)
     {
         string saveDir = Application.persistentDataPath;
         byte[] onnxBytes = Convert.FromBase64String(respuesta.onnx_base64);
@@ -189,6 +197,19 @@ public static class TrainingUploader
         string namedScalerPath = Path.Combine(saveDir, "scaler_" + modelName + ".json");
         File.WriteAllText(namedScalerPath, respuesta.scaler_json);
         Debug.Log("[TrainingUploader] Modelo guardado: " + namedOnnxPath + " (" + onnxBytes.Length + " bytes)");
+
+        // 1b. Metadatos, para que el selector pueda mostrar fecha y metricas
+        //     sin tener que abrir el ONNX.
+        ModeloMeta meta = new ModeloMeta();
+        meta.nombre = modelName;
+        meta.fechaISO = DateTime.Now.ToString("o");
+        meta.frames = frames;
+        meta.accMov = respuesta.acc_mov;
+        meta.f1Mov = respuesta.f1_mov;
+        meta.accShoot = respuesta.acc_shoot;
+        meta.accPass = respuesta.acc_pass;
+        meta.lossFinal = respuesta.loss_final;
+        ModelosDisponibles.GuardarMeta(meta);
 
         // 2. Copia "activa": la que cargan los AIControllerFNNClasi por defecto.
         string activeOnnxPath = Path.Combine(saveDir, "SoccerModel_Active.onnx");
