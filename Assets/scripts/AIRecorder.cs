@@ -4,50 +4,82 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// Graba automáticamente las posiciones absolutas de la IA (y la pelota)
-/// durante el partido. Sirve para generar mapas de calor comparativos
-/// con el dataset de entrenamiento humano.
+/// Graba lo que hace el jugador controlado por el modelo durante el partido,
+/// para poder comparar su comportamiento con el del humano que lo entreno
+/// (mapas de calor, ritmo de acciones, zonas de disparo...).
 ///
-/// Uso: adjunta este componente al mismo GameObject que el AIController
-///      (Legacy, FSM o multi-modelo). Se activa solo al iniciar la escena
-///      y guarda el CSV al salir.
+/// Escribe EL MISMO sistema de coordenadas que Recorder.cs: ademas de la
+/// posicion absoluta guarda la posicion relativa a las dos porterias, que es
+/// lo unico que graba el Recorder humano. Asi el script de heatmaps puede
+/// tratar los dos ficheros con el mismo codigo, sin suponer que ambos equipos
+/// atacan hacia el mismo lado.
+///
+/// Uso: va en el mismo GameObject que AIControllerFNNClasi.
+/// CharacterManagerInField lo habilita solo en el jugador que lleva el modelo.
 /// </summary>
 public class AIRecorder : MonoBehaviour
 {
-    [Header("Configuration")]
-    [Tooltip("Intervalo entre snapshots en segundos (0.1 = 10 fps de datos)")]
+    [Header("Configuracion")]
+    [Tooltip("Intervalo entre snapshots en segundos (0.1 = 10 Hz, igual que Recorder.cs)")]
     public float snapshotInterval = 0.1f;
 
     [Tooltip("Nombre base del fichero de salida")]
     public string csvOutputName = "AIData";
 
-    [Tooltip("Si es false, no graba nada (útil para deshabilitar sin eliminar el componente)")]
+    [Tooltip("Si es false no graba nada, sin necesidad de quitar el componente")]
     public bool recordingEnabled = true;
 
-    [Header("References (auto-detectadas si se dejan vacías)")]
-    public PlayerID myPlayer;
+    [Tooltip("No graba los frames del saque tras gol: el jugador esta congelado " +
+             "en el punto de spawn y esos frames crean un pico falso en el mapa.")]
+    public bool ignorarFramesDeReset = true;
 
-    // Internals
-    private float _timer       = 0f;
-    private int   _totalFrames = 0;
-    private List<string> _lines = new List<string>();
+    [Header("Referencias (se autodetectan si se dejan vacias)")]
+    public PlayerID myPlayer;
+    public Transform rivalGoalTransform;
+    public Transform ownGoalTransform;
+
+    // ---- Internos ----
+    private float _timer;
+    private int _totalFrames;
+    private readonly List<string> _lines = new List<string>();
+    private bool _guardado;
+
+    // Acciones ejecutadas desde el ultimo snapshot. El controlador las avisa
+    // con RegistrarAccion(); aqui solo se vuelcan. Antes estas columnas se
+    // escribian siempre a 0, asi que no habia forma de dibujar donde dispara
+    // o roba el modelo.
+    private readonly bool[] _accionPendiente = new bool[4];
+    public const int ACCION_DISPARO = 0;
+    public const int ACCION_PASE = 1;
+    public const int ACCION_ROBO_K = 2;
+    public const int ACCION_ROBO_L = 3;
 
     private static readonly System.Globalization.CultureInfo Inv =
         System.Globalization.CultureInfo.InvariantCulture;
 
-    // ── Ciclo de vida ────────────────────────────────────────────────────────
+    private const string CABECERA =
+        "AbsMyPosX,AbsMyPosZ,AbsBallPosX,AbsBallPosZ," +
+        "RelPorteriaRivalX,RelPorteriaRivalZ," +
+        "RelPorteriaPropiaX,RelPorteriaPropiaZ," +
+        "RelPelotaX,RelPelotaZ,DistPelota," +
+        "TienePelota,TienePelotaEquipo," +
+        "InputX,InputZ," +
+        "Disparo,Pase,RoboK,RoboL";
+
+    // ========================================================================
+    // CICLO DE VIDA
+    // ========================================================================
     private void Start()
     {
         if (!recordingEnabled) return;
 
-        if (myPlayer == null)
-            myPlayer = GetComponent<PlayerID>();
+        if (myPlayer == null) myPlayer = GetComponent<PlayerID>();
 
-        // Cabecera CSV — mismas columnas de posición absoluta que Recorder.cs
-        _lines.Add("AbsMyPosX,AbsMyPosZ,AbsBallPosX,AbsBallPosZ," +
-                   "TienePelota,InputX,InputZ,Disparo,Pase");
+        BuscarPorterias();
 
-        Debug.Log($"[AIRecorder] Iniciado en {gameObject.name}");
+        _lines.Add(CABECERA);
+        Debug.Log("[AIRecorder] Grabando en " + gameObject.name +
+                  " (modelo '" + NombreDelModelo() + "')");
     }
 
     private void Update()
@@ -58,60 +90,208 @@ public class AIRecorder : MonoBehaviour
         if (_timer < snapshotInterval) return;
         _timer -= snapshotInterval;
 
-        RecordSnapshot();
+        if (ignorarFramesDeReset && EnReset())
+        {
+            LimpiarAcciones();
+            return;
+        }
+
+        Capturar();
         _totalFrames++;
     }
 
-    private void RecordSnapshot()
+    // Se llama al descargar la escena. Es la ruta importante: el partido
+    // termina en Timer.EndMatch() con un LoadScene, que destruye este objeto
+    // ANTES de que Unity llegue a OnApplicationQuit. Con el guardado solo en
+    // OnApplicationQuit la grabacion se perdia entera en toda partida que
+    // acabase por tiempo, que son todas.
+    private void OnDestroy() { Guardar(); }
+
+    private void OnApplicationQuit() { Guardar(); }
+
+    // ========================================================================
+    // CAPTURA
+    // ========================================================================
+    private void Capturar()
     {
-        Vector3 myPos   = transform.position;
+        Vector3 myPos = transform.position;
         Vector3 ballPos = Bola.instance != null
             ? Bola.instance.transform.position
             : Vector3.zero;
 
-        // ¿Tiene la pelota?
-        int hasBall = 0;
-        if (Bola.instance != null && Bola.instance.EnPosesion &&
-            Bola.instance.Owner != null)
-        {
-            PlayerID owner = Bola.instance.Owner.GetComponent<PlayerID>();
-            if (owner != null && owner == myPlayer)
-                hasBall = 1;
-        }
+        Vector3 rivalGoal = rivalGoalTransform != null ? rivalGoalTransform.position : Vector3.zero;
+        Vector3 ownGoal = ownGoalTransform != null ? ownGoalTransform.position : Vector3.zero;
 
-        // Movimiento actual (velocity del Rigidbody normalizada a {-1,0,1})
-        Rigidbody rb = GetComponent<Rigidbody>();
+        float relRivalX = rivalGoal.x - myPos.x;
+        float relRivalZ = rivalGoal.z - myPos.z;
+        float relOwnX = ownGoal.x - myPos.x;
+        float relOwnZ = ownGoal.z - myPos.z;
+
+        float relBallX = ballPos.x - myPos.x;
+        float relBallZ = ballPos.z - myPos.z;
+        float distBall = Vector3.Distance(myPos, ballPos);
+
+        int tienePelota = TengoLaPelota() ? 1 : 0;
+        int posesionEquipo = PosesionDelEquipo();
+
+        // Direccion de movimiento discretizada a {-1,0,1}, como InputX/InputZ
+        // del humano. El umbral es sobre velocidad del Rigidbody: las
+        // velocidades del juego son de cientos de unidades, asi que cualquier
+        // valor pequenyo separa bien "quieto" de "moviendose".
         float vx = 0f, vz = 0f;
+        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
+            const float UMBRAL_VEL = 1f;
             vx = rb.linearVelocity.x;
             vz = rb.linearVelocity.z;
-            // Discretizar igual que el modelo: signo si supera umbral
-            float threshold = 0.3f;
-            vx = vx >  threshold ?  1f : vx < -threshold ? -1f : 0f;
-            vz = vz >  threshold ?  1f : vz < -threshold ? -1f : 0f;
+            vx = vx > UMBRAL_VEL ? 1f : (vx < -UMBRAL_VEL ? -1f : 0f);
+            vz = vz > UMBRAL_VEL ? 1f : (vz < -UMBRAL_VEL ? -1f : 0f);
         }
 
-        string F(float v) => v.ToString("F3", Inv);
+        _lines.Add(
+            F(myPos.x) + "," + F(myPos.z) + "," +
+            F(ballPos.x) + "," + F(ballPos.z) + "," +
+            F(relRivalX) + "," + F(relRivalZ) + "," +
+            F(relOwnX) + "," + F(relOwnZ) + "," +
+            F(relBallX) + "," + F(relBallZ) + "," + F(distBall) + "," +
+            tienePelota + "," + posesionEquipo + "," +
+            F(vx) + "," + F(vz) + "," +
+            (_accionPendiente[0] ? 1 : 0) + "," +
+            (_accionPendiente[1] ? 1 : 0) + "," +
+            (_accionPendiente[2] ? 1 : 0) + "," +
+            (_accionPendiente[3] ? 1 : 0));
 
-        _lines.Add($"{F(myPos.x)},{F(myPos.z)}," +
-                   $"{F(ballPos.x)},{F(ballPos.z)}," +
-                   $"{hasBall}," +
-                   $"{F(vx)},{F(vz)}," +
-                   $"0,0");  // Disparo y Pase los detecta el propio AIController
+        LimpiarAcciones();
     }
 
-    // ── Guardado ─────────────────────────────────────────────────────────────
-    public void SaveToFile()
+    /// <summary>
+    /// El controlador avisa aqui cada vez que ejecuta una accion. Se queda
+    /// marcada hasta el siguiente snapshot para que no se pierda ninguna:
+    /// las acciones duran un frame y los snapshots van a 10 Hz.
+    /// </summary>
+    public void RegistrarAccion(int accion)
     {
-        if (!recordingEnabled || _lines.Count <= 1) return;
-
-        string date  = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
-        string path  = Path.Combine(Application.dataPath,
-                                    $"{csvOutputName}_{date}.csv");
-        File.WriteAllLines(path, _lines);
-        Debug.Log($"[AIRecorder] {_totalFrames} snapshots → {path}");
+        if (!recordingEnabled) return;
+        if (accion < 0 || accion >= _accionPendiente.Length) return;
+        _accionPendiente[accion] = true;
     }
 
-    private void OnApplicationQuit() => SaveToFile();
+    private void LimpiarAcciones()
+    {
+        for (int i = 0; i < _accionPendiente.Length; i++) _accionPendiente[i] = false;
+    }
+
+    // ========================================================================
+    // GUARDADO
+    // ========================================================================
+    private void Guardar()
+    {
+        if (_guardado) return;                 // OnDestroy y OnApplicationQuit pueden dispararse los dos
+        if (!recordingEnabled) return;
+        if (_lines.Count <= 1) return;
+        _guardado = true;
+
+        string nombre = csvOutputName + "_" + Sanear(NombreDelModelo()) + "_" +
+                        DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss") + ".csv";
+
+        // persistentDataPath es el unico sitio en el que se puede escribir
+        // desde una build. Application.dataPath en build es la carpeta
+        // *_Data del juego, no la carpeta Assets del proyecto.
+        string destino = Path.Combine(Application.persistentDataPath, nombre);
+        try
+        {
+            File.WriteAllLines(destino, _lines);
+            Debug.Log("[AIRecorder] " + _totalFrames + " snapshots -> " + destino);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("[AIRecorder] No se pudo guardar en " + destino + ": " + e.Message);
+            return;
+        }
+
+#if UNITY_EDITOR
+        // En el editor, ademas, una copia en Assets/ para tenerla junto a los
+        // SoccerData_*.csv del humano.
+        try { File.WriteAllLines(Path.Combine(Application.dataPath, nombre), _lines); }
+        catch (Exception e) { Debug.LogWarning("[AIRecorder] copia en Assets fallida: " + e.Message); }
+#endif
+    }
+
+    // ========================================================================
+    // AYUDAS
+    // ========================================================================
+    /// <summary>
+    /// Compara por GameObject, no por componente. En este objeto conviven
+    /// varios PlayerID (el rol y el CharacterGV), asi que GetComponent puede
+    /// devolver uno distinto del que Bola guardo como Owner y la comparacion
+    /// por referencia daba siempre false.
+    /// </summary>
+    private bool TengoLaPelota()
+    {
+        if (Bola.instance == null || !Bola.instance.EnPosesion) return false;
+        PlayerID owner = Bola.instance.Owner;
+        return owner != null && owner.gameObject == gameObject;
+    }
+
+    /// <summary>0 = nadie, 1 = mi equipo, 2 = el rival. Mismo criterio que Recorder.cs.</summary>
+    private int PosesionDelEquipo()
+    {
+        if (Bola.instance == null || !Bola.instance.EnPosesion) return 0;
+        PlayerID owner = Bola.instance.Owner;
+        if (owner == null || myPlayer == null) return 0;
+        return (owner.id % 2 == myPlayer.id % 2) ? 1 : 2;
+    }
+
+    private bool EnReset()
+    {
+        PlayerID[] todos = GetComponents<PlayerID>();
+        for (int i = 0; i < todos.Length; i++)
+            if (todos[i] != null && todos[i].EnReset) return true;
+        return false;
+    }
+
+    private void BuscarPorterias()
+    {
+        if (rivalGoalTransform != null && ownGoalTransform != null) return;
+
+        Porteria[] porterias = FindObjectsByType<Porteria>(FindObjectsSortMode.None);
+        int myTeam = myPlayer != null ? myPlayer.id % 2 : 0;
+
+        foreach (Porteria p in porterias)
+        {
+            bool esPropia = (p.team % 2 == myTeam);
+            if (esPropia && ownGoalTransform == null) ownGoalTransform = p.transform;
+            else if (!esPropia && rivalGoalTransform == null) rivalGoalTransform = p.transform;
+        }
+
+        if (rivalGoalTransform == null || ownGoalTransform == null)
+            Debug.LogWarning("[AIRecorder] No se encontraron las dos porterias: las columnas " +
+                             "relativas saldran a cero y el mapa no se podra alinear con el humano.");
+    }
+
+    private string NombreDelModelo()
+    {
+        if (Data.instance != null && !string.IsNullOrEmpty(Data.instance.rutaModeloONNX))
+        {
+            string f = Path.GetFileNameWithoutExtension(Data.instance.rutaModeloONNX);
+            const string PREFIJO = "SoccerModel_";
+            if (f.StartsWith(PREFIJO, StringComparison.Ordinal))
+                f = f.Substring(PREFIJO.Length);
+            if (!string.IsNullOrEmpty(f)) return f;
+        }
+        return "desconocido";
+    }
+
+    private static string Sanear(string s)
+    {
+        char[] malos = Path.GetInvalidFileNameChars();
+        foreach (char c in malos) s = s.Replace(c, '_');
+        return s.Replace(' ', '_');
+    }
+
+    private static string F(float v)
+    {
+        return v.ToString("F3", Inv);
+    }
 }

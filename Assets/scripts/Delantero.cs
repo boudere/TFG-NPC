@@ -370,6 +370,8 @@ public class Delantero : PlayerID, IResettable
     }
 
 
+    public override bool EnReset { get { return resetPos; } }
+
     public void ResetToSpawn()
     {
 

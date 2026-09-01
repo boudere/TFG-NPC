@@ -354,6 +354,8 @@ public class CharacterGV : PlayerID
         playerStop = null;
     }
 
+    public override bool EnReset { get { return resetPos; } }
+
     public void ResetToSpawn()
     {
         resetPos = true;

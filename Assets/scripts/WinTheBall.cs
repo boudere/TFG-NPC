@@ -162,21 +162,47 @@ public class WinTheBall : MonoBehaviour
         yo.SetSprintHacia(objetivo, hayPoseedor);
     }
 
+    /// <summary>
+    /// Version para el jugador humano: el ladron es el que controla el usuario.
+    /// </summary>
     public bool EsPoseedorValidoParaRobar(PlayerID owner)
+    {
+        if (characterManager == null) characterManager = CharacterManager.instance;
+        return EsPoseedorValidoParaRobar(owner, characterManager != null ? characterManager.index : -1);
+    }
+
+    /// <summary>
+    /// Decide si 'owner' es un objetivo legitimo para QUIEN quiere robar.
+    ///
+    /// Antes solo existia la version de arriba, que comparaba siempre contra
+    /// characterManager.index, o sea contra el equipo del HUMANO. Para tu tecla
+    /// L era correcto, pero cuando quien robaba era un NPC la pregunta estaba
+    /// mal referenciada: "es del equipo del humano?" en vez de "es del equipo
+    /// del que roba?". Si el NPC jugaba en el equipo contrario al tuyo, la
+    /// condicion quedaba invertida y el robo estaba bloqueado justo cuando
+    /// tenia sentido. Por eso el modelo no ejecutaba nunca la K ni la L.
+    /// </summary>
+    public bool EsPoseedorValidoParaRobar(PlayerID owner, int idLadron)
     {
         if (owner == null) return true;
         if (owner.CompareTag("Portero") || owner is Portero) return false;
-        if (characterManager == null) characterManager = CharacterManager.instance;
-        if (characterManager == null) return true;
-        if (owner.id % 2 == characterManager.index % 2) return false;
+        if (idLadron < 0) return true;
+        if (owner.id == idLadron) return false;            // no se roba a si mismo
+        if (owner.id % 2 == idLadron % 2) return false;    // mismo equipo
         return true;
     }
 
     public void EjecutarRobo(GameObject playerGo)
     {
+        if (characterManager == null) characterManager = CharacterManager.instance;
+        EjecutarRobo(playerGo, characterManager != null ? characterManager.index : -1);
+    }
+
+    public void EjecutarRobo(GameObject playerGo, int idLadron)
+    {
         if (playerGo == null) return;
         if (Bola.instance == null) return;
-        if (Bola.instance.EnPosesion && !EsPoseedorValidoParaRobar(Bola.instance.Owner))
+        if (Bola.instance.EnPosesion && !EsPoseedorValidoParaRobar(Bola.instance.Owner, idLadron))
         {
             return;
         }

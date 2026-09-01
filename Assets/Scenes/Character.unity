@@ -453,7 +453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -680,7 +680,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -907,7 +907,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -2053,7 +2053,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -2527,7 +2527,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -2782,7 +2782,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -3584,7 +3584,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -3827,7 +3827,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -4156,7 +4156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 5022602860645237092, guid: 158a50b2278ca064389d2bfdfa7dc7a5, type: 3}
   scalerJson: {fileID: 4900000, guid: ba9a935446a4347468e884d4938fe029, type: 3}
-  actionThreshold: 0.606
+  actionThreshold: 0.45
   actionCooldown: 0.1
   shootSpreadDeg: 8
   moveSpeed: 100
@@ -4506,7 +4506,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -4749,7 +4749,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150
@@ -4976,7 +4976,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onnxModelAsset: {fileID: 0}
   scalerJson: {fileID: 0}
-  actionThreshold: 0.35
+  actionThreshold: 0.45
   actionCooldown: 1
   shootSpreadDeg: 8
   moveSpeed: 150

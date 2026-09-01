@@ -114,6 +114,15 @@ public class CentroCampista : PlayerID, IResettable
             move("otherArea");
 
             // Decisiones con balón
+            // El jugador que lleva el humano decide con el teclado (O y P).
+            // Sin esta guarda el rol seguia ejecutando sus propios pases: dentro
+            // del bloque solo estaban protegidos el PaseConCriterio de Tirar() y
+            // el tiroPorteria, pero no passBallOwnPlayer ni los otros dos
+            // PaseConCriterio, asi que el centrocampista controlado pasaba solo.
+            // Delantero y Defensa ya lo hacian bien; este era el unico rol con
+            // el agujero, y es justo el del "centro ofensivo".
+            if (this.id == characterManager.index) return;
+
             if (AccionConBola())
             {
                 float decision = Random.value;
@@ -463,6 +472,8 @@ public class CentroCampista : PlayerID, IResettable
         frozen = false;
     }
 
+
+    public override bool EnReset { get { return resetPos; } }
 
     public void ResetToSpawn()
     {

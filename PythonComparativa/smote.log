@@ -1,0 +1,28 @@
+  SoccerData_2026_08_25_03_40_18.csv: 726 filas
+  SoccerData_2026_08_25_03_42_04.csv: 623 filas
+  SoccerData_2026_08_26_03_13_39.csv: 2051 filas
+  SoccerData_2026_08_26_03_39_57.csv: 1683 filas
+  SoccerData_2026_08_26_03_45_10.csv: 2594 filas
+  SoccerData_2026_08_26_03_58_15.csv: 474 filas
+  SoccerData_2026_08_27_05_47_47.csv: 2919 filas
+  SoccerData_2026_08_29_01_24_20.csv: 2881 filas
+  SoccerData_2026_08_29_22_15_16.csv: 2989 filas
+  SoccerData_2026_08_31_23_59_55.csv: 2813 filas
+  SoccerData_2026_09_01_01_26_23.csv: 2900 filas
+
+train 16940 filas | test 5713 filas (2 sesiones sin ver)
+
+A  sin SMOTE, con pos_weight ...
+B  SMOTE solo en train (16940 -> 20975 filas), con pos_weight ...
+C  SMOTE solo en train, SIN pos_weight ...
+D  SMOTE antes de partir + particion aleatoria (pipeline viejo) ...
+
+==================================================================================
+condicion                               Acc mov   F1 mov  F1 disparo   F1 pase
+==================================================================================
+A · sin SMOTE (actual)                     24.4     20.3        42.0      29.5
+B · SMOTE correcto + pos_weight            24.3     20.7        40.6      21.8
+C · SMOTE correcto, sin pos_weight         27.9     22.7        10.7      19.2
+D · SMOTE antes de partir (viejo)          60.7     53.5        95.3      96.0
+
+A, B y C comparten test. D tiene su propio test contaminado: no es comparable.

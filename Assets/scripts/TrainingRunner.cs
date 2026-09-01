@@ -118,10 +118,13 @@ public class TrainingRunner : MonoBehaviour
                 {
                     _aviso = Aviso.Ok;
                     _avisoTexto = "Modelo '" + nombreModelo + "' entrenado";
+                    // F1, no accuracy: ver el comentario en ModelosDisponibles.
                     _avisoDetalle = res.datos != null
-                        ? "Mov " + res.datos.acc_mov.ToString("F1") + "%   " +
-                          "Disparo " + res.datos.acc_shoot.ToString("F1") + "%   " +
-                          "Pase " + res.datos.acc_pass.ToString("F1") + "%"
+                        ? "F1  Mov " + res.datos.f1_mov.ToString("F0") + "%   " +
+                          "Disparo " + res.datos.f1_shoot.ToString("F0") + "%   " +
+                          "Pase " + res.datos.f1_pass.ToString("F0") + "%   " +
+                          "Robo " + res.datos.f1_robok.ToString("F0") + "/" +
+                          res.datos.f1_robol.ToString("F0") + "%"
                         : "";
                 }
                 else

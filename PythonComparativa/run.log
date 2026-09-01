@@ -1,0 +1,70 @@
+==============================================================================
+  COMPARATIVA DE ARQUITECTURAS - protocolo unico, sin fuga
+==============================================================================
+
+[1/4] Cargando sesiones   (dispositivo: cpu)
+  SoccerData_2026_08_25_03_40_18.csv: 726 filas
+  SoccerData_2026_08_25_03_42_04.csv: 623 filas
+  SoccerData_2026_08_26_03_13_39.csv: 2051 filas
+  SoccerData_2026_08_26_03_39_57.csv: 1683 filas
+  SoccerData_2026_08_26_03_45_10.csv: 2594 filas
+  SoccerData_2026_08_26_03_58_15.csv: 474 filas
+  SoccerData_2026_08_27_05_47_47.csv: 2919 filas
+  SoccerData_2026_08_29_01_24_20.csv: 2881 filas
+  SoccerData_2026_08_29_22_15_16.csv: 2989 filas
+  SoccerData_2026_08_31_23_59_55.csv: 2813 filas
+  SoccerData_2026_09_01_01_26_23.csv: 2900 filas
+
+  train: 9 sesiones, 16940 filas (28.2 min)
+  test : 2 sesiones, 5713 filas (9.5 min)
+
+[2/4] Lineas base sobre el conjunto de test
+  Azar (9 clases)                     11.1%
+  Clase mayoritaria                   21.8%
+  Persistencia (repetir anterior)     75.9%
+
+[3/4] Entrenando las seis arquitecturas (150 epocas, Adam 0.001, lote 32)
+
+  --- FNN dual-head
+/home/claude/comp/comparar.py:136: RuntimeWarning: overflow encountered in exp
+  return 1.0 / (1.0 + np.exp(-z))
+      acc mov  24.4%   F1 mov  20.3%   F1 disparo  42.0%   F1 pase  29.5%
+
+  --- Multi-modelo (MoE)
+/home/claude/comp/comparar.py:136: RuntimeWarning: overflow encountered in exp
+  return 1.0 / (1.0 + np.exp(-z))
+      experto Shoot: solo 0 frames de entreno, se omite
+      expertos entrenados: Recover, Approach, Pass
+      acc mov  22.9%   F1 mov  19.7%   F1 disparo  34.5%   F1 pase  29.1%
+
+  --- RNN (Elman)
+      acc mov  22.4%   F1 mov  19.4%   F1 disparo  27.5%   F1 pase  18.8%
+
+  --- GRU
+/home/claude/comp/comparar.py:136: RuntimeWarning: overflow encountered in exp
+  return 1.0 / (1.0 + np.exp(-z))
+      acc mov  23.0%   F1 mov  20.0%   F1 disparo  46.7%   F1 pase  16.5%
+
+  --- FNN sliding window
+/home/claude/comp/comparar.py:136: RuntimeWarning: overflow encountered in exp
+  return 1.0 / (1.0 + np.exp(-z))
+      acc mov  28.1%   F1 mov  24.6%   F1 disparo  28.9%   F1 pase  26.6%
+
+  --- Inspirado en FSM
+      acc mov  21.7%   F1 mov  19.9%   F1 disparo  21.3%   F1 pase  11.6%
+
+[4/4] Tabla comparativa
+
+      arquitectura  parametros  acc_mov  f1_mov  prec_mov  rec_mov  f1_disparo  f1_pase  n_disparo  n_pase
+     FNN dual-head       14219     24.4    20.3      24.6     20.3        42.0     29.5         29     125
+Multi-modelo (MoE)       42657     22.9    19.7      20.6     19.4        34.5     29.1         29     125
+       RNN (Elman)        7499     22.4    19.4      19.6     19.5        27.5     18.8         29     125
+               GRU       24683     23.0    20.0      20.7     20.0        46.7     16.5         29     125
+FNN sliding window       37963     28.1    24.6      25.2     24.9        28.9     26.6         29     125
+  Inspirado en FSM       13894     21.7    19.9      21.0     20.1        21.3     11.6         29     125
+
+Guardado en comparativa_arquitecturas.csv
+
+Mejor en movimiento: FNN sliding window (28.1%)
+Persistencia:        75.9%
+  -> Ninguna arquitectura supera a repetir el fotograma anterior.

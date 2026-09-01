@@ -50,6 +50,10 @@ public static class TrainingUploader
         public float prec_pass;
         public float rec_pass;
         public float f1_pass;
+        public float acc_robok;
+        public float f1_robok;
+        public float acc_robol;
+        public float f1_robol;
         public float loss_final;
         public string message;
     }
@@ -208,6 +212,13 @@ public static class TrainingUploader
         meta.f1Mov = respuesta.f1_mov;
         meta.accShoot = respuesta.acc_shoot;
         meta.accPass = respuesta.acc_pass;
+        // El F1 es la metrica que vale con clases desbalanceadas: dentro de su
+        // puerta, el pase es ~8% de los frames, asi que "no pasar nunca" ya
+        // saca 92% de accuracy. Se guardan los dos, pero se muestra el F1.
+        meta.f1Shoot = respuesta.f1_shoot;
+        meta.f1Pass = respuesta.f1_pass;
+        meta.f1RoboK = respuesta.f1_robok;
+        meta.f1RoboL = respuesta.f1_robol;
         meta.lossFinal = respuesta.loss_final;
         ModelosDisponibles.GuardarMeta(meta);
 

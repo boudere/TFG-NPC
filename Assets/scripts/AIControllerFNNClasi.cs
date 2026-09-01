@@ -31,10 +31,25 @@ public class AIControllerFNNClasi : MonoBehaviour
     public string defaultScalerFileName = "scaler_clasificacion_fnn.json";
 
     [Header("Action Inference")]
-    [Tooltip("Umbral para activar Disparo/Pase desde la salida sigmoide [0,1]")]
-    [Range(0f, 1f)] public float actionThreshold = 0.35f;
+    [Tooltip("Umbral para activar Disparo/Pase/RoboK/RoboL desde la salida sigmoide [0,1].\n" +
+         "0.45 medido sobre 9.3 min de juego grabado: es donde el ritmo de acciones del\n" +
+         "modelo mas se parece al del humano sin caer en el spam. Subirlo a 0.80 no acierta\n" +
+         "mas, solo actua menos: el robo baja al 43% de tu ritmo y el disparo al 54%.")]
+    [Range(0f, 1f)] public float actionThreshold = 0.45f;
     [Tooltip("Tiempo mínimo entre acciones para evitar spam")]
     public float actionCooldown = 1.0f;
+
+    [Header("Robo con sprint (equivalente a la tecla K del jugador)")]
+    [Tooltip("Velocidad durante el sprint de robo. La del jugador humano es 300.")]
+    public float sprintSpeed = 300f;
+    [Tooltip("Segundos maximos que puede durar un sprint de robo.")]
+    public float sprintTimeout = 4f;
+    [Tooltip("Radio para dar por llegado el sprint. Se amplia solo si en un paso de fisica se avanza mas que esto.")]
+    public float sprintArrivalRadius = 15f;
+    [Tooltip("Si nos alejamos del objetivo mas que esto respecto a lo mas cerca que llegamos, se aborta.")]
+    public float sprintToleranciaPerdida = 40f;
+    [Tooltip("Margen de carrera sobre la distancia inicial al objetivo.")]
+    public float sprintMargenPersecucion = 1.25f;
     [Tooltip("Dispersión angular del disparo en grados (0 = tiro perfecto)")]
     [Range(0f, 30f)] public float shootSpreadDeg = 8f;
 
@@ -81,6 +96,18 @@ public class AIControllerFNNClasi : MonoBehaviour
     private const string OnnxInputName = "vector_observation";
     private const int ExpectedInputSize = 40;
     private float nextActionTime = 0f;
+
+    // Estado del sprint de robo. El NPC no usa CharacterGV (lo desactiva en
+    // Update), asi que no puede reutilizar el sprint que hay alli: necesita el
+    // suyo, y mientras dura tiene que anular el movimiento del modelo.
+    private bool _sprintActivo;
+    private Transform _sprintObjetivo;
+    private PlayerID _sprintPoseedor;
+    private Vector3 _sprintDireccion;
+    private Vector3 _sprintOrigen;
+    private float _sprintFin;
+    private float _sprintDistanciaPermitida;
+    private float _sprintMejorDistancia;
     private bool scalerWarningShown = false;
     private float nextLogTime = 0f;
 
@@ -99,6 +126,7 @@ public class AIControllerFNNClasi : MonoBehaviour
     private void Start()
     {
         if (myPlayer    == null) myPlayer    = GetComponent<PlayerID>();
+        if (aiRecorder  == null) aiRecorder  = GetComponent<AIRecorder>();
         if (myRigidbody == null) myRigidbody = GetComponent<Rigidbody>();
         if (characterGV == null) characterGV = GetComponent<CharacterGV>();
 
@@ -244,6 +272,29 @@ public class AIControllerFNNClasi : MonoBehaviour
     private void Update()
     {
         if (myPlayer == null || session == null) return;
+
+        // Congelacion compartida: mientras el jugador este en un reset (el saque
+        // de 4 segundos tras un gol), la IA se queda quieta como todos los
+        // demas. Antes era la unica que seguia moviendose porque resetByTag
+        // congela el rol y el CharacterGV, pero no a este componente.
+        if (EnResetCompartido())
+        {
+            if (_sprintActivo) TerminarSprintRobo(false, "reset del partido");
+            if (myRigidbody != null)
+                myRigidbody.linearVelocity = new Vector3(0f, myRigidbody.linearVelocity.y, 0f);
+            if (characterGV != null) characterGV.enabled = false;
+            return;
+        }
+
+        // Mientras dura el sprint de robo el modelo no conduce: el NPC va a por
+        // el poseedor igual que tu con la K. Se salta tambien la inferencia,
+        // que en esos segundos no aporta nada y cuesta CPU.
+        if (_sprintActivo)
+        {
+            ActualizarSprintRobo();
+            if (characterGV != null) characterGV.enabled = false;
+            return;
+        }
 
         // 1. Recopilar las 40 features
         float[] inputs = RecopilarVariablesDelEntorno();
@@ -455,6 +506,16 @@ public class AIControllerFNNClasi : MonoBehaviour
         return (movement, actions);
     }
 
+    // Grabador de comportamiento. Puede ser null: solo esta habilitado en
+    // el jugador que lleva el modelo, y solo si se quieren mapas de calor.
+    private AIRecorder aiRecorder;
+
+    /// <summary>Avisa al grabador de que se acaba de ejecutar una accion.</summary>
+    private void AnotarAccion(int accion)
+    {
+        if (aiRecorder != null) aiRecorder.RegistrarAccion(accion);
+    }
+
     // ── ACCIONES ──
     private string TryApplyAction(float shootProb, float passProb, float roboKProb, float roboLProb)
     {
@@ -472,6 +533,7 @@ public class AIControllerFNNClasi : MonoBehaviour
             {
                 AimAtGoal();
                 Shoot.instance.disparoLibre();
+                AnotarAccion(AIRecorder.ACCION_DISPARO);
                 nextActionTime = Time.time + actionCooldown;
                 string actionStr = $"DISPARO (prob={shootProb:F2})";
                 Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
@@ -481,6 +543,7 @@ public class AIControllerFNNClasi : MonoBehaviour
             if (doPass && Pase.instance != null)
             {
                 Pase.instance.searchPlayersToPass("npc", transform.position, myPlayer.id);
+                AnotarAccion(AIRecorder.ACCION_PASE);
                 nextActionTime = Time.time + actionCooldown;
                 string actionStr = $"PASE (prob={passProb:F2})";
                 Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
@@ -495,20 +558,176 @@ public class AIControllerFNNClasi : MonoBehaviour
             if ((doRoboK || doRoboL) && WinTheBall.instance != null && Bola.instance != null)
             {
                 PlayerID owner = Bola.instance.Owner;
-                if (Bola.instance.EnPosesion && owner != null && WinTheBall.instance.EsPoseedorValidoParaRobar(owner))
+                int miId = myPlayer != null ? myPlayer.id : -1;
+
+                if (Bola.instance.EnPosesion && owner != null &&
+                    WinTheBall.instance.EsPoseedorValidoParaRobar(owner, miId))
                 {
-                    WinTheBall.instance.EjecutarRobo(gameObject);
-                    nextActionTime = Time.time + actionCooldown;
-                    string tipoRobo = doRoboK && doRoboL ? (roboKProb >= roboLProb ? "RoboK" : "RoboL") : (doRoboK ? "RoboK" : "RoboL");
-                    float probMax = Mathf.Max(roboKProb, roboLProb);
-                    string actionStr = $"ROBO [{tipoRobo}] (prob={probMax:F2})";
-                    Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
-                    return actionStr;
+                    float distPoseedor = Vector3.Distance(transform.position, owner.transform.position);
+                    float distBalon = Vector3.Distance(transform.position, Bola.instance.transform.position);
+
+                    // Cada tecla hace lo suyo, igual que para el jugador humano:
+                    //   L -> robo directo, solo si ya esta pegado.
+                    //   K -> si esta pegado roba; si no, esprinta y roba al llegar.
+                    bool prefiereK = doRoboK && (!doRoboL || roboKProb >= roboLProb);
+
+                    if (distBalon < WinTheBall.instance.distanciaMaxima)
+                    {
+                        WinTheBall.instance.EjecutarRobo(gameObject, miId);
+                        AnotarAccion(prefiereK ? AIRecorder.ACCION_ROBO_K : AIRecorder.ACCION_ROBO_L);
+                        nextActionTime = Time.time + actionCooldown;
+                        string actionStr = $"ROBO [{(prefiereK ? "RoboK" : "RoboL")}] directo (prob={Mathf.Max(roboKProb, roboLProb):F2})";
+                        Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
+                        return actionStr;
+                    }
+
+                    if (prefiereK && distPoseedor <= WinTheBall.instance.rangoSprint)
+                    {
+                        IniciarSprintRobo(owner);
+                        AnotarAccion(AIRecorder.ACCION_ROBO_K);
+                        nextActionTime = Time.time + actionCooldown;
+                        string actionStr = $"SPRINT ROBO [RoboK] hacia {owner.id} a {distPoseedor:F0} (prob={roboKProb:F2})";
+                        Debug.Log($"[AIControllerFNNClasi] ⚡ ACCIÓN EJECUTADA: {actionStr}");
+                        return actionStr;
+                    }
                 }
             }
         }
 
         return "NINGUNA";
+    }
+
+    // ======================================================================
+    // SPRINT DE ROBO (equivalente a la tecla K del jugador humano)
+    // ======================================================================
+    /// <summary>
+    /// Consulta TODOS los PlayerID de este GameObject (el rol y el CharacterGV
+    /// conviven en el mismo objeto) y devuelve true si alguno esta en reset.
+    /// Se miran todos a proposito: myPlayer puede haber resuelto a cualquiera
+    /// de los dos, y basta con que uno diga que hay que estarse quieto.
+    /// </summary>
+    private bool EnResetCompartido()
+    {
+        PlayerID[] todos = GetComponents<PlayerID>();
+        for (int i = 0; i < todos.Length; i++)
+        {
+            if (todos[i] != null && todos[i].EnReset) return true;
+        }
+        return false;
+    }
+
+    private void IniciarSprintRobo(PlayerID poseedor)
+    {
+        if (poseedor == null) return;
+
+        Vector3 dir = poseedor.transform.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.001f) return;
+
+        float distanciaInicial = dir.magnitude;
+
+        _sprintObjetivo = poseedor.transform;
+        _sprintPoseedor = poseedor;
+        _sprintDireccion = dir / distanciaInicial;
+        _sprintOrigen = transform.position;
+        _sprintFin = Time.time + sprintTimeout;
+        _sprintMejorDistancia = distanciaInicial;
+
+        // La carrera permitida sale de lo lejos que esta el objetivo, no de un
+        // numero fijo: asi no se corren 400 unidades para un objetivo a 150.
+        _sprintDistanciaPermitida = distanciaInicial * sprintMargenPersecucion + 25f;
+        _sprintActivo = true;
+    }
+
+    private void TerminarSprintRobo(bool intentarRobo, string motivo)
+    {
+        _sprintActivo = false;
+        _sprintObjetivo = null;
+        _sprintPoseedor = null;
+        _sprintDireccion = Vector3.zero;
+
+        if (myRigidbody != null)
+            myRigidbody.linearVelocity = new Vector3(0f, myRigidbody.linearVelocity.y, 0f);
+
+        if (!intentarRobo || WinTheBall.instance == null || Bola.instance == null)
+        {
+            if (enableDebugLogs) Debug.Log($"[AIControllerFNNClasi] Sprint de robo terminado: {motivo}");
+            return;
+        }
+
+        int miId = myPlayer != null ? myPlayer.id : -1;
+        float distBalon = Vector3.Distance(transform.position, Bola.instance.transform.position);
+        float umbral = Mathf.Max(WinTheBall.instance.distanciaMaxima, sprintArrivalRadius + 5f);
+
+        if (distBalon <= umbral)
+        {
+            WinTheBall.instance.EjecutarRobo(gameObject, miId);
+            if (enableDebugLogs) Debug.Log($"[AIControllerFNNClasi] ⚡ ROBO al terminar el sprint ({motivo})");
+        }
+        else if (enableDebugLogs)
+        {
+            Debug.Log($"[AIControllerFNNClasi] Sprint terminado ({motivo}) pero el balon esta a {distBalon:F0}: no roba.");
+        }
+    }
+
+    private void ActualizarSprintRobo()
+    {
+        if (Time.time >= _sprintFin)
+        {
+            TerminarSprintRobo(true, "timeout");
+            return;
+        }
+
+        // Si el balon cambia de duenyo o se suelta, el motivo del sprint ya no existe.
+        if (Bola.instance == null || !Bola.instance.EnPosesion ||
+            Bola.instance.Owner != _sprintPoseedor || _sprintObjetivo == null)
+        {
+            TerminarSprintRobo(false, "el objetivo ha perdido el balon");
+            return;
+        }
+
+        if (Vector3.Distance(transform.position, _sprintOrigen) >= _sprintDistanciaPermitida)
+        {
+            TerminarSprintRobo(true, "distancia maxima recorrida");
+            return;
+        }
+
+        Vector3 hacia = _sprintObjetivo.position - transform.position;
+        hacia.y = 0f;
+        float distancia = hacia.magnitude;
+
+        // Si nos alejamos en vez de acercarnos, corre mas que nosotros.
+        if (distancia < _sprintMejorDistancia)
+        {
+            _sprintMejorDistancia = distancia;
+        }
+        else if (distancia > _sprintMejorDistancia + sprintToleranciaPerdida)
+        {
+            TerminarSprintRobo(true, "me alejo del objetivo");
+            return;
+        }
+
+        // Radio de llegada proporcional al avance por paso de fisica: a 300 u/s
+        // el rigidbody avanza ~6 unidades por FixedUpdate y un radio fijo
+        // pequenyo se atravesaria de un salto sin detectarse.
+        float radioLlegada = Mathf.Max(sprintArrivalRadius, sprintSpeed * Time.fixedDeltaTime * 1.5f);
+        if (distancia <= radioLlegada)
+        {
+            TerminarSprintRobo(true, "llegada");
+            return;
+        }
+
+        if (distancia > 0.01f) _sprintDireccion = hacia / distancia;
+
+        Vector3 v = _sprintDireccion * sprintSpeed;
+        myRigidbody.linearVelocity = new Vector3(v.x, myRigidbody.linearVelocity.y, v.z);
+
+        if (v.sqrMagnitude > 0.01f)
+        {
+            Quaternion rot = Quaternion.LookRotation(_sprintDireccion, Vector3.up);
+            myRigidbody.MoveRotation(
+                Quaternion.RotateTowards(myRigidbody.rotation, rot, turnSpeedDeg * Time.deltaTime));
+        }
     }
 
     private bool HasBallControl()
@@ -675,6 +894,12 @@ public class AIControllerFNNClasi : MonoBehaviour
         };
 
         return inputs;
+    }
+
+    private void OnDisable()
+    {
+        // Si nos desactivan a mitad de sprint, no dejar al rigidbody lanzado.
+        if (_sprintActivo) TerminarSprintRobo(false, "componente desactivado");
     }
 
     private void OnDestroy()

@@ -179,6 +179,15 @@ public class PlayerID : MonoBehaviour
         stop = false;
     }
 
+    /// <summary>
+    /// true mientras este jugador esta congelado por un reset (saque tras gol).
+    /// Cada rol la sobreescribe con su propio resetPos. Existe para que
+    /// AIControllerFNNClasi pueda respetar la misma congelacion que los demas:
+    /// resetByTag congela el rol y el CharacterGV, pero el controlador de la IA
+    /// no se enteraba y era el unico que se movia durante esos segundos.
+    /// </summary>
+    public virtual bool EnReset { get { return false; } }
+
 
 
     protected void goToOtherArea() 
@@ -227,6 +236,12 @@ public class PlayerID : MonoBehaviour
 
     protected void PaseConCriterio()
     {
+        // Red de seguridad. Este helper lo llaman los tres roles y no todos lo
+        // protegian en todas sus ramas, asi que el jugador del humano acababa
+        // dando pases que el no habia pedido. Guardarlo aqui cierra el agujero
+        // para cualquier llamada, presente o futura.
+        if (CharacterManager.instance != null && this.id == CharacterManager.instance.index)
+            return;
 
         GameObject[] porterias = GameObject.FindGameObjectsWithTag("Porteria");
         foreach (GameObject p in porterias)

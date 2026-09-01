@@ -17,9 +17,19 @@ public class ModeloMeta
     public float f1Mov = -1f;
     public float accShoot = -1f;
     public float accPass = -1f;
+    public float f1Shoot = -1f;
+    public float f1Pass = -1f;
+    public float f1RoboK = -1f;
+    public float f1RoboL = -1f;
     public float lossFinal = -1f;
 
     public bool TieneMetricas { get { return accMov >= 0f; } }
+
+    /// <summary>
+    /// true si el modelo trae F1 de acciones. Los entrenados antes de este
+    /// cambio solo guardaban accuracy, que con estas clases no dice nada.
+    /// </summary>
+    public bool TieneF1Acciones { get { return f1Shoot >= 0f; } }
 }
 
 /// <summary>Un modelo listo para usar: onnx + scaler emparejados.</summary>
@@ -36,9 +46,23 @@ public class ModeloInfo
         string s = fecha.ToString("dd/MM/yyyy HH:mm");
         if (meta != null && meta.TieneMetricas)
         {
-            s += "   Mov " + meta.accMov.ToString("F0") + "%" +
-                 "   Disparo " + meta.accShoot.ToString("F0") + "%" +
-                 "   Pase " + meta.accPass.ToString("F0") + "%";
+            // Se muestra F1, no accuracy. La accuracy en estas clases es
+            // enganyosa: el pase es ~8% de los frames dentro de su puerta, asi
+            // que no pasar nunca ya saca un 92%.
+            s += "   F1  Mov " + meta.f1Mov.ToString("F0") + "%";
+
+            if (meta.TieneF1Acciones)
+            {
+                s += "   Disparo " + meta.f1Shoot.ToString("F0") + "%" +
+                     "   Pase " + meta.f1Pass.ToString("F0") + "%" +
+                     "   Robo " + meta.f1RoboK.ToString("F0") + "/" +
+                     meta.f1RoboL.ToString("F0") + "%";
+            }
+            else
+            {
+                s += "   (acciones sin F1: modelo anterior al cambio)";
+            }
+
             if (meta.frames > 0) s += "   " + meta.frames + " frames";
         }
         else

@@ -83,6 +83,12 @@ class TrainResponse(BaseModel):
     prec_pass: float = 0.0
     rec_pass: float = 0.0
     f1_pass: float = 0.0
+    # RoboK y RoboL: antes se calculaban en el entrenamiento pero no llegaban
+    # a Unity, asi que el juego no podia mostrar como de bien roba el modelo.
+    acc_robok: float = 0.0
+    f1_robok: float = 0.0
+    acc_robol: float = 0.0
+    f1_robol: float = 0.0
     loss_final: float = 0.0
     message: str
 
@@ -180,6 +186,10 @@ async def train_model(request: TrainRequest):
             prec_pass=round(metrics.get('prec_pass', 0) * 100, 2),
             rec_pass=round(metrics.get('rec_pass', 0) * 100, 2),
             f1_pass=round(metrics.get('f1_pass', 0) * 100, 2),
+            acc_robok=round(metrics.get('acc_robok', 0) * 100, 2),
+            f1_robok=round(metrics.get('f1_robok', 0) * 100, 2),
+            acc_robol=round(metrics.get('acc_robol', 0) * 100, 2),
+            f1_robol=round(metrics.get('f1_robol', 0) * 100, 2),
             loss_final=round(metrics.get('loss_final', 0), 4),
             message=f"Modelo '{model_name}' entrenado exitosamente"
         )
