@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -127,6 +127,13 @@ public class AIControllerFNNClasi : MonoBehaviour
     {
         if (myPlayer    == null) myPlayer    = GetComponent<PlayerID>();
         if (aiRecorder  == null) aiRecorder  = GetComponent<AIRecorder>();
+
+        // Indicador flotante que marca en pantalla cual de los once jugadores
+        // lleva el modelo. Se anyade aqui a proposito: este componente solo se
+        // habilita en el jugador del modelo, asi que el marcador aparece justo
+        // sobre el que toca sin tener que arrastrar nada en la escena.
+        if (mostrarIndicador && GetComponent<IndicadorModelo>() == null)
+            gameObject.AddComponent<IndicadorModelo>();
         if (myRigidbody == null) myRigidbody = GetComponent<Rigidbody>();
         if (characterGV == null) characterGV = GetComponent<CharacterGV>();
 
@@ -145,6 +152,17 @@ public class AIControllerFNNClasi : MonoBehaviour
                     rivalGoalTransform = p.transform;
             }
         }
+
+        // Marcador real. Tiene que leerse EXACTAMENTE igual que en Recorder.cs:
+        // si el dataset se graba con el marcador de verdad y aqui se enviaran
+        // ceros, el modelo veria en partida una entrada distinta de la que
+        // aprendio, que es el fallo silencioso mas caro de todos.
+        if (ownGoalTransform != null)
+            _porteriaPropia = ownGoalTransform.GetComponentInParent<Porteria>()
+                              ?? ownGoalTransform.GetComponent<Porteria>();
+        if (rivalGoalTransform != null)
+            _porteriaRival = rivalGoalTransform.GetComponentInParent<Porteria>()
+                             ?? rivalGoalTransform.GetComponent<Porteria>();
 
         // Orden de preferencia:
         //   1. El modelo que el jugador eligio en la lista (AsignarModelo).
@@ -269,6 +287,22 @@ public class AIControllerFNNClasi : MonoBehaviour
         Debug.Log($"[AIControllerFNNClasi] Modelo recargado desde {onnxPath}");
     }
 
+    // ── FRECUENCIA DE INFERENCIA ───────────────────────────────────
+    // Recorder.cs graba las partidas a 10 Hz (snapshotTime = 0.1 s). Si el modelo
+    // se ejecutase en cada fotograma renderizado (~60 Hz) trabajaria en condiciones
+    // distintas a las del entrenamiento: la ventana temporal, el estado oculto y la
+    // diferencia entre fotogramas consecutivos dejarian de corresponderse con lo
+    // aprendido. Este temporizador mantiene la inferencia a la misma frecuencia a la
+    // que se grabaron los datos.
+    [Header("Frecuencia de inferencia")]
+    [Tooltip("Segundos entre inferencias. 0.1 = 10 Hz, la misma frecuencia a la que Recorder.cs graba las partidas.")]
+    public float inferenceInterval = 0.1f;
+
+    private float _acumuladorInferencia = 0f;
+    private bool  _hayDecision = false;
+    private float _decInputX = 0f;
+    private float _decInputZ = 0f;
+
     private void Update()
     {
         if (myPlayer == null || session == null) return;
@@ -296,6 +330,43 @@ public class AIControllerFNNClasi : MonoBehaviour
             return;
         }
 
+        // Inferencia a frecuencia fija (ver comentario de inferenceInterval).
+        _acumuladorInferencia += Time.deltaTime;
+        if (_acumuladorInferencia >= inferenceInterval || !_hayDecision)
+        {
+            _acumuladorInferencia -= inferenceInterval;
+            if (_acumuladorInferencia < 0f || _acumuladorInferencia > inferenceInterval)
+                _acumuladorInferencia = 0f;
+            _hayDecision = true;
+            Decidir();
+        }
+
+        // Suavizado y actuacion: cada fotograma, hacia la ultima decision tomada.
+        currentInputX = Mathf.Lerp(currentInputX, _decInputX, Time.deltaTime * movementSmoothing);
+        currentInputZ = Mathf.Lerp(currentInputZ, _decInputZ, Time.deltaTime * movementSmoothing);
+
+        Vector3 moveDir = new Vector3(currentInputX, 0f, currentInputZ).normalized;
+        ApplyMovement(moveDir);
+
+        if (characterGV != null) characterGV.enabled = false;
+
+        if (constrainToField)
+        {
+            Vector3 pos = transform.position;
+            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
+            {
+                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
+                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
+                transform.position = pos;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Una decision del modelo. Se ejecuta a inferenceInterval, no cada fotograma.
+    /// </summary>
+    private void Decidir()
+    {
         // 1. Recopilar las 40 features
         float[] inputs = RecopilarVariablesDelEntorno();
         if (inputs.Length != ExpectedInputSize)
@@ -349,9 +420,9 @@ public class AIControllerFNNClasi : MonoBehaviour
             targetInputZ = Mathf.Clamp(targetInputZ + Random.Range(-explorationNoise, explorationNoise), -1f, 1f);
         }
 
-        // 5. Suavizado de Inputs (Mathf.Lerp)
-        currentInputX = Mathf.Lerp(currentInputX, targetInputX, Time.deltaTime * movementSmoothing);
-        currentInputZ = Mathf.Lerp(currentInputZ, targetInputZ, Time.deltaTime * movementSmoothing);
+        // 5. Guardar la decision; el suavizado se aplica en Update, cada fotograma.
+        _decInputX = targetInputX;
+        _decInputZ = targetInputZ;
 
         // Procesar salida de acciones
         float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
@@ -359,11 +430,7 @@ public class AIControllerFNNClasi : MonoBehaviour
         float roboKProb = prediction.actions.Length > 2 ? prediction.actions[2] : 0f;
         float roboLProb = prediction.actions.Length > 3 ? prediction.actions[3] : 0f;
 
-        // 7. Aplicar movimiento
-        Vector3 moveDir = new Vector3(currentInputX, 0f, currentInputZ).normalized;
-        ApplyMovement(moveDir);
-
-        // 8. Intentar acciones y obtener la acción realizada
+        // 7. Intentar acciones y obtener la accion realizada
         string actionExecuted = TryApplyAction(shootProb, passProb, roboKProb, roboLProb);
 
         // 6. Log periódico con diagnóstico completo
@@ -395,20 +462,6 @@ public class AIControllerFNNClasi : MonoBehaviour
                       $"           ⚡ ACCIÓN REALIZADA: {actionExecuted}");
         }
 
-        // 9. Desactivar CharacterGV
-        if (characterGV != null) characterGV.enabled = false;
-
-        // 10. Restricción de campo (seguridad: clamp sin frenar)
-        if (constrainToField)
-        {
-            Vector3 pos = transform.position;
-            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
-            {
-                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
-                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
-                transform.position = pos;
-            }
-        }
     }
 
     // ── MOVIMIENTO — Seek Steering Behavior (Reynolds) + Boundary Avoidance ──
@@ -509,6 +562,15 @@ public class AIControllerFNNClasi : MonoBehaviour
     // Grabador de comportamiento. Puede ser null: solo esta habilitado en
     // el jugador que lleva el modelo, y solo si se quieren mapas de calor.
     private AIRecorder aiRecorder;
+
+    // Contadores de goles, cacheados igual que en Recorder.cs.
+    private Porteria _porteriaPropia;
+    private Porteria _porteriaRival;
+
+    [Header("Ayudas visuales")]
+    [Tooltip("Muestra un marcador flotante sobre este jugador indicando que " +
+             "lleva el modelo. En partida se puede ocultar con F2.")]
+    public bool mostrarIndicador = true;
 
     /// <summary>Avisa al grabador de que se acaba de ejecutar una accion.</summary>
     private void AnotarAccion(int accion)
@@ -819,10 +881,10 @@ public class AIControllerFNNClasi : MonoBehaviour
         float distBallToOwnGoal = Vector3.Distance(ballPos, ownGoalPos);
 
         // ---- Puntuaciones ----
-        int scoreT1 = 0;
-        int scoreT2 = 0;
-        int puntuacionPropia    = myPlayer.id % 2 == 0 ? scoreT1 : scoreT2;
-        int puntuacionContraria = myPlayer.id % 2 == 0 ? scoreT2 : scoreT1;
+        // goalCounterTeam de una porteria = goles ENCAJADOS por su equipo, asi
+        // que los mios estan en la porteria rival y viceversa.
+        int puntuacionPropia    = _porteriaRival  != null ? _porteriaRival.goalCounterTeam  : 0;
+        int puntuacionContraria = _porteriaPropia != null ? _porteriaPropia.goalCounterTeam : 0;
 
         // ---- Clasificar jugadores ----
         PlayerID[] allPlayers = FindObjectsByType<PlayerID>(FindObjectsSortMode.None);

@@ -1,0 +1,227 @@
+/home/claude/seq/train_secuenciales.py:414: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:822.)
+  total += float(loss); n += 1
+/home/claude/seq/train_secuenciales.py:438: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(
+==============================================================
+  GRU Y FNN SLIDING WINDOW — dataset unico
+==============================================================
+
+SoccerData_2026_09_02_01_09_17.csv: 5990 filas (10.0 min)
+  _tmp_seq.csv: 5990 -> 4852 tras filtro  (Disparo=23, Pase=21, RoboK=43, RoboL=37)
+
+  TOTAL combinado: 4852 filas
+  Disparo=1 en total: 23
+  Pase=1    en total: 21
+  RoboK=1   en total: 43
+  RoboL=1   en total: 37
+
+  Correccion de timing (label-shift hacia TienePelota=1):
+    Disparo: 23 etiquetas movidas -> 23 validas
+    Pase:    20 etiquetas movidas -> 19 validas
+
+  Ventana de intencion (5 frames = 0.5s):
+    Disparo    23 ->   115 muestras positivas
+    Pase       19 ->    95 muestras positivas
+    RoboK      43 ->   195 muestras positivas
+    RoboL      37 ->   161 muestras positivas
+
+  (sin SMOTE: 4852 filas reales)
+
+  Filas finales del dataset: 4852
+  Split TEMPORAL: primeros 3881 frames para entrenar, ultimos 971 para evaluar (una sola sesion).
+
+  train 3881 frames | test 971 frames
+  tramos continuos: 38 en train, 11 en test
+
+[pesos de clase]
+  pos_weight[Disparo] = 7.6  (90 positivos / 680 negativos, sobre 770 frames con la puerta abierta)
+  pos_weight[Pase] = 10.7  (66 positivos / 704 negativos, sobre 770 frames con la puerta abierta)
+  pos_weight[RoboK] = 6.9  (115 positivos / 792 negativos, sobre 907 frames con la puerta abierta)
+  pos_weight[RoboL] = 5.4  (74 positivos / 397 negativos, sobre 471 frames con la puerta abierta)
+
+### GRU — semilla 0
+
+==============================================================
+  GRU  (estado oculto de 64, perdida en todos los pasos)
+==============================================================
+  235 trozos de 50 pasos
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=1.2531
+  Epoca [ 50/150]  Loss=0.5950
+  Epoca [ 75/150]  Loss=0.3508
+  Epoca [100/150]  Loss=0.2178
+  Epoca [125/150]  Loss=0.1531
+  Epoca [150/150]  Loss=0.0948
+
+==============================================================
+  EVALUACION — GRU (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=34.9%  Prec=29.3%  Rec=28.1%  F1=27.7%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    307 frames,   20 positivos ( 6.5%)  F1@0.50=  0.0%   mejor umbral 0.10 -> F1=8.2%
+  Pase       307 frames,   25 positivos ( 8.1%)  F1@0.50= 28.1%   mejor umbral 0.05 -> F1=35.0%
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 19.6%   mejor umbral 0.95 -> F1=20.8%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50= 42.1%   mejor umbral 0.10 -> F1=52.2%
+
+### GRU — semilla 1
+
+==============================================================
+  GRU  (estado oculto de 64, perdida en todos los pasos)
+==============================================================
+  235 trozos de 50 pasos
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=1.2194
+  Epoca [ 50/150]  Loss=0.5873
+  Epoca [ 75/150]  Loss=0.3119
+  Epoca [100/150]  Loss=0.1896
+  Epoca [125/150]  Loss=0.1196
+  Epoca [150/150]  Loss=0.0786
+
+==============================================================
+  EVALUACION — GRU (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=34.1%  Prec=26.0%  Rec=24.5%  F1=23.1%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    307 frames,   20 positivos ( 6.5%)  F1@0.50= 23.8%   mejor umbral 0.80 -> F1=24.7%
+  Pase       307 frames,   25 positivos ( 8.1%)  F1@0.50= 30.3%   mejor umbral 0.85 -> F1=31.4%
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 29.1%   mejor umbral 0.95 -> F1=32.7%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50=  0.0%   mejor umbral 0.05 -> F1=26.7%
+
+### GRU — semilla 2
+
+==============================================================
+  GRU  (estado oculto de 64, perdida en todos los pasos)
+==============================================================
+  235 trozos de 50 pasos
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=1.2738
+  Epoca [ 50/150]  Loss=0.6430
+  Epoca [ 75/150]  Loss=0.3683
+  Epoca [100/150]  Loss=0.2244
+  Epoca [125/150]  Loss=0.1376
+  Epoca [150/150]  Loss=0.0920
+
+==============================================================
+  EVALUACION — GRU (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=31.5%  Prec=23.5%  Rec=24.8%  F1=23.4%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    307 frames,   20 positivos ( 6.5%)  F1@0.50=  5.7%   mejor umbral 0.30 -> F1=7.5%
+  Pase       307 frames,   25 positivos ( 8.1%)  F1@0.50= 24.2%   mejor umbral 0.95 -> F1=28.2%
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 21.7%   mejor umbral 0.95 -> F1=22.7%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50=  0.0%   mejor umbral 0.05 -> F1=0.0%
+
+  [GRU] semillas: acc_mov 34.9, 34.1, 31.5  -> se exporta la semilla 1
+  ONNX -> out/SoccerModelGRU_10minutos.onnx
+
+### SlidingWindow — semilla 0
+
+==============================================================
+  FNN SLIDING WINDOW  (fotograma anterior + actual = 80 entradas)
+==============================================================
+  3843 pares de entrenamiento, 960 de test
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=0.5782
+  Epoca [ 50/150]  Loss=0.3569
+  Epoca [ 75/150]  Loss=0.2524
+  Epoca [100/150]  Loss=0.2134
+  Epoca [125/150]  Loss=0.2065
+  Epoca [150/150]  Loss=0.2059
+
+==============================================================
+  EVALUACION — FNN sliding window (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=32.5%  Prec=23.8%  Rec=26.4%  F1=23.8%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    306 frames,   20 positivos ( 6.5%)  F1@0.50= 18.3%   mejor umbral 0.55 -> F1=18.4%
+  Pase       306 frames,   25 positivos ( 8.2%)  F1@0.50= 13.9%   mejor umbral 0.95 -> F1=17.2%
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 20.4%   mejor umbral 0.05 -> F1=27.1%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50= 25.0%   mejor umbral 0.05 -> F1=60.0%
+
+### SlidingWindow — semilla 1
+
+==============================================================
+  FNN SLIDING WINDOW  (fotograma anterior + actual = 80 entradas)
+==============================================================
+  3843 pares de entrenamiento, 960 de test
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=0.5337
+  Epoca [ 50/150]  Loss=0.3136
+  Epoca [ 75/150]  Loss=0.2681
+  Epoca [100/150]  Loss=0.2263
+  Epoca [125/150]  Loss=0.1683
+  Epoca [150/150]  Loss=0.1826
+
+==============================================================
+  EVALUACION — FNN sliding window (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=36.6%  Prec=25.8%  Rec=27.1%  F1=25.5%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    306 frames,   20 positivos ( 6.5%)  F1@0.50= 16.0%   mejor umbral 0.35 -> F1=18.1%
+  Pase       306 frames,   25 positivos ( 8.2%)  F1@0.50= 25.9%   mejor umbral 0.15 -> F1=36.9%
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 21.3%   mejor umbral 0.05 -> F1=26.9%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50= 44.4%   mejor umbral 0.05 -> F1=60.0%
+
+### SlidingWindow — semilla 2
+
+==============================================================
+  FNN SLIDING WINDOW  (fotograma anterior + actual = 80 entradas)
+==============================================================
+  3843 pares de entrenamiento, 960 de test
+
+Entrenando 150 epocas...
+  Epoca [ 25/150]  Loss=0.5449
+  Epoca [ 50/150]  Loss=0.3310
+  Epoca [ 75/150]  Loss=0.2334
+  Epoca [100/150]  Loss=0.2551
+  Epoca [125/150]  Loss=0.1835
+  Epoca [150/150]  Loss=0.1542
+
+==============================================================
+  EVALUACION — FNN sliding window (test 20%)
+==============================================================
+
+[Movimiento] Accuracy=34.6%  Prec=25.3%  Rec=26.2%  F1=24.5%
+
+[Acciones — cada una solo en los frames donde era posible]
+  Disparo    306 frames,   20 positivos ( 6.5%)  F1@0.50= 14.8%   mejor umbral 0.25 -> F1=16.3%
+  Pase       306 frames,   25 positivos ( 8.2%)  F1@0.50=  0.0%   mejor umbral 0.15 -> F1=33.3%/home/claude/seq/train_secuenciales.py:505: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(
+
+  RoboK      141 frames,   20 positivos (14.2%)  F1@0.50= 21.7%   mejor umbral 0.75 -> F1=22.2%
+  RoboL       36 frames,    6 positivos (16.7%)  F1@0.50= 72.7%   mejor umbral 0.05 -> F1=76.9%
+
+  [SlidingWindow] semillas: acc_mov 32.5, 36.6, 34.6  -> se exporta la semilla 2
+  ONNX -> out/SoccerModelSliding_10minutos.onnx
+  scaler -> out/scaler_gru_10minutos.json  (40 valores)
+  scaler -> out/scaler_sliding_10minutos.json  (80 valores)
+
+==============================================================
+  RESUMEN
+==============================================================
+
+  Media +/- desviacion entre 3 semillas.
+
+arquitectura            accMov         f1Mov        f1Disp        f1Pase       f1RoboK       f1RoboL
+----------------------------------------------------------------------------------------------------
+GRU                33.5+/- 1.8   24.7+/- 2.6    9.8+/-12.4   27.5+/- 3.1   23.5+/- 5.0   14.0+/-24.3
+SlidingWindow      34.5+/- 2.0   24.6+/- 0.8   16.4+/- 1.8   13.3+/-13.0   21.1+/- 0.7   47.4+/-24.0
+
+  Referencia, el FNN entrenado con este mismo CSV (meta_10minutos.json):
+  FNN dual-head      36.6         26.0         16.8         37.5         11.1          0.0   (una sola semilla)

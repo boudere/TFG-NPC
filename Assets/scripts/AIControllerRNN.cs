@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class AIControllerRNN : MonoBehaviour
@@ -100,9 +100,60 @@ public class AIControllerRNN : MonoBehaviour
         }
     }
 
+    // ── FRECUENCIA DE INFERENCIA ───────────────────────────────────
+    // Recorder.cs graba las partidas a 10 Hz (snapshotTime = 0.1 s). Si el modelo
+    // se ejecutase en cada fotograma renderizado (~60 Hz) trabajaria en condiciones
+    // distintas a las del entrenamiento: la ventana temporal, el estado oculto y la
+    // diferencia entre fotogramas consecutivos dejarian de corresponderse con lo
+    // aprendido. Este temporizador mantiene la inferencia a la misma frecuencia a la
+    // que se grabaron los datos.
+    [Header("Frecuencia de inferencia")]
+    [Tooltip("Segundos entre inferencias. 0.1 = 10 Hz, la misma frecuencia a la que Recorder.cs graba las partidas.")]
+    public float inferenceInterval = 0.1f;
+
+    private float _acumuladorInferencia = 0f;
+    private bool  _hayDecision = false;
+    private float _decInputX = 0f;
+    private float _decInputZ = 0f;
+
     private void Update()
     {
         if (myPlayer == null || worker == null) return;
+
+        // Inferencia a frecuencia fija (ver comentario de inferenceInterval).
+        _acumuladorInferencia += Time.deltaTime;
+        if (_acumuladorInferencia >= inferenceInterval || !_hayDecision)
+        {
+            _acumuladorInferencia -= inferenceInterval;
+            if (_acumuladorInferencia < 0f || _acumuladorInferencia > inferenceInterval)
+                _acumuladorInferencia = 0f;
+            _hayDecision = true;
+            Decidir();
+        }
+
+        // Actuacion: cada fotograma, con la ultima decision tomada.
+        Vector3 moveDir = new Vector3(_decInputX, 0f, _decInputZ).normalized;
+        ApplyMovement(moveDir);
+
+        if (characterGV != null) characterGV.enabled = false;
+
+        if (constrainToField)
+        {
+            Vector3 pos = transform.position;
+            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
+            {
+                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
+                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
+                transform.position = pos;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Una decision del modelo. Se ejecuta a inferenceInterval, no cada fotograma.
+    /// </summary>
+    private void Decidir()
+    {
 
         float[] inputs = RecopilarVariablesDelEntorno();
         
@@ -159,22 +210,9 @@ public class AIControllerRNN : MonoBehaviour
                       $"Contexto -> {ballStatus} | Posesion: {teamHasBall} | DistPelota: {distToBall:F1} | DistPorteria: {distToGoal:F1} | DistAliado: {distAlly:F1} | DistEnemigo: {distEnemy:F1}");
         }
 
-        Vector3 moveDir = new Vector3(aiInputX, 0f, aiInputZ).normalized;
-        ApplyMovement(moveDir);
+        _decInputX = aiInputX;
+        _decInputZ = aiInputZ;
         TryApplyAction(shootProb, passProb);
-
-        if (characterGV != null) characterGV.enabled = false;
-
-        if (constrainToField)
-        {
-            Vector3 pos = transform.position;
-            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
-            {
-                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
-                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
-                transform.position = pos;
-            }
-        }
     }
 
     private void ApplyMovement(Vector3 moveDir)

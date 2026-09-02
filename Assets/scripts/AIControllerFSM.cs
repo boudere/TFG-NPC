@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
@@ -160,6 +160,22 @@ public class AIControllerFSM : MonoBehaviour
         }
     }
 
+    // ── FRECUENCIA DE INFERENCIA ───────────────────────────────────
+    // Recorder.cs graba las partidas a 10 Hz (snapshotTime = 0.1 s). Si el modelo
+    // se ejecutase en cada fotograma renderizado (~60 Hz) trabajaria en condiciones
+    // distintas a las del entrenamiento: la ventana temporal, el estado oculto y la
+    // diferencia entre fotogramas consecutivos dejarian de corresponderse con lo
+    // aprendido. Este temporizador mantiene la inferencia a la misma frecuencia a la
+    // que se grabaron los datos.
+    [Header("Frecuencia de inferencia")]
+    [Tooltip("Segundos entre inferencias. 0.1 = 10 Hz, la misma frecuencia a la que Recorder.cs graba las partidas.")]
+    public float inferenceInterval = 0.1f;
+
+    private float _acumuladorInferencia = 0f;
+    private bool  _hayDecision = false;
+    private float[] _logitsEstado = null;
+    private float[] _movModelo    = null;
+
     private void Update()
     {
         if (myPlayer == null || worker == null) return;
@@ -172,14 +188,29 @@ public class AIControllerFSM : MonoBehaviour
             return;
         }
 
-        // Normalizar
-        float[] normalizedInputs = (float[])rawInputs.Clone();
-        NormalizeFeatures(normalizedInputs);
+        // La RED se ejecuta a frecuencia fija (ver comentario de inferenceInterval).
+        // El enmascarado, la histeresis y la logica tactica de cada estado siguen
+        // corriendo cada fotograma, para que el agente reaccione al instante a
+        // perder o recuperar el balon.
+        _acumuladorInferencia += Time.deltaTime;
+        if (_acumuladorInferencia >= inferenceInterval || !_hayDecision)
+        {
+            _acumuladorInferencia -= inferenceInterval;
+            if (_acumuladorInferencia < 0f || _acumuladorInferencia > inferenceInterval)
+                _acumuladorInferencia = 0f;
+            _hayDecision = true;
 
-        // Ejecutar inferencia
-        var prediction = Predecir(normalizedInputs);
-        float[] stateLogits = prediction.stateLogits;
-        float[] movement    = prediction.movement;
+            float[] normalizedInputs = (float[])rawInputs.Clone();
+            NormalizeFeatures(normalizedInputs);
+
+            var prediction = Predecir(normalizedInputs);
+            _logitsEstado = prediction.stateLogits;
+            _movModelo    = prediction.movement;
+        }
+
+        float[] stateLogits = _logitsEstado;
+        float[] movement    = _movModelo;
+        if (stateLogits == null || movement == null) return;
 
         // ── POSESIÓN (calculada antes del masking) ─────────────────────────────
         bool ballFree      = (Bola.instance == null || !Bola.instance.EnPosesion

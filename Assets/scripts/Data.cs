@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Data : MonoBehaviour
 {
@@ -13,9 +13,20 @@ public class Data : MonoBehaviour
     // Los rellena el selector de modelos; los lee CharacterManagerInField.
     public string rutaScalerModelo;
     public string nombreModeloAplicado;
+
+    // Que arquitectura se enchufa al pulsar "aplicar modelo".
+    //   0 = FNN de clasificacion (la del juego, con descarga de modelo)
+    //   1 = GRU
+    //   2 = FNN sliding window
+    // Las dos ultimas cargan su .onnx desde el inspector (Sentis solo puede
+    // leer ModelAsset importados, no ficheros sueltos en tiempo de ejecucion),
+    // asi que solo sirven para la comparativa del TFG, no para el juego final.
+    public int arquitecturaModelo = 0;
     public string textoPanel;
     public int blueTeam = 0;
-    public int matchSeconds = 300;
+    // Duracion del partido en segundos. 600 = 10 min.
+    // Se sobrescribe en InfoCharacter.Start y desde el panel de ajustes.
+    public int matchSeconds = 600;
 public int redTeam = 0;
 
     // ------------------------------------------------------------------

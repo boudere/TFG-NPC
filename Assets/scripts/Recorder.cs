@@ -25,6 +25,11 @@ public class Recorder : MonoBehaviour
     public Transform rivalGoalTransform;
     public Transform ownGoalTransform;
 
+    // Las porterias llevan el contador real de goles encajados. Se cachean
+    // porque el snapshot corre a 10 Hz y no conviene un GetComponent por frame.
+    private Porteria _porteriaPropia;
+    private Porteria _porteriaRival;
+
     // ─── Estado de grabación ────────────────────────────────────────────────
     private bool         isRecording    = false;
     private int          totalFrames    = 0;
@@ -107,6 +112,19 @@ public class Recorder : MonoBehaviour
                       $"| Propia: {(ownGoalTransform != null ? ownGoalTransform.name : "NO ENCONTRADA")} " +
                       $"| Rival: {(rivalGoalTransform != null ? rivalGoalTransform.name : "NO ENCONTRADA")}");
         }
+
+        // Fuera del if de arriba a proposito: tambien hay que resolverlas cuando
+        // las porterias se asignan a mano desde el inspector.
+        if (ownGoalTransform != null)
+            _porteriaPropia = ownGoalTransform.GetComponentInParent<Porteria>()
+                              ?? ownGoalTransform.GetComponent<Porteria>();
+        if (rivalGoalTransform != null)
+            _porteriaRival = rivalGoalTransform.GetComponentInParent<Porteria>()
+                             ?? rivalGoalTransform.GetComponent<Porteria>();
+
+        if (_porteriaPropia == null || _porteriaRival == null)
+            Debug.LogWarning("[Recorder] No se pudo resolver alguna Porteria: " +
+                             "las columnas de marcador se grabaran a 0.");
 
         // Cabecera CSV (40 features + labels)
         string header =
@@ -216,9 +234,12 @@ public class Recorder : MonoBehaviour
         float distToOwnGoal     = Vector3.Distance(myPos, ownGoalPos);
         float distBallToOwnGoal = Vector3.Distance(ballPos, ownGoalPos);
 
-        int scoreT1 = 0, scoreT2 = 0;
-        int puntuacionPropia    = myPlayer.id % 2 == 0 ? scoreT1 : scoreT2;
-        int puntuacionContraria = myPlayer.id % 2 == 0 ? scoreT2 : scoreT1;
+        // TriggerGoal incrementa goalCounterTeam de la porteria en la que ENTRA
+        // el balon, asi que ese contador son los goles ENCAJADOS por el equipo
+        // duenyo de esa porteria. De ahi el cruce: los goles que yo he marcado
+        // estan en la porteria rival, y los que me han metido en la mia.
+        int puntuacionPropia    = _porteriaRival  != null ? _porteriaRival.goalCounterTeam  : 0;
+        int puntuacionContraria = _porteriaPropia != null ? _porteriaPropia.goalCounterTeam : 0;
 
         // ── Clasificar jugadores ──
         PlayerID[] allPlayers = FindObjectsByType<PlayerID>(FindObjectsSortMode.None);

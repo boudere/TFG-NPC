@@ -30,7 +30,7 @@ public class ShowTime : MonoBehaviour
     void Start()
     {
         Debug.Log(Data.instance.matchSeconds);
-        SetTime(Data.instance.matchSeconds); // empieza en 05:00
+        SetTime(Data.instance.matchSeconds); // 600 s por defecto -> empieza en 10:00
        
     }
 

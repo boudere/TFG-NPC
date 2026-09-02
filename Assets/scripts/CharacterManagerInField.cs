@@ -44,6 +44,8 @@ public class CharacterManagerInField : MonoBehaviour
             CharacterGV characterGV = p[i].GetComponent<CharacterGV>();
             TrainingClient trainingClient = p[i].GetComponent<TrainingClient>();
             AIControllerFNNClasi aiControllerFNNClasi = p[i].GetComponent<AIControllerFNNClasi>();
+            AIControllerGRU aiControllerGRU = p[i].GetComponent<AIControllerGRU>();
+            AIControllerSlidingWindow aiControllerSliding = p[i].GetComponent<AIControllerSlidingWindow>();
             AIRecorder aiRecorder = p[i].GetComponent<AIRecorder>();
 
             if (recorder != null)
@@ -57,6 +59,15 @@ public class CharacterManagerInField : MonoBehaviour
 
             if (aiControllerFNNClasi != null)
                 aiControllerFNNClasi.enabled = false;
+
+            // Las tres arquitecturas se apagan siempre: mas abajo solo se
+            // enciende la elegida. Si quedaran dos activas se pelearian por el
+            // mismo Rigidbody y el agente se moveria de forma erratica.
+            if (aiControllerGRU != null)
+                aiControllerGRU.enabled = false;
+
+            if (aiControllerSliding != null)
+                aiControllerSliding.enabled = false;
 
             if (aiRecorder != null) 
                 aiRecorder.enabled = false;
@@ -119,10 +130,32 @@ public class CharacterManagerInField : MonoBehaviour
                 {
                     
                     AIControllerFNNClasi aiControllerFNNClasi = p[i].GetComponent<AIControllerFNNClasi>();
+                    AIControllerGRU aiControllerGRU = p[i].GetComponent<AIControllerGRU>();
+                    AIControllerSlidingWindow aiControllerSliding = p[i].GetComponent<AIControllerSlidingWindow>();
                     AIRecorder aiRecorder = p[i].GetComponent<AIRecorder>();
 
-                    if (aiControllerFNNClasi != null)
+                    // Data.arquitecturaModelo decide cual de las tres juega.
+                    // 0 es el FNN, que es el flujo normal del juego; 1 y 2 son
+                    // la GRU y la ventana deslizante, que existen para la
+                    // comparativa del TFG y cargan su modelo del inspector.
+                    int arq = Data.instance.arquitecturaModelo;
+
+                    if (arq == 1 && aiControllerGRU != null)
                     {
+                        aiControllerGRU.enabled = true;
+                    }
+                    else if (arq == 2 && aiControllerSliding != null)
+                    {
+                        aiControllerSliding.enabled = true;
+                    }
+                    else if (aiControllerFNNClasi != null)
+                    {
+                        if (arq != 0)
+                        {
+                            Debug.LogWarning($"[CharacterManagerInField] arquitecturaModelo={arq} " +
+                                             "pero ese controlador no esta en el jugador. Se usa el FNN.");
+                        }
+
                         // Antes de habilitarlo, para que su Start ya encuentre
                         // la eleccion hecha y no cargue el modelo por defecto.
                         if (!string.IsNullOrEmpty(Data.instance.rutaModeloONNX))

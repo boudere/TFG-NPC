@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class AIControllerSlidingWindow : MonoBehaviour
@@ -10,6 +10,22 @@ public class AIControllerSlidingWindow : MonoBehaviour
     [Header("Action Inference")]
     [Range(0f, 1f)] public float actionThreshold = 0.35f;
     public float actionCooldown = 1.0f;
+
+    [Header("Robo con sprint (equivalente a la tecla K del jugador)")]
+    [Tooltip("Velocidad durante el sprint de robo. La del jugador humano es 300.")]
+    public float sprintSpeed = 300f;
+    [Tooltip("Segundos maximos que puede durar un sprint de robo.")]
+    public float sprintTimeout = 4f;
+    [Tooltip("Radio para dar por llegado el sprint. Se amplia solo si en un paso de fisica se avanza mas que esto.")]
+    public float sprintArrivalRadius = 15f;
+    [Tooltip("Si nos alejamos del objetivo mas que esto respecto a lo mas cerca que llegamos, se aborta.")]
+    public float sprintToleranciaPerdida = 40f;
+    [Tooltip("Margen de carrera sobre la distancia inicial al objetivo.")]
+    public float sprintMargenPersecucion = 1.25f;
+
+    [Header("Indicador")]
+    [Tooltip("Marca en pantalla cual de los once jugadores lleva el modelo.")]
+    public bool mostrarIndicador = true;
     [Range(0f, 30f)] public float shootSpreadDeg = 8f;
 
     [Header("Movement")]
@@ -47,6 +63,22 @@ public class AIControllerSlidingWindow : MonoBehaviour
 
     private float[] previousInputs = null;
 
+
+    // ── Estado del sprint de robo (copiado de AIControllerFNNClasi para que las
+    //    tres arquitecturas ejecuten las acciones exactamente igual) ──
+    private bool _sprintActivo;
+    private Transform _sprintObjetivo;
+    private PlayerID _sprintPoseedor;
+    private Vector3 _sprintDireccion;
+    private Vector3 _sprintOrigen;
+    private float _sprintFin;
+    private float _sprintDistanciaPermitida;
+    private float _sprintMejorDistancia;
+
+    private AIRecorder aiRecorder;
+    private Porteria _porteriaPropia;
+    private Porteria _porteriaRival;
+
     [System.Serializable]
     public class ScalerData
     {
@@ -60,6 +92,16 @@ public class AIControllerSlidingWindow : MonoBehaviour
         if (myPlayer    == null) myPlayer    = GetComponent<PlayerID>();
         if (myRigidbody == null) myRigidbody = GetComponent<Rigidbody>();
         if (characterGV == null) characterGV = GetComponent<CharacterGV>();
+
+        if (aiRecorder == null) aiRecorder = GetComponent<AIRecorder>();
+
+        // Indicador flotante: este componente solo esta habilitado en el jugador
+        // del modelo, asi que el marcador aparece justo sobre el que toca.
+        if (mostrarIndicador && GetComponent<IndicadorModelo>() == null)
+        {
+            IndicadorModelo ind = gameObject.AddComponent<IndicadorModelo>();
+            ind.nombreOverride = "Sliding window";
+        }
 
         if (rivalGoalTransform == null || ownGoalTransform == null)
         {
@@ -75,6 +117,17 @@ public class AIControllerSlidingWindow : MonoBehaviour
                     rivalGoalTransform = p.transform;
             }
         }
+
+        // Marcador real. Tiene que leerse EXACTAMENTE igual que en Recorder.cs:
+        // el dataset se graba con el marcador de verdad, asi que enviar ceros
+        // aqui haria que el modelo viera en partida una entrada distinta de la
+        // que aprendio. Es el fallo silencioso mas caro de todos.
+        if (ownGoalTransform != null)
+            _porteriaPropia = ownGoalTransform.GetComponentInParent<Porteria>()
+                              ?? ownGoalTransform.GetComponent<Porteria>();
+        if (rivalGoalTransform != null)
+            _porteriaRival = rivalGoalTransform.GetComponentInParent<Porteria>()
+                             ?? rivalGoalTransform.GetComponent<Porteria>();
 
         if (onnxModelAsset != null)
         {
@@ -98,9 +151,80 @@ public class AIControllerSlidingWindow : MonoBehaviour
         }
     }
 
+    // ── FRECUENCIA DE INFERENCIA ───────────────────────────────────
+    // Recorder.cs graba las partidas a 10 Hz (snapshotTime = 0.1 s). Si el modelo
+    // se ejecutase en cada fotograma renderizado (~60 Hz) trabajaria en condiciones
+    // distintas a las del entrenamiento: la ventana temporal, el estado oculto y la
+    // diferencia entre fotogramas consecutivos dejarian de corresponderse con lo
+    // aprendido. Este temporizador mantiene la inferencia a la misma frecuencia a la
+    // que se grabaron los datos.
+    [Header("Frecuencia de inferencia")]
+    [Tooltip("Segundos entre inferencias. 0.1 = 10 Hz, la misma frecuencia a la que Recorder.cs graba las partidas.")]
+    public float inferenceInterval = 0.1f;
+
+    private float _acumuladorInferencia = 0f;
+    private bool  _hayDecision = false;
+    private float _decInputX = 0f;
+    private float _decInputZ = 0f;
+
     private void Update()
     {
         if (myPlayer == null || worker == null) return;
+
+        // Congelacion compartida: mientras el jugador este en un reset (el saque
+        // de 4 segundos tras un gol) la IA se queda quieta como los demas.
+        if (EnResetCompartido())
+        {
+            if (_sprintActivo) TerminarSprintRobo(false, "reset del partido");
+            if (myRigidbody != null)
+                myRigidbody.linearVelocity = new Vector3(0f, myRigidbody.linearVelocity.y, 0f);
+            if (characterGV != null) characterGV.enabled = false;
+            return;
+        }
+
+        // Mientras dura el sprint de robo el modelo no conduce: el NPC va a por
+        // el poseedor igual que tu con la K.
+        if (_sprintActivo)
+        {
+            ActualizarSprintRobo();
+            if (characterGV != null) characterGV.enabled = false;
+            return;
+        }
+
+        // Inferencia a frecuencia fija (ver comentario de inferenceInterval).
+        _acumuladorInferencia += Time.deltaTime;
+        if (_acumuladorInferencia >= inferenceInterval || !_hayDecision)
+        {
+            _acumuladorInferencia -= inferenceInterval;
+            if (_acumuladorInferencia < 0f || _acumuladorInferencia > inferenceInterval)
+                _acumuladorInferencia = 0f;
+            _hayDecision = true;
+            Decidir();
+        }
+
+        // Actuacion: cada fotograma, con la ultima decision tomada.
+        Vector3 moveDir = new Vector3(_decInputX, 0f, _decInputZ).normalized;
+        ApplyMovement(moveDir);
+
+        if (characterGV != null) characterGV.enabled = false;
+
+        if (constrainToField)
+        {
+            Vector3 pos = transform.position;
+            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
+            {
+                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
+                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
+                transform.position = pos;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Una decision del modelo. Se ejecuta a inferenceInterval, no cada fotograma.
+    /// </summary>
+    private void Decidir()
+    {
 
         float[] currentInputs = RecopilarVariablesDelEntorno();
         
@@ -147,6 +271,8 @@ public class AIControllerSlidingWindow : MonoBehaviour
         }
         float shootProb = prediction.actions.Length > 0 ? prediction.actions[0] : 0f;
         float passProb  = prediction.actions.Length > 1 ? prediction.actions[1] : 0f;
+        float roboKProb = prediction.actions.Length > 2 ? prediction.actions[2] : 0f;
+        float roboLProb = prediction.actions.Length > 3 ? prediction.actions[3] : 0f;
 
         if (explorationNoise > 0f)
         {
@@ -186,22 +312,9 @@ public class AIControllerSlidingWindow : MonoBehaviour
                       $"Contexto -> {ballStatus} | Posesion: {teamHasBall} | DistPelota: {distToBall:F1} | DistPorteria: {distToGoal:F1} | DistAliado: {distAlly:F1} | DistEnemigo: {distEnemy:F1}");
         }
 
-        Vector3 moveDir = new Vector3(aiInputX, 0f, aiInputZ).normalized;
-        ApplyMovement(moveDir);
-        TryApplyAction(shootProb, passProb);
-
-        if (characterGV != null) characterGV.enabled = false;
-
-        if (constrainToField)
-        {
-            Vector3 pos = transform.position;
-            if (Mathf.Abs(pos.x) > fieldLimitX || Mathf.Abs(pos.z) > fieldLimitZ)
-            {
-                pos.x = Mathf.Clamp(pos.x, -fieldLimitX, fieldLimitX);
-                pos.z = Mathf.Clamp(pos.z, -fieldLimitZ, fieldLimitZ);
-                transform.position = pos;
-            }
-        }
+        _decInputX = aiInputX;
+        _decInputZ = aiInputZ;
+        TryApplyAction(shootProb, passProb, roboKProb, roboLProb);
     }
 
     private void ApplyMovement(Vector3 moveDir)
@@ -267,34 +380,204 @@ public class AIControllerSlidingWindow : MonoBehaviour
         using var actionsTensor = worker.PeekOutput("discrete_actions") as Unity.InferenceEngine.Tensor<float>;
 
         float[] movement = movementTensor != null ? movementTensor.DownloadToArray() : new float[9];
-        float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[2];
+        float[] actions  = actionsTensor != null ? actionsTensor.DownloadToArray() : new float[4];
 
         return (movement, actions);
     }
 
-    private void TryApplyAction(float shootProb, float passProb)
+
+    /// <summary>Avisa al grabador de que se acaba de ejecutar una accion.</summary>
+    private void AnotarAccion(int accion)
     {
-        if (Time.time < nextActionTime) return;
-        if (!HasBallControl()) return;
+        if (aiRecorder != null) aiRecorder.RegistrarAccion(accion);
+    }
 
-        bool doShoot = shootProb >= actionThreshold;
-        bool doPass  = passProb  >= actionThreshold;
-
-        if (doShoot && doPass)
-            doShoot = shootProb >= passProb;
-
-        if (doShoot && Shoot.instance != null)
+    /// <summary>
+    /// Consulta TODOS los PlayerID de este GameObject (el rol y el CharacterGV
+    /// conviven en el mismo objeto) y devuelve true si alguno esta en reset.
+    /// </summary>
+    private bool EnResetCompartido()
+    {
+        PlayerID[] todos = GetComponents<PlayerID>();
+        for (int i = 0; i < todos.Length; i++)
         {
-            AimAtGoal();
-            Shoot.instance.disparoLibre();
-            nextActionTime = Time.time + actionCooldown;
+            if (todos[i] != null && todos[i].EnReset) return true;
+        }
+        return false;
+    }
+
+    private void IniciarSprintRobo(PlayerID poseedor)
+    {
+        if (poseedor == null) return;
+
+        Vector3 dir = poseedor.transform.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.001f) return;
+
+        float distanciaInicial = dir.magnitude;
+
+        _sprintObjetivo = poseedor.transform;
+        _sprintPoseedor = poseedor;
+        _sprintDireccion = dir / distanciaInicial;
+        _sprintOrigen = transform.position;
+        _sprintFin = Time.time + sprintTimeout;
+        _sprintMejorDistancia = distanciaInicial;
+
+        // La carrera permitida sale de lo lejos que esta el objetivo, no de un
+        // numero fijo: asi no se corren 400 unidades para un objetivo a 150.
+        _sprintDistanciaPermitida = distanciaInicial * sprintMargenPersecucion + 25f;
+        _sprintActivo = true;
+    }
+
+    private void TerminarSprintRobo(bool intentarRobo, string motivo)
+    {
+        _sprintActivo = false;
+        _sprintObjetivo = null;
+        _sprintPoseedor = null;
+        _sprintDireccion = Vector3.zero;
+
+        if (myRigidbody != null)
+            myRigidbody.linearVelocity = new Vector3(0f, myRigidbody.linearVelocity.y, 0f);
+
+        if (!intentarRobo || WinTheBall.instance == null || Bola.instance == null)
+            return;
+
+        int miId = myPlayer != null ? myPlayer.id : -1;
+        float distBalon = Vector3.Distance(transform.position, Bola.instance.transform.position);
+        float umbral = Mathf.Max(WinTheBall.instance.distanciaMaxima, sprintArrivalRadius + 5f);
+
+        if (distBalon <= umbral)
+            WinTheBall.instance.EjecutarRobo(gameObject, miId);
+    }
+
+    private void ActualizarSprintRobo()
+    {
+        if (Time.time >= _sprintFin)
+        {
+            TerminarSprintRobo(true, "timeout");
             return;
         }
 
-        if (doPass && Pase.instance != null)
+        // Si el balon cambia de duenyo o se suelta, el motivo del sprint ya no existe.
+        if (Bola.instance == null || !Bola.instance.EnPosesion ||
+            Bola.instance.Owner != _sprintPoseedor || _sprintObjetivo == null)
         {
-            Pase.instance.searchPlayersToPass("npc", transform.position, myPlayer.id);
-            nextActionTime = Time.time + actionCooldown;
+            TerminarSprintRobo(false, "el objetivo ha perdido el balon");
+            return;
+        }
+
+        if (Vector3.Distance(transform.position, _sprintOrigen) >= _sprintDistanciaPermitida)
+        {
+            TerminarSprintRobo(true, "distancia maxima recorrida");
+            return;
+        }
+
+        Vector3 hacia = _sprintObjetivo.position - transform.position;
+        hacia.y = 0f;
+        float distancia = hacia.magnitude;
+
+        if (distancia < _sprintMejorDistancia)
+        {
+            _sprintMejorDistancia = distancia;
+        }
+        else if (distancia > _sprintMejorDistancia + sprintToleranciaPerdida)
+        {
+            TerminarSprintRobo(true, "me alejo del objetivo");
+            return;
+        }
+
+        // Radio de llegada proporcional al avance por paso de fisica: a 300 u/s
+        // el rigidbody avanza ~6 unidades por FixedUpdate y un radio fijo
+        // pequenyo se atravesaria de un salto sin detectarse.
+        float radioLlegada = Mathf.Max(sprintArrivalRadius, sprintSpeed * Time.fixedDeltaTime * 1.5f);
+        if (distancia <= radioLlegada)
+        {
+            TerminarSprintRobo(true, "llegada");
+            return;
+        }
+
+        if (distancia > 0.01f) _sprintDireccion = hacia / distancia;
+
+        Vector3 v = _sprintDireccion * sprintSpeed;
+        myRigidbody.linearVelocity = new Vector3(v.x, myRigidbody.linearVelocity.y, v.z);
+
+        if (v.sqrMagnitude > 0.01f)
+        {
+            Quaternion rot = Quaternion.LookRotation(_sprintDireccion, Vector3.up);
+            myRigidbody.MoveRotation(
+                Quaternion.RotateTowards(myRigidbody.rotation, rot, turnSpeedDeg * Time.deltaTime));
+        }
+    }
+
+    // ── ACCIONES ──
+    // Las cuatro teclas del jugador humano, no solo dos: sin K ni L el agente
+    // no puede recuperar el balon y no seria comparable con el FNN.
+    private void TryApplyAction(float shootProb, float passProb, float roboKProb, float roboLProb)
+    {
+        if (Time.time < nextActionTime) return;
+
+        if (HasBallControl())
+        {
+            bool doShoot = shootProb >= actionThreshold;
+            bool doPass  = passProb  >= actionThreshold;
+
+            if (doShoot && doPass)
+                doShoot = shootProb >= passProb;
+
+            if (doShoot && Shoot.instance != null)
+            {
+                AimAtGoal();
+                Shoot.instance.disparoLibre();
+                AnotarAccion(AIRecorder.ACCION_DISPARO);
+                nextActionTime = Time.time + actionCooldown;
+                return;
+            }
+
+            if (doPass && Pase.instance != null)
+            {
+                Pase.instance.searchPlayersToPass("npc", transform.position, myPlayer.id);
+                AnotarAccion(AIRecorder.ACCION_PASE);
+                nextActionTime = Time.time + actionCooldown;
+                return;
+            }
+        }
+        else
+        {
+            bool doRoboK = roboKProb >= actionThreshold;
+            bool doRoboL = roboLProb >= actionThreshold;
+
+            if ((doRoboK || doRoboL) && WinTheBall.instance != null && Bola.instance != null)
+            {
+                PlayerID owner = Bola.instance.Owner;
+                int miId = myPlayer != null ? myPlayer.id : -1;
+
+                if (Bola.instance.EnPosesion && owner != null &&
+                    WinTheBall.instance.EsPoseedorValidoParaRobar(owner, miId))
+                {
+                    float distPoseedor = Vector3.Distance(transform.position, owner.transform.position);
+                    float distBalon = Vector3.Distance(transform.position, Bola.instance.transform.position);
+
+                    // Cada tecla hace lo suyo, igual que para el jugador humano:
+                    //   L -> robo directo, solo si ya esta pegado.
+                    //   K -> si esta pegado roba; si no, esprinta y roba al llegar.
+                    bool prefiereK = doRoboK && (!doRoboL || roboKProb >= roboLProb);
+
+                    if (distBalon < WinTheBall.instance.distanciaMaxima)
+                    {
+                        WinTheBall.instance.EjecutarRobo(gameObject, miId);
+                        AnotarAccion(prefiereK ? AIRecorder.ACCION_ROBO_K : AIRecorder.ACCION_ROBO_L);
+                        nextActionTime = Time.time + actionCooldown;
+                        return;
+                    }
+
+                    if (prefiereK && distPoseedor <= WinTheBall.instance.rangoSprint)
+                    {
+                        IniciarSprintRobo(owner);
+                        AnotarAccion(AIRecorder.ACCION_ROBO_K);
+                        nextActionTime = Time.time + actionCooldown;
+                    }
+                }
+            }
         }
     }
 
@@ -369,10 +652,10 @@ public class AIControllerSlidingWindow : MonoBehaviour
         float distToOwnGoal     = Vector3.Distance(myPos, ownGoalPos);
         float distBallToOwnGoal = Vector3.Distance(ballPos, ownGoalPos);
 
-        int scoreT1 = 0;
-        int scoreT2 = 0;
-        int puntuacionPropia    = myPlayer.id % 2 == 0 ? scoreT1 : scoreT2;
-        int puntuacionContraria = myPlayer.id % 2 == 0 ? scoreT2 : scoreT1;
+        // goalCounterTeam de una porteria = goles ENCAJADOS por su equipo, asi
+        // que los mios estan en la porteria rival y viceversa.
+        int puntuacionPropia    = _porteriaRival  != null ? _porteriaRival.goalCounterTeam  : 0;
+        int puntuacionContraria = _porteriaPropia != null ? _porteriaPropia.goalCounterTeam : 0;
 
         PlayerID[] allPlayers = FindObjectsByType<PlayerID>(FindObjectsSortMode.None);
 
