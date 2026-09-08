@@ -152,8 +152,11 @@ public class CharacterManagerInField : MonoBehaviour
                     {
                         if (arq != 0)
                         {
-                            Debug.LogWarning($"[CharacterManagerInField] arquitecturaModelo={arq} " +
-                                             "pero ese controlador no esta en el jugador. Se usa el FNN.");
+                            // Cualificado a proposito: este fichero tambien tiene
+                            // using System.Diagnostics, donde hay otro Debug.
+                            UnityEngine.Debug.LogWarning(
+                                $"[CharacterManagerInField] arquitecturaModelo={arq} " +
+                                "pero ese controlador no esta en el jugador. Se usa el FNN.");
                         }
 
                         // Antes de habilitarlo, para que su Start ya encuentre
