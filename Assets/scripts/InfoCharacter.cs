@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
 
 public class InfoCharacter : MonoBehaviour
 {
@@ -20,6 +21,13 @@ public class InfoCharacter : MonoBehaviour
     public Image ImageSeleccionadoJuego;
     public Image ImageSeleccionadoEntreno;
     public Image ImageModeloAplicado;
+
+    public Image resetJugador;
+    public Image resetEntreno;
+    public Image resetModelo;
+
+    public Image requireJugador;
+    public Image requireEntreno;
 
     [SerializeField] private Sprite fichaNoSeleccionado;
 
@@ -38,6 +46,10 @@ public class InfoCharacter : MonoBehaviour
     public int indexModel;
     public static InfoCharacter instance;
 
+    [SerializeField] private Image warningPlayer;
+
+    private Coroutine warningCoroutine;
+
 
     private void Awake()
     {
@@ -54,16 +66,22 @@ public class InfoCharacter : MonoBehaviour
 
     void Start()
     {
-        Data.instance.matchSeconds = 300; 
-      characterManager = CharacterManager.instance;
+        Data.instance.matchSeconds = 300;
+
+        characterManager = CharacterManager.instance;
         index = characterManager.index;
         indexModel = characterManager.indexModel;
-   
-        if (index > characterManager.characterList.Count - 1) { index = -1; }
+
+        if (index > characterManager.characterList.Count - 1)
+            index = -1;
 
         ValidarIndices();
         ActualizarInterfaz();
         ActualizarFichas();
+
+        // Ocultar warning al empezar
+        if (warningPlayer != null)
+            warningPlayer.gameObject.SetActive(false);
     }
 
 
@@ -75,6 +93,12 @@ public class InfoCharacter : MonoBehaviour
         ImageSeleccionadoJuego.enabled = false;
         ImageSeleccionadoEntreno.enabled = false;
         ImageModeloAplicado.enabled = false;
+        resetJugador.enabled = false;
+        resetEntreno.enabled = false;
+        resetModelo.enabled = false;
+        requireJugador.enabled= false;
+        requireEntreno.enabled = false;
+
 
         switch (Data.instance.esJuego)
         {
@@ -83,12 +107,17 @@ public class InfoCharacter : MonoBehaviour
                 imagenesModelo.enabled = true;
                 ImageSeleccionadoJuego.enabled = true;
                 ImageModeloAplicado.enabled = true;
+                requireJugador.enabled = true;
+                resetJugador.enabled = true;
+                resetModelo.enabled = true;
 
                 break;
 
             case false:
                 imagenesEntrenamiento.enabled = true;
                 ImageSeleccionadoEntreno.enabled = true;
+                requireEntreno.enabled = true;
+                resetEntreno.enabled = true;
                 break;
         }
     }
@@ -230,12 +259,19 @@ public class InfoCharacter : MonoBehaviour
             return;
         }
 
+        //if (characterManager.index < 0 ||
+        //    characterManager.index >= characterManager.characterList.Count)
+        //{
+        //    MostrarAviso(Data.instance.esJuego
+        //        ? "Elige primero el jugador que vas a controlar."
+        //        : "Elige primero el jugador con el que vas a entrenar.");
+        //    return;
+        //}
+
         if (characterManager.index < 0 ||
-            characterManager.index >= characterManager.characterList.Count)
+    characterManager.index >= characterManager.characterList.Count)
         {
-            MostrarAviso(Data.instance.esJuego
-                ? "Elige primero el jugador que vas a controlar."
-                : "Elige primero el jugador con el que vas a entrenar.");
+            MostrarWarningPlayer();
             return;
         }
 
@@ -318,5 +354,45 @@ public class InfoCharacter : MonoBehaviour
 
         GUI.Box(new Rect(x, y, w, h), "", _avisoCaja);
         GUI.Label(new Rect(x + 16, y + 10, w - 32, h - 20), _aviso, _avisoTexto);
+    }
+
+    public void resetMainSelection()
+    {
+        index = -1;
+        characterManager.index = -1;
+
+        if (Data.instance.esJuego)
+        {
+            ImageSeleccionadoJuego.sprite = fichaNoSeleccionado;
+        }
+        else
+        {
+            ImageSeleccionadoEntreno.sprite = fichaNoSeleccionado;
+        }
+    }
+
+    public void resetModelSelection()
+    {
+        indexModel = -1;
+        characterManager.indexModel = -1;
+        ImageModeloAplicado.sprite = fichaNoSeleccionado;
+    }
+
+    private void MostrarWarningPlayer()
+    {
+        if (warningCoroutine != null)
+            StopCoroutine(warningCoroutine);
+
+        warningCoroutine = StartCoroutine(MostrarWarningCoroutine());
+    }
+
+    private IEnumerator MostrarWarningCoroutine()
+    {
+        warningPlayer.gameObject.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(4f);
+
+        warningPlayer.gameObject.SetActive(false);
+        warningCoroutine = null;
     }
 }

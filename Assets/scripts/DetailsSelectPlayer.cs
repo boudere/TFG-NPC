@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using System.Collections;
 
 public class DetailsSelectPlayer : MonoBehaviour
 {
@@ -23,7 +23,9 @@ public class DetailsSelectPlayer : MonoBehaviour
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_InputField inputField;
 
-    
+    [SerializeField] private Image warningSelect;
+    private Coroutine warningCoroutine;
+
     private CharacterManager characterManager;
 
 
@@ -74,6 +76,9 @@ public class DetailsSelectPlayer : MonoBehaviour
         }
         ActualizarInterfaz();
 
+        if (warningSelect != null)
+            warningSelect.gameObject.SetActive(false);
+
     }
 
     private void Apply(int index)
@@ -122,6 +127,7 @@ public class DetailsSelectPlayer : MonoBehaviour
             characterManager.index = characterManager.select;
         } else
         {
+            MostrarWarningPlayer();
             UnityEngine.Debug.Log("Jugador ya asociado");
         }
 
@@ -134,6 +140,7 @@ public class DetailsSelectPlayer : MonoBehaviour
     {
         if (characterManager.index == characterManager.select)
         {
+            MostrarWarningPlayer();
             UnityEngine.Debug.Log("Jugador ya asociado");
             return;
         }
@@ -207,5 +214,23 @@ public class DetailsSelectPlayer : MonoBehaviour
         Data.instance.jugadorAplicarModelo = false;
         Data.instance.jugadorSeleccionado = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+    }
+
+    private void MostrarWarningPlayer()
+    {
+        if (warningCoroutine != null)
+            StopCoroutine(warningCoroutine);
+
+        warningCoroutine = StartCoroutine(MostrarWarningCoroutine());
+    }
+
+    private IEnumerator MostrarWarningCoroutine()
+    {
+        warningSelect.gameObject.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(4f);
+
+        warningSelect.gameObject.SetActive(false);
+        warningCoroutine = null;
     }
 }
