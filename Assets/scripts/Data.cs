@@ -24,9 +24,9 @@ public class Data : MonoBehaviour
     public int arquitecturaModelo = 0;
     public string textoPanel;
     public int blueTeam = 0;
-    // Duracion del partido en segundos. 600 = 10 min.
+  
     // Se sobrescribe en InfoCharacter.Start y desde el panel de ajustes.
-    public int matchSeconds = 600;
+    public int matchSeconds = 300;
 public int redTeam = 0;
 
     // ------------------------------------------------------------------

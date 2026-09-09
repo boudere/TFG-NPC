@@ -360,7 +360,12 @@ public class CentroCampista : PlayerID, IResettable
         Vector3 direction = (npcTarget - transform.position).normalized;
 
            float currentSpeed = npcSpeed;
-     
+
+        if (Bola.instance.transform.IsChildOf(this.transform))
+        {
+            currentSpeed *= 0.85f;
+        }
+
 
         rb.linearVelocity = new Vector3(
             direction.x * currentSpeed,

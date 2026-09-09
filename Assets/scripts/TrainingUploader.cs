@@ -20,7 +20,7 @@ public static class TrainingUploader
     public const string DefaultServerUrl = "http://localhost:8000";
 
     /// <summary>Segundos que se espera al servidor antes de rendirse.</summary>
-    public const int TimeoutSegundos = 600;
+    public const int TimeoutSegundos = 300;
 
     [Serializable]
     private class TrainRequestData

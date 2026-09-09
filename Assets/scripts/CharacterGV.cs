@@ -121,15 +121,28 @@ public class CharacterGV : PlayerID
             moveDir = new Vector3(h, 0f, v).normalized;
         }
 
+        if (index >= 0 && index < 4)
+        {
+            npcSpeed = 120;
+        }
         float speed = sprint ? sprintSpeed : npcSpeed;
+
+
+       
+        if (Bola.instance.transform.IsChildOf(this.transform))
+        {
+            speed *= 0.85f;
+        }
+
 
         Vector3 movement = moveDir * speed;
 
+
         rb.linearVelocity = new Vector3(
-            movement.x,
-            rb.linearVelocity.y,
-            movement.z
-        );
+                movement.x,
+                rb.linearVelocity.y,
+                movement.z
+            );
 
         if (moveDir.sqrMagnitude > 0.001f)
         {

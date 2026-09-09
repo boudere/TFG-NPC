@@ -54,7 +54,7 @@ public class InfoCharacter : MonoBehaviour
 
     void Start()
     {
-        Data.instance.matchSeconds = 600;   // 10 min, en entrenamiento y en juego
+        Data.instance.matchSeconds = 300; 
       characterManager = CharacterManager.instance;
         index = characterManager.index;
         indexModel = characterManager.indexModel;
@@ -192,8 +192,8 @@ public class InfoCharacter : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(inputTime.text))
         {
-            timeValue = 600;
-            Debug.Log("Sin valor. Se asigna el tiempo por defecto: 600 (10 min)");
+            timeValue = 300;
+            Debug.Log("Sin valor. Se asigna el tiempo por defecto: 5 mins");
         }
         else if (int.TryParse(inputTime.text, out int valor))
         {
