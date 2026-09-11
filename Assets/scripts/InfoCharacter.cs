@@ -34,6 +34,8 @@ public class InfoCharacter : MonoBehaviour
     [SerializeField] private GameObject ajustes;
     [SerializeField] private GameObject ajustesTiempo;
 
+    public static InfoCharacter instance;
+
 
     public TMP_InputField inputTime;
 
@@ -44,7 +46,7 @@ public class InfoCharacter : MonoBehaviour
     private CharacterManager characterManager;
     public int index;
     public int indexModel;
-    public static InfoCharacter instance;
+
 
     [SerializeField] private Image warningPlayer;
 
@@ -62,6 +64,7 @@ public class InfoCharacter : MonoBehaviour
         //{
         //    Destroy(gameObject);
         //}
+        instance = this;
     }
 
     void Start()
@@ -71,6 +74,9 @@ public class InfoCharacter : MonoBehaviour
         characterManager = CharacterManager.instance;
         index = characterManager.index;
         indexModel = characterManager.indexModel;
+
+        //index = -1;
+        //indexModel = -1;
 
         if (index > characterManager.characterList.Count - 1)
             index = -1;
@@ -129,6 +135,7 @@ public class InfoCharacter : MonoBehaviour
         ImageSeleccionadoEntreno.sprite = fichaNoSeleccionado;
         ImageModeloAplicado.sprite = fichaNoSeleccionado;
 
+        Debug.Log(index);
        
         if (index >= 0 && index < characterManager.characterList.Count)
         {

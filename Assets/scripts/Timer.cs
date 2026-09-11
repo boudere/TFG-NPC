@@ -5,13 +5,20 @@ using UnityEngine.SceneManagement;
 
 public class Timer : MonoBehaviour
 {
-
+    private InfoCharacter ifch;
+    public static Timer instance;
     private float timer = 0f;
     private bool matchEnded = false;
     private int matchSeconds;
+    private bool pausado = false;
 
+    private void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
+        
         matchEnded = false;
         matchSeconds = Data.instance.matchSeconds;
         Debug.Log(matchSeconds);
@@ -20,6 +27,9 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
+        if (pausado || matchEnded)
+            return;
+
         timer += Time.deltaTime;
 
         if (timer >= 1f)
@@ -37,11 +47,31 @@ public class Timer : MonoBehaviour
         }
     }
 
-    void EndMatch()
+  
+
+    public void Pausar()
     {
+        pausado = true;
+        Time.timeScale = 0f;
+    }
+
+    public void Reanudar()
+    {
+        pausado = false;
+        Time.timeScale = 1f;
+    }
+
+     public void EndMatch()
+    {
+        
+        InfoCharacter.instance.index = -1;
+        InfoCharacter.instance.indexModel = -1;
         Debug.Log("Fin del partido");
         Time.timeScale = 0f;
         matchEnded = true;
+
+        
+
 
         if (Data.instance.esJuego)
         {
