@@ -8,6 +8,8 @@ public class Goal : MonoBehaviour
     [SerializeField] private GameObject pausarBoton;
     [SerializeField] private GameObject reanudarBoton;
     [SerializeField] private GameObject salirBoton;
+    [SerializeField]private GameObject arbitroPanel;
+    [SerializeField] private GameObject arbitroButon;
     public static Goal instance;
 
     private void Awake()
@@ -31,6 +33,7 @@ public class Goal : MonoBehaviour
             exitModal.SetActive(false);
             pausarBoton.SetActive(true);
             reanudarBoton.SetActive(false);
+            arbitroPanel.SetActive(false);
         }
 
     }
@@ -87,5 +90,17 @@ public class Goal : MonoBehaviour
         salirBoton.SetActive(false);
         pausarBoton.SetActive(false);
         Timer.instance.Pausar();
+    }
+
+    public void arbitro()
+    {
+        arbitroPanel.SetActive(true);
+        arbitroButon.SetActive(false);
+    }
+
+    public void closeArbitro()
+    {
+        arbitroPanel.SetActive(false);
+        arbitroButon.SetActive(true);
     }
 }

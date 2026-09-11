@@ -56,7 +56,7 @@ public class TriggerHavePlayer : MonoBehaviour
         if (owner == null) return;
 
 
-
+       
 
         PlayerID otherPlayer = other.GetComponentInParent<PlayerID>();
         if (otherPlayer != null)
@@ -66,12 +66,11 @@ public class TriggerHavePlayer : MonoBehaviour
                 return;
             }
 
-
             Defensa defensa = otherPlayer.GetComponent<Defensa>();
 
             if (defensa != null && Bola.instance.transform.IsChildOf(owner.transform))
             {
-               detectTag(owner.gameObject);
+                detectTag(owner.gameObject);
             }
 
         }
