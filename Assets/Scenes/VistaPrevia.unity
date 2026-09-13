@@ -7743,7 +7743,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0aab921ddce62e44295a93e00401fd42, type: 2}
   - {fileID: 11400000, guid: 7e2803e606fefb749ac21b1336cc0cf3, type: 2}
   - {fileID: 11400000, guid: d67d603cf21945744b16137e1f18293d, type: 2}
-  index: 0
+  index: -1
   indexModel: -1
   select: -1
   characters: []

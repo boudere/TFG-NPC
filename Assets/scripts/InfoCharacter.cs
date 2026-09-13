@@ -291,6 +291,7 @@ public class InfoCharacter : MonoBehaviour
         {
             if (characterManager.characterList[i].id == index)
             {
+                characterManager.pl = characterManager.characterList[i].personajeJugable;
                 characterManager.characterList[i].selected = true;
                 break;
             }

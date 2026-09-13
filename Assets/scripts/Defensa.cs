@@ -301,17 +301,24 @@ public class Defensa : PlayerID, IResettable
             float aux = Random.value;
             if (aux < 0.1f)
             {
-               Shoot.instance.disparoLibre();
+                Goal.instance.LogArbitro($"El jugador {this.name} ha disparado la bola");
+                Shoot.instance.disparoLibre();
+                
             }
             else if (0.1f < aux && aux < 0.4f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al jugador más cercano");
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
-            }else if (0.4f < aux && aux < 0.7f)
+               
+            }
+            else if (0.4f < aux && aux < 0.7f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} te va a pasar el balón");
                 Pase.instance.passBallOwnPlayer();
             }
             else if (aux > 0.7f && aux > 0.8f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al centrocampista más cercano");
                 Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
             }
         }

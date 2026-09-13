@@ -15,6 +15,7 @@ public class CharacterManagerInField : MonoBehaviour
     void Start()
     {
     characterManager = CharacterManager.instance;
+        
         GameObject[] p = GetAllFieldPlayers();
 
         foreach (GameObject player in p) {

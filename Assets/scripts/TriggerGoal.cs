@@ -44,6 +44,7 @@ public class TriggerGoal : MonoBehaviour
 
         goalCounter++;
         porteria.goalCounterTeam++;
+        Goal.instance.LogArbitro("GOOOOOOOOL GOOOL GOOOL");
 
         StartCoroutine(ResetBallAfterDelay(ballRoot));
         searchPlayersReset();

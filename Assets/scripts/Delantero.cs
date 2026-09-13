@@ -252,18 +252,22 @@ public class Delantero : PlayerID, IResettable
             float aux = Random.value;
             if (aux < 0.1f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha disparado la bola");
                 Shoot.instance.disparoLibre();
             }
             else if (0.1f < aux && aux < 0.2f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al jugador más cercano");
                 Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
             }
             else if (0.2f < aux && aux < 0.45f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al jugador mejor colocado");
                 PaseConCriterio();
             }
             else if (0.45f < aux && aux < 0.7f)
             {
+                Goal.instance.LogArbitro($"El jugador {this.name} ha tirado a portería");
                 tiroPorteria();
             }
             else if (0.7f < aux && aux < 0.9f) { Pase.instance.passBallOwnPlayer(); }

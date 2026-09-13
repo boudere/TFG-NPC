@@ -147,32 +147,39 @@ public class CentroCampista : PlayerID, IResettable
                 {
                     if (decision < 0.05f)
                     {
+                        
                         opcionPaseLoco();
                     }
                     else if (decision < 0.3f)
                     {
+                        
                         if (Pase.instance.calculateDistance(this.transform.position) < 200)
                         {
+                            Goal.instance.LogArbitro($"El jugador {this.name} te va a pasar el balón");
                             Pase.instance.passBallOwnPlayer();
                         }
                         else
                         {
+                            Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al jugador mejor situadp");
                             PaseConCriterio();
                         }
 
                     }
                     else if (decision < 0.6f)
                     {
+                        Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase");
                         PaseConCriterio();
                     }
                     else if (decision < 0.95f)
                     {
+                        Goal.instance.LogArbitro($"El jugador {this.name} ha disparado la bola");
                         disparoPorteria = true;
                     }
                 }
 
                 if (disparoPorteria && Random.value < 0.1f)
                 {
+                    Goal.instance.LogArbitro($"El jugador {this.name} ha disparado la bola");
                     disparoPorteria = false;
 
                     if (characterManager.index != this.id)
@@ -416,18 +423,22 @@ public class CentroCampista : PlayerID, IResettable
         float aux = Random.value;
         if (aux < 0.1f)
         {
+            Goal.instance.LogArbitro($"El jugador {this.name} ha disparado la bola");
             Shoot.instance.disparoLibre();
         }
         else if (0.1f < aux && aux < 0.4f)
         {
+            Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al jugador más cercano");
             Pase.instance.searchPlayersToPass("npc", transform.position, this.id);
         }
         else if (0.4f < aux && aux < 0.7f) // Que estén en el area
         {
+            Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al centrocampista más cercano");
             Pase.instance.searchPlayersToPass("CentroCampista", transform.position, this.id);
         }
         else
         {
+            Goal.instance.LogArbitro($"El jugador {this.name} ha efectuado un pase al delantero más cercano");
             Pase.instance.searchPlayersToPass("Delantero", transform.position, this.id);
         }
     }

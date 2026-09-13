@@ -62,7 +62,7 @@ public class ShowScore : MonoBehaviour
         rightScore = Mathf.Clamp(value, 0, 99);
         UpdateRightScore();
         Data.instance.redTeam = rightScore;
-        Debug.Log($"{rightScore} red");
+        Goal.instance.LogArbitro($" Puntuación actualizada: equipo azul: {leftScore} - equipo rojo: {rightScore}");
     }
 
     // team1 se muestra cruzado en el marcador izquierdo
@@ -71,7 +71,7 @@ public class ShowScore : MonoBehaviour
         leftScore = Mathf.Clamp(value, 0, 99);
         UpdateLeftScore();
         Data.instance.blueTeam = leftScore;
-        Debug.Log($"{leftScore} blue");
+        Goal.instance.LogArbitro($" Puntuación actualizada: equipo azul: {leftScore} - equipo rojo: {rightScore}");
     }
 
     private void UpdateLeftScore()

@@ -16,6 +16,7 @@ public class CharacterManager : MonoBehaviour
     public int index;
     public int indexModel;
     public int select;
+    public GameObject pl;
    
     public CharacterGV[] characters;
     private void Awake()
@@ -36,5 +37,6 @@ public class CharacterManager : MonoBehaviour
         index = -1;
         indexModel = -1;
         select = -1;
+        
     }
 }

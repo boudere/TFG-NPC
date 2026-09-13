@@ -34,6 +34,7 @@ public class Pase : MonoBehaviour
         {
             if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == characterManager.index)
             {
+                Goal.instance.LogArbitro($"Has realizado un pase {CharacterManager.instance.pl.name}");
                 Vector3 pos = new Vector3(0f, 0f, 0f);
                 string tagPlayer = "character";
                 this.tagPlayer = tagPlayer;
@@ -189,6 +190,7 @@ public class Pase : MonoBehaviour
         {
             passBallCharacter(playerID);
         }
+        Goal.instance.LogArbitro($"El jugador {this.playerID} va a recibir el balón ");
 
         Bola.instance.Soltar();
 

@@ -17,6 +17,7 @@ public class CharacterSelector : MonoBehaviour
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material newMaterial;
     [SerializeField] private bool selected;
+    [SerializeField] private GameObject selectedGameObject;
     private int index;
     private AsyncOperation _async;
     void Start()
@@ -49,6 +50,7 @@ public class CharacterSelector : MonoBehaviour
         task.text = characterManager.characterList[index].task; 
         feature.text = characterManager.characterList[index].feature;
         function.text = characterManager.characterList[index].function;
+        selectedGameObject = characterManager.characterList[index].personajeJugable;
     }
 
     private void CambiarPantalla() {
@@ -111,6 +113,7 @@ public class CharacterSelector : MonoBehaviour
             if (characterManager.characterList[i].id == index)
             {
                 characterManager.characterList[i].selected = true;
+                characterManager.pl = selectedGameObject;
                 break;
             }
         }

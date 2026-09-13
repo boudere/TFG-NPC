@@ -16,6 +16,7 @@ public class Shoot : MonoBehaviour
         {
             if (Bola.instance != null && Bola.instance.EnPosesion && Bola.instance.Owner != null && Bola.instance.Owner.id == CharacterManager.instance.index)
             {
+                Goal.instance.LogArbitro($"El jugador {CharacterManager.instance.pl.name} ha disparado la bola");
                 disparoLibre();
             }
         }
@@ -23,6 +24,8 @@ public class Shoot : MonoBehaviour
 
     public void disparoLibre()
     {
+
+       
         Bola.instance.Soltar();
 
 
