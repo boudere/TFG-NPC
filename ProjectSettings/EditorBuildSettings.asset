@@ -32,6 +32,27 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/AddTrain.unity
     guid: 166a2c9f2c9f2524e823437706a245be
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso1.unity
+    guid: 61e0c782203b2504e8bb78565a389a6f
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso2.unity
+    guid: 93426dee2083c29459955c254ffc493a
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso3.unity
+    guid: 128d87d51404cce44ad27427b82b5f85
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso4.unity
+    guid: 31659a750be3a3544a66972282ee59a3
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso5.unity
+    guid: 1d8cc1f84601d2041bf09550721ef70b
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso6.unity
+    guid: 0d1544156a821a84384a0ae18045e36c
+  - enabled: 1
+    path: Assets/Scenes/tutorial/paso7.unity
+    guid: cbb8eefb445192f41a2037c6b2619e29
   - enabled: 0
     path: Assets/Scenes/FPS.unity
     guid: ef5e08cfe8671874db83e4afc0dda960

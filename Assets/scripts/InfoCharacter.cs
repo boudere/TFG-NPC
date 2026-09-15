@@ -403,4 +403,9 @@ public class InfoCharacter : MonoBehaviour
         warningPlayer.gameObject.SetActive(false);
         warningCoroutine = null;
     }
+
+    public void openTutorial()
+    {
+        SceneManager.LoadScene(9);
+    }
 }
