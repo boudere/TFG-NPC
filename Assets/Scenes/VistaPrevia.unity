@@ -849,7 +849,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 200074347}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2096702857}
+        m_TargetAssemblyTypeName: InfoCharacter, Assembly-CSharp
+        m_MethodName: putMusic
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &200074347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,7 +882,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c558997dd3756ff40b790c127d46c746, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 42c6f9e2c95986d47b9b0ae2c648f76d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9904,6 +9916,9 @@ MonoBehaviour:
   fichaNoSeleccionado: {fileID: 21300000, guid: f05c0486557f71244a0e23e647d9b36e, type: 3}
   ajustes: {fileID: 889998538}
   ajustesTiempo: {fileID: 266043455}
+  botonVolumen: {fileID: 200074346}
+  volumenSi: {fileID: 21300000, guid: 42c6f9e2c95986d47b9b0ae2c648f76d, type: 3}
+  volumenNo: {fileID: 21300000, guid: 9d7cea8139886d44b9752daff374292f, type: 3}
   inputTime: {fileID: 412102320}
   index: -1
   indexModel: -1

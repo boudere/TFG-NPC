@@ -5,6 +5,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class InfoCharacter : MonoBehaviour
 {
@@ -34,6 +35,10 @@ public class InfoCharacter : MonoBehaviour
     [SerializeField] private GameObject ajustes;
     [SerializeField] private GameObject ajustesTiempo;
 
+    [SerializeField] private Button botonVolumen;
+    [SerializeField] private Sprite volumenSi;
+    [SerializeField] private Sprite volumenNo;
+
     public static InfoCharacter instance;
 
 
@@ -51,6 +56,7 @@ public class InfoCharacter : MonoBehaviour
     [SerializeField] private Image warningPlayer;
 
     private Coroutine warningCoroutine;
+    public static bool  music = true;
 
 
     private void Awake()
@@ -69,6 +75,8 @@ public class InfoCharacter : MonoBehaviour
 
     void Start()
     {
+        music = true;
+        botonVolumen.image.sprite = volumenSi;
         Data.instance.matchSeconds = 300;
 
         characterManager = CharacterManager.instance;
@@ -407,5 +415,14 @@ public class InfoCharacter : MonoBehaviour
     public void openTutorial()
     {
         SceneManager.LoadScene(9);
+    }
+
+    public void putMusic()
+    {
+        music = !music;
+
+        botonVolumen.image.sprite = music ? volumenSi : volumenNo;
+       
+
     }
 }
