@@ -29,8 +29,8 @@ public class ShowTime : MonoBehaviour
 
     void Start()
     {
-        Debug.Log(Data.instance.matchSeconds);
-        SetTime(Data.instance.matchSeconds); 
+        SetTime(InfoCharacter.matchSeconds);
+       // SetTime(Data.instance.matchSeconds); 
        
     }
 

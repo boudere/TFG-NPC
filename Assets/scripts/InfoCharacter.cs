@@ -57,7 +57,7 @@ public class InfoCharacter : MonoBehaviour
 
     private Coroutine warningCoroutine;
     public static bool  music = true;
-
+    public static int matchSeconds = 300;
 
     private void Awake()
     {
@@ -77,7 +77,7 @@ public class InfoCharacter : MonoBehaviour
     {
         music = true;
         botonVolumen.image.sprite = volumenSi;
-        Data.instance.matchSeconds = 300;
+      //  Data.instance.matchSeconds = 300;
 
         characterManager = CharacterManager.instance;
         index = characterManager.index;
@@ -242,6 +242,7 @@ public class InfoCharacter : MonoBehaviour
         else if (int.TryParse(inputTime.text, out int valor))
         {
             timeValue = valor;
+            matchSeconds = valor;
             Debug.Log(timeValue);
         }
         else
@@ -251,6 +252,7 @@ public class InfoCharacter : MonoBehaviour
         }
 
         Data.instance.matchSeconds = timeValue;
+
         ajustesTiempo.SetActive(false);
     }
 

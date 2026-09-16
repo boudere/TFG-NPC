@@ -20,9 +20,10 @@ public class Timer : MonoBehaviour
     {
         
         matchEnded = false;
-        matchSeconds = Data.instance.matchSeconds;
+        // matchSeconds = Data.instance.matchSeconds;
+        matchSeconds = InfoCharacter.matchSeconds;
         Debug.Log(matchSeconds);
-        ShowTime.instance.SetTime(Data.instance.matchSeconds);
+        ShowTime.instance.SetTime(InfoCharacter.matchSeconds);
     }
 
     void Update()
